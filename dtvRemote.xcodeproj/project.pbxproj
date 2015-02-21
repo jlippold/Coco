@@ -1,0 +1,446 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		859D6D871A9926CA0024FBA4 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 859D6D861A9926CA0024FBA4 /* main.m */; };
+		859D6D8A1A9926CA0024FBA4 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 859D6D891A9926CA0024FBA4 /* AppDelegate.m */; };
+		859D6D8D1A9926CA0024FBA4 /* dtvRemote.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 859D6D8B1A9926CA0024FBA4 /* dtvRemote.xcdatamodeld */; };
+		859D6D901A9926CA0024FBA4 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 859D6D8F1A9926CA0024FBA4 /* ViewController.m */; };
+		859D6D931A9926CA0024FBA4 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 859D6D911A9926CA0024FBA4 /* Main.storyboard */; };
+		859D6D951A9926CA0024FBA4 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 859D6D941A9926CA0024FBA4 /* Images.xcassets */; };
+		859D6D981A9926CA0024FBA4 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 859D6D961A9926CA0024FBA4 /* LaunchScreen.xib */; };
+		859D6DA41A9926CA0024FBA4 /* dtvRemoteTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 859D6DA31A9926CA0024FBA4 /* dtvRemoteTests.m */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		859D6D9E1A9926CA0024FBA4 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 859D6D791A9926CA0024FBA4 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 859D6D801A9926CA0024FBA4;
+			remoteInfo = dtvRemote;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		859D6D811A9926CA0024FBA4 /* dtvRemote.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = dtvRemote.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		859D6D851A9926CA0024FBA4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		859D6D861A9926CA0024FBA4 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		859D6D881A9926CA0024FBA4 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
+		859D6D891A9926CA0024FBA4 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
+		859D6D8C1A9926CA0024FBA4 /* dtvRemote.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = dtvRemote.xcdatamodel; sourceTree = "<group>"; };
+		859D6D8E1A9926CA0024FBA4 /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
+		859D6D8F1A9926CA0024FBA4 /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
+		859D6D921A9926CA0024FBA4 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		859D6D941A9926CA0024FBA4 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
+		859D6D971A9926CA0024FBA4 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/LaunchScreen.xib; sourceTree = "<group>"; };
+		859D6D9D1A9926CA0024FBA4 /* dtvRemoteTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = dtvRemoteTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		859D6DA21A9926CA0024FBA4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		859D6DA31A9926CA0024FBA4 /* dtvRemoteTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = dtvRemoteTests.m; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		859D6D7E1A9926CA0024FBA4 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		859D6D9A1A9926CA0024FBA4 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		859D6D781A9926CA0024FBA4 = {
+			isa = PBXGroup;
+			children = (
+				859D6D831A9926CA0024FBA4 /* dtvRemote */,
+				859D6DA01A9926CA0024FBA4 /* dtvRemoteTests */,
+				859D6D821A9926CA0024FBA4 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		859D6D821A9926CA0024FBA4 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				859D6D811A9926CA0024FBA4 /* dtvRemote.app */,
+				859D6D9D1A9926CA0024FBA4 /* dtvRemoteTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		859D6D831A9926CA0024FBA4 /* dtvRemote */ = {
+			isa = PBXGroup;
+			children = (
+				859D6D881A9926CA0024FBA4 /* AppDelegate.h */,
+				859D6D891A9926CA0024FBA4 /* AppDelegate.m */,
+				859D6D8E1A9926CA0024FBA4 /* ViewController.h */,
+				859D6D8F1A9926CA0024FBA4 /* ViewController.m */,
+				859D6D911A9926CA0024FBA4 /* Main.storyboard */,
+				859D6D941A9926CA0024FBA4 /* Images.xcassets */,
+				859D6D961A9926CA0024FBA4 /* LaunchScreen.xib */,
+				859D6D8B1A9926CA0024FBA4 /* dtvRemote.xcdatamodeld */,
+				859D6D841A9926CA0024FBA4 /* Supporting Files */,
+			);
+			path = dtvRemote;
+			sourceTree = "<group>";
+		};
+		859D6D841A9926CA0024FBA4 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				859D6D851A9926CA0024FBA4 /* Info.plist */,
+				859D6D861A9926CA0024FBA4 /* main.m */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		859D6DA01A9926CA0024FBA4 /* dtvRemoteTests */ = {
+			isa = PBXGroup;
+			children = (
+				859D6DA31A9926CA0024FBA4 /* dtvRemoteTests.m */,
+				859D6DA11A9926CA0024FBA4 /* Supporting Files */,
+			);
+			path = dtvRemoteTests;
+			sourceTree = "<group>";
+		};
+		859D6DA11A9926CA0024FBA4 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				859D6DA21A9926CA0024FBA4 /* Info.plist */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		859D6D801A9926CA0024FBA4 /* dtvRemote */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 859D6DA71A9926CA0024FBA4 /* Build configuration list for PBXNativeTarget "dtvRemote" */;
+			buildPhases = (
+				859D6D7D1A9926CA0024FBA4 /* Sources */,
+				859D6D7E1A9926CA0024FBA4 /* Frameworks */,
+				859D6D7F1A9926CA0024FBA4 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = dtvRemote;
+			productName = dtvRemote;
+			productReference = 859D6D811A9926CA0024FBA4 /* dtvRemote.app */;
+			productType = "com.apple.product-type.application";
+		};
+		859D6D9C1A9926CA0024FBA4 /* dtvRemoteTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 859D6DAA1A9926CA0024FBA4 /* Build configuration list for PBXNativeTarget "dtvRemoteTests" */;
+			buildPhases = (
+				859D6D991A9926CA0024FBA4 /* Sources */,
+				859D6D9A1A9926CA0024FBA4 /* Frameworks */,
+				859D6D9B1A9926CA0024FBA4 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				859D6D9F1A9926CA0024FBA4 /* PBXTargetDependency */,
+			);
+			name = dtvRemoteTests;
+			productName = dtvRemoteTests;
+			productReference = 859D6D9D1A9926CA0024FBA4 /* dtvRemoteTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		859D6D791A9926CA0024FBA4 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0610;
+				ORGANIZATIONNAME = jed;
+				TargetAttributes = {
+					859D6D801A9926CA0024FBA4 = {
+						CreatedOnToolsVersion = 6.1.1;
+					};
+					859D6D9C1A9926CA0024FBA4 = {
+						CreatedOnToolsVersion = 6.1.1;
+						TestTargetID = 859D6D801A9926CA0024FBA4;
+					};
+				};
+			};
+			buildConfigurationList = 859D6D7C1A9926CA0024FBA4 /* Build configuration list for PBXProject "dtvRemote" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 859D6D781A9926CA0024FBA4;
+			productRefGroup = 859D6D821A9926CA0024FBA4 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				859D6D801A9926CA0024FBA4 /* dtvRemote */,
+				859D6D9C1A9926CA0024FBA4 /* dtvRemoteTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		859D6D7F1A9926CA0024FBA4 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				859D6D931A9926CA0024FBA4 /* Main.storyboard in Resources */,
+				859D6D981A9926CA0024FBA4 /* LaunchScreen.xib in Resources */,
+				859D6D951A9926CA0024FBA4 /* Images.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		859D6D9B1A9926CA0024FBA4 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		859D6D7D1A9926CA0024FBA4 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				859D6D8D1A9926CA0024FBA4 /* dtvRemote.xcdatamodeld in Sources */,
+				859D6D8A1A9926CA0024FBA4 /* AppDelegate.m in Sources */,
+				859D6D901A9926CA0024FBA4 /* ViewController.m in Sources */,
+				859D6D871A9926CA0024FBA4 /* main.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		859D6D991A9926CA0024FBA4 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				859D6DA41A9926CA0024FBA4 /* dtvRemoteTests.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		859D6D9F1A9926CA0024FBA4 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 859D6D801A9926CA0024FBA4 /* dtvRemote */;
+			targetProxy = 859D6D9E1A9926CA0024FBA4 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		859D6D911A9926CA0024FBA4 /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				859D6D921A9926CA0024FBA4 /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+		859D6D961A9926CA0024FBA4 /* LaunchScreen.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				859D6D971A9926CA0024FBA4 /* Base */,
+			);
+			name = LaunchScreen.xib;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		859D6DA51A9926CA0024FBA4 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.1;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		859D6DA61A9926CA0024FBA4 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = YES;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.1;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		859D6DA81A9926CA0024FBA4 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				INFOPLIST_FILE = dtvRemote/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		859D6DA91A9926CA0024FBA4 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				INFOPLIST_FILE = dtvRemote/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+		859D6DAB1A9926CA0024FBA4 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(SDKROOT)/Developer/Library/Frameworks",
+					"$(inherited)",
+				);
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = dtvRemoteTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/dtvRemote.app/dtvRemote";
+			};
+			name = Debug;
+		};
+		859D6DAC1A9926CA0024FBA4 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(SDKROOT)/Developer/Library/Frameworks",
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = dtvRemoteTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/dtvRemote.app/dtvRemote";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		859D6D7C1A9926CA0024FBA4 /* Build configuration list for PBXProject "dtvRemote" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				859D6DA51A9926CA0024FBA4 /* Debug */,
+				859D6DA61A9926CA0024FBA4 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		859D6DA71A9926CA0024FBA4 /* Build configuration list for PBXNativeTarget "dtvRemote" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				859D6DA81A9926CA0024FBA4 /* Debug */,
+				859D6DA91A9926CA0024FBA4 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+		859D6DAA1A9926CA0024FBA4 /* Build configuration list for PBXNativeTarget "dtvRemoteTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				859D6DAB1A9926CA0024FBA4 /* Debug */,
+				859D6DAC1A9926CA0024FBA4 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCVersionGroup section */
+		859D6D8B1A9926CA0024FBA4 /* dtvRemote.xcdatamodeld */ = {
+			isa = XCVersionGroup;
+			children = (
+				859D6D8C1A9926CA0024FBA4 /* dtvRemote.xcdatamodel */,
+			);
+			currentVersion = 859D6D8C1A9926CA0024FBA4 /* dtvRemote.xcdatamodel */;
+			path = dtvRemote.xcdatamodeld;
+			sourceTree = "<group>";
+			versionGroupType = wrapper.xcdatamodel;
+		};
+/* End XCVersionGroup section */
+	};
+	rootObject = 859D6D791A9926CA0024FBA4 /* Project object */;
+}
