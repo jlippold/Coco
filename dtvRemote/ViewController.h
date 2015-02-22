@@ -8,8 +8,16 @@
 
 #import <UIKit/UIKit.h>
 
-@interface ViewController : UIViewController
+@interface ViewController : UIViewController <UITableViewDataSource,UITableViewDelegate, UIWebViewDelegate> {
+    NSArray* _mainTableData;
+}
 
+@property (nonatomic, strong) NSMutableDictionary *channelList;
+@property (nonatomic, strong) UITableView *mainTableView;
+@property (nonatomic, strong) UIWebView *webView;
+
+@property (nonatomic, strong) NSOperationQueue *whatsPlayingQueue;
+@property (nonatomic, strong) NSTimer *whatsPlayingTimer;
 
 @end
 
