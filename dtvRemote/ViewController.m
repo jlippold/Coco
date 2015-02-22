@@ -35,7 +35,9 @@
     _whatsPlayingQueue.maxConcurrentOperationCount = 3;
     
     if ([[_channelList allKeys] count] == 0) {
-        [self populateChannelList];
+        dispatch_after(0, dispatch_get_main_queue(), ^{
+            [self populateChannelList];
+        });
     } else {
         NSLog(@"Channel list loaded from disk");
         [self startWhatsPlayingTimer];
@@ -101,36 +103,155 @@
             _channelList = [[NSMutableDictionary alloc] initWithDictionary:[savedData objectForKey:@"channelList"]];
         }
     }
-
+    
 }
 
 - (void) populateChannelList {
     NSLog(@"Loading Channel list...");
-    _webView = [[UIWebView alloc] init];
-    [_webView setFrame:CGRectMake(0, 0, [[UIScreen mainScreen] bounds].size.width, 200)];
-    [_webView setDelegate:self];
-    NSURL *nsurl = [NSURL URLWithString:@"https://www.directv.com/guide"];
-    NSURLRequest *nsrequest=[NSURLRequest requestWithURL:nsurl];
-    [_webView loadRequest:nsrequest];
+    
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Guide Listing"
+                                                                   message:@"Please enter your 5 digit zipcode" preferredStyle:UIAlertControllerStyleAlert];
+    
+    UIAlertAction* accept =
+    [UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:
+     ^(UIAlertAction * action){
+         
+         UITextField *chosenZip = alert.textFields.firstObject;
+         NSString *zip = chosenZip.text;
+         NSLog(@"Entered: %@", zip);
+         
+         //save entered zip
+         [[NSUserDefaults standardUserDefaults] setObject:zip forKey:@"zip"];
+         [[NSUserDefaults standardUserDefaults] synchronize];
+         
+         if ([zip length] != 5) {
+             [self populateChannelList];
+             return;
+         }
+         
+         //get valid locations for zip code
+         NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"https://www.directv.com/json/zipcode/%@", zip]];
+         [NSURLConnection sendAsynchronousRequest:[NSURLRequest requestWithURL:url]
+                                            queue:[NSOperationQueue mainQueue]
+                                completionHandler:^(NSURLResponse *response,
+                                                    NSData *data,
+                                                    NSError *connectionError)
+          {
+              
+              if (data.length > 0 && connectionError == nil) {
+                  //update channelList with currently playing title
+                  NSDictionary *json = [NSJSONSerialization JSONObjectWithData:data options:0 error:NULL];
+                  NSMutableDictionary *zipCodes = [[NSMutableDictionary alloc] init];
+                  
+                  if (json[@"zipCodes"]) {
+                      for (id item in [json objectForKey: @"zipCodes"]) {
+                          NSString *zip = [item objectForKey:@"zipCode"];
+                          NSDictionary *dictionary = @{@"zipCode" : [item objectForKey:@"zipCode"],
+                                                       @"state" : [item objectForKey:@"state"],
+                                                       @"countyName" : [item objectForKey:@"countyName"],
+                                                       @"timeZone": item[@"timeZone"][@"tzId"] };
+                          [zipCodes setObject:dictionary forKey:zip];
+                      }
+                  }
+                  NSLog(@"%lu", (unsigned long)[zipCodes count]);
+                  
+                  NSArray *foundZipCodes = [zipCodes allKeys];
+                  
+                  if ([foundZipCodes count] == 0 ) {
+                      //somethings wrong, ask again for zip
+                      [self populateChannelList];
+                      return;
+                  } else {
+                      
+                      UIAlertController *view = [UIAlertController
+                                                 alertControllerWithTitle:@"Confirm your location"
+                                                 message:@""
+                                                 preferredStyle:UIAlertControllerStyleActionSheet];
+                      
+                      for (NSUInteger i = 0; i < [foundZipCodes count]; i++) {
+                          
+                          id key = [foundZipCodes objectAtIndex: i];
+                          id item = zipCodes[key];
+                          UIAlertAction *action = [UIAlertAction actionWithTitle: item[@"countyName"] style: UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
+                              
+                              [self loadChannelListFromLocation:item];
+                              
+                              [view dismissViewControllerAnimated:YES completion:nil];
+                          }];
+                          [view addAction:action];
+                      }
+                      
+                      
+                      UIAlertAction* cancel = [UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleDestructive handler:^(UIAlertAction * action) {
+                          [view dismissViewControllerAnimated:YES completion:nil];
+                          [self populateChannelList];
+                          return;
+                      }];
+                      
+                      [view addAction:cancel];
+                      [self presentViewController:view animated:YES completion:nil];
+                  }
+                  
+              } else {
+                  [self populateChannelList];
+                  return;
+              }
+              
+          }];
+         
+     }];
+    
+    [alert addAction:accept];
+    [alert addTextFieldWithConfigurationHandler:^(UITextField *textField) {
+        textField.text = [[NSUserDefaults standardUserDefaults] stringForKey:@"zip"];
+        textField.keyboardType = UIKeyboardTypeNumberPad;
+        textField.placeholder = @"10001";
+        
+    }];
+    
+    
+    [self presentViewController:alert animated:YES completion:nil];
+
 }
 
-
-
--(void)webView:(UIWebView *)webView didFailLoadWithError:(NSError *)error {
-    NSLog(@"Error loading: %@", [error description]);
+- (void) loadChannelListFromLocation:(id)location {
+    NSLog(@"%@",location);
+    
+    NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:@"https://www.directv.com/guide"]];
+    NSMutableURLRequest *mutableRequest = [request mutableCopy];
+    NSString *cookie = [NSString stringWithFormat:@"dtve-prospect-state=%@; dtve-prospect-zip=%@%%7C%@;",
+                        location[@"state"], location[@"zipCode"],
+                        [location[@"timeZone"] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
+    
+    [mutableRequest addValue:cookie forHTTPHeaderField:@"Cookie"];
+    
+    request = [mutableRequest copy];
+    
+    [NSURLConnection sendAsynchronousRequest:request queue:[NSOperationQueue mainQueue] completionHandler:
+     ^(NSURLResponse *response, NSData *data, NSError *error) {
+         NSString *responseText = [[NSString alloc] initWithData:data encoding:NSASCIIStringEncoding];
+         for (NSString *line in [responseText componentsSeparatedByString:@"\n"]) {
+             NSString *searchTerm = @"var dtvClientData = ";
+             if ([line hasPrefix:@"<!--[if gt IE 8]>"] && [line containsString:searchTerm]) {
+                 NSRange range = [line rangeOfString:searchTerm];
+                 NSString *json = [line substringFromIndex:(range.location + searchTerm.length)];
+                 NSRange endrange = [json rangeOfString:@"};"];
+                 json = [json substringToIndex:endrange.location+1];
+                 [self getJsonFromText:json];
+             }
+         }
+     }];
+    
 }
 
-- (void)webViewDidFinishLoad:(UIWebView *)webview {
-    if ([[webview stringByEvaluatingJavaScriptFromString:@"document.readyState"] isEqualToString:@"complete"]) {
-        // UIWebView object has fully loaded.
-        
-        NSString *data = [webview
-                          stringByEvaluatingJavaScriptFromString:@"JSON.stringify(dtvClientData.guideData);"];
-        
-        NSDictionary *json = [NSJSONSerialization JSONObjectWithData:[data dataUsingEncoding:NSUTF8StringEncoding] options:0 error:NULL];
-        if (json[@"channels"]) {
-            
-            for (id item in [json objectForKey: @"channels"]) {
+- (void) getJsonFromText:(NSString *)text {
+    NSLog(@"JSON: %@", text);
+    
+    NSDictionary *json = [NSJSONSerialization JSONObjectWithData:[text dataUsingEncoding:NSUTF8StringEncoding] options:0 error:NULL];
+    if (json[@"guideData"]) {
+        id root = json[@"guideData"];
+        if (root[@"channels"]) {
+            for (id item in [root objectForKey: @"channels"]) {
                 
                 NSDictionary *dictionary = @{@"chId" : [item objectForKey:@"chId"],
                                              @"chName" : [item objectForKey:@"chName"],
@@ -143,12 +264,13 @@
             }
             
         }
-        _webView = nil;
-        [self saveChannelList];
-        [self startWhatsPlayingTimer];
-        [_mainTableView reloadData];
         
     }
+    
+    [self saveChannelList];
+    [self startWhatsPlayingTimer];
+    [_mainTableView reloadData];
+    
 }
 
 -(void)startWhatsPlayingTimer {
