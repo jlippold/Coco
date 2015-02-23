@@ -7,6 +7,8 @@
 //
 
 #import "ViewController.h"
+#import "iNet.h"
+
 
 @interface ViewController ()
 
@@ -40,7 +42,12 @@
         });
     } else {
         NSLog(@"Channel list loaded from disk");
-        [self startWhatsPlayingTimer];
+        
+        iNet* inet = [[iNet alloc] init];
+        NSMutableArray *clients = [inet findClients];
+        
+        NSLog(@"%@", clients);
+//        [self startWhatsPlayingTimer];
     }
 }
 
@@ -389,6 +396,8 @@
     
     return [outArray componentsJoinedByString:@","];
 }
+
+
 
 
 @end

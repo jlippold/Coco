@@ -15,6 +15,8 @@
 		859D6D951A9926CA0024FBA4 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 859D6D941A9926CA0024FBA4 /* Images.xcassets */; };
 		859D6D981A9926CA0024FBA4 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 859D6D961A9926CA0024FBA4 /* LaunchScreen.xib */; };
 		859D6DA41A9926CA0024FBA4 /* dtvRemoteTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 859D6DA31A9926CA0024FBA4 /* dtvRemoteTests.m */; };
+		859D6DB11A9A8F5E0024FBA4 /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 859D6DB01A9A8F5E0024FBA4 /* CFNetwork.framework */; };
+		859D6DB31A9AA3F60024FBA4 /* iNet.m in Sources */ = {isa = PBXBuildFile; fileRef = 859D6DB21A9AA3F60024FBA4 /* iNet.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -42,6 +44,9 @@
 		859D6D9D1A9926CA0024FBA4 /* dtvRemoteTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = dtvRemoteTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		859D6DA21A9926CA0024FBA4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		859D6DA31A9926CA0024FBA4 /* dtvRemoteTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = dtvRemoteTests.m; sourceTree = "<group>"; };
+		859D6DB01A9A8F5E0024FBA4 /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = System/Library/Frameworks/CFNetwork.framework; sourceTree = SDKROOT; };
+		859D6DB21A9AA3F60024FBA4 /* iNet.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = iNet.m; sourceTree = "<group>"; };
+		859D6DB41A9AA4040024FBA4 /* iNet.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = iNet.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -49,6 +54,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				859D6DB11A9A8F5E0024FBA4 /* CFNetwork.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -65,6 +71,7 @@
 		859D6D781A9926CA0024FBA4 = {
 			isa = PBXGroup;
 			children = (
+				859D6DB01A9A8F5E0024FBA4 /* CFNetwork.framework */,
 				859D6D831A9926CA0024FBA4 /* dtvRemote */,
 				859D6DA01A9926CA0024FBA4 /* dtvRemoteTests */,
 				859D6D821A9926CA0024FBA4 /* Products */,
@@ -87,6 +94,8 @@
 				859D6D891A9926CA0024FBA4 /* AppDelegate.m */,
 				859D6D8E1A9926CA0024FBA4 /* ViewController.h */,
 				859D6D8F1A9926CA0024FBA4 /* ViewController.m */,
+				859D6DB41A9AA4040024FBA4 /* iNet.h */,
+				859D6DB21A9AA3F60024FBA4 /* iNet.m */,
 				859D6D911A9926CA0024FBA4 /* Main.storyboard */,
 				859D6D941A9926CA0024FBA4 /* Images.xcassets */,
 				859D6D961A9926CA0024FBA4 /* LaunchScreen.xib */,
@@ -222,6 +231,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				859D6DB31A9AA3F60024FBA4 /* iNet.m in Sources */,
 				859D6D8D1A9926CA0024FBA4 /* dtvRemote.xcdatamodeld in Sources */,
 				859D6D8A1A9926CA0024FBA4 /* AppDelegate.m in Sources */,
 				859D6D901A9926CA0024FBA4 /* ViewController.m in Sources */,
