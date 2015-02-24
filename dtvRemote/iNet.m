@@ -7,6 +7,8 @@
 //   Finds clients on the network
 
 #import "iNet.h"
+#import "ViewController.h"
+@import SystemConfiguration.CaptiveNetwork;
 
 @interface iNet ()
 
@@ -14,14 +16,19 @@
 
 @implementation iNet
 
--(NSMutableArray *)findClients {
+- (void)dealloc {
+    [_portScanQueue removeObserver:self forKeyPath:@"Scanner"];
+}
+
+-(void)findClients {
     
-    NSMutableArray *clients = [[NSMutableArray alloc] init];
     NSString *addr = [self getWifiAddress];
     
     _portScanQueue = [[NSOperationQueue alloc] init];
     _portScanQueue.name = @"Scanner";
     _portScanQueue.maxConcurrentOperationCount = 20;
+    
+    [_portScanQueue addObserver:self forKeyPath:@"Scanner" options: NSKeyValueObservingOptionNew context: NULL];
     
     if ([addr containsString:@"."]) {
         NSRange range = [addr rangeOfString:@"." options:NSBackwardsSearch];
@@ -34,7 +41,7 @@
             NSString *strUrl = [NSString stringWithFormat:@"http://%@:8080/",
                                 [addresses objectAtIndex:i]];
             
-            NSLog(@"scanning %@", [addresses objectAtIndex:i]);
+            //NSLog(@"scanning %@", [addresses objectAtIndex:i]);
             NSURL *url = [NSURL URLWithString:strUrl];
             
             NSURLRequest *request = [[NSURLRequest alloc] initWithURL:url
@@ -44,18 +51,17 @@
             [NSURLConnection sendAsynchronousRequest:request queue:_portScanQueue completionHandler:
              ^(NSURLResponse *response, NSData *data, NSError *connectionError)
              {
+
                  if (data.length > 0 && connectionError == nil) {
-                     [clients addObject:[addresses objectAtIndex:i]];
-                  //how do i return clients; from here, wghen queue is complete?
+                     ViewController* vc = [[ViewController alloc] init];
+                     [vc pushClient:[addresses objectAtIndex:i]];
                  }
              }];
             
         }
         
-    } else {
-        return clients;
     }
-    return clients;
+
 }
 
 - (NSMutableArray *) getCandidates:(NSString *)subnet {
@@ -101,5 +107,8 @@
     freeifaddrs(interfaces);
     return address;
 }
+
+
+
 
 @end

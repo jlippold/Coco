@@ -17,6 +17,6 @@
 
 @property (nonatomic, strong) NSOperationQueue *portScanQueue;
 
--(NSMutableArray *)findClients;
+-(void)findClients;
 
 @end

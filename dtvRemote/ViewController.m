@@ -44,9 +44,8 @@
         NSLog(@"Channel list loaded from disk");
         
         iNet* inet = [[iNet alloc] init];
-        NSMutableArray *clients = [inet findClients];
+        [inet findClients];
         
-        NSLog(@"%@", clients);
 //        [self startWhatsPlayingTimer];
     }
 }
@@ -252,7 +251,6 @@
 }
 
 - (void) getJsonFromText:(NSString *)text {
-    NSLog(@"JSON: %@", text);
     
     NSDictionary *json = [NSJSONSerialization JSONObjectWithData:[text dataUsingEncoding:NSUTF8StringEncoding] options:0 error:NULL];
     if (json[@"guideData"]) {
@@ -395,6 +393,10 @@
     }
     
     return [outArray componentsJoinedByString:@","];
+}
+
+- (void)pushClient:(NSString *)client {
+    NSLog(@"%@", client);
 }
 
 
