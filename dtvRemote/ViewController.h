@@ -19,7 +19,7 @@
 @property (nonatomic, strong) NSOperationQueue *whatsPlayingQueue;
 @property (nonatomic, strong) NSTimer *whatsPlayingTimer;
 
--(void)pushClient:(NSString *)clients;
+-(void)pushClients:(NSMutableArray *)clients;
 
 
 @end

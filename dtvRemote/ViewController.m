@@ -395,8 +395,8 @@
     return [outArray componentsJoinedByString:@","];
 }
 
-- (void)pushClient:(NSString *)client {
-    NSLog(@"%@", client);
+- (void)pushClients:(NSMutableArray *)clients {
+    NSLog(@"%@", clients);
 }
 
 

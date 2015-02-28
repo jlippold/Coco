@@ -8,6 +8,7 @@
 
 #import "iNet.h"
 #import "ViewController.h"
+#include "TargetConditionals.h"
 @import SystemConfiguration.CaptiveNetwork;
 
 @interface iNet ()
@@ -16,57 +17,119 @@
 
 @implementation iNet
 
+@synthesize portScanQueue = _portScanQueue;
+
+
 - (void)dealloc {
-    [_portScanQueue removeObserver:self forKeyPath:@"Scanner"];
+   //[self.portScanQueue removeObserver:self forKeyPath:@"Scanner"];
 }
 
+
 -(void)findClients {
+    NSLog(@"Scanning");
     
-    NSString *addr = [self getWifiAddress];
+    NSString *wifiAddress = [self getWifiAddress];
+
     
-    _portScanQueue = [[NSOperationQueue alloc] init];
-    _portScanQueue.name = @"Scanner";
-    _portScanQueue.maxConcurrentOperationCount = 20;
+    self.portScanQueue = [[NSOperationQueue alloc] init];
+    self.portScanQueue.name = @"Scanner";
+
+    //[self.portScanQueue addObserver:self forKeyPath:@"Scanner" options:NSKeyValueObservingOptionNew context: NULL];
     
-    [_portScanQueue addObserver:self forKeyPath:@"Scanner" options: NSKeyValueObservingOptionNew context: NULL];
-    
-    if ([addr containsString:@"."]) {
-        NSRange range = [addr rangeOfString:@"." options:NSBackwardsSearch];
-        NSString *subnet = [addr substringToIndex:range.location];
-        NSMutableArray *addresses = [self getCandidates:subnet];
+    if ([wifiAddress containsString:@"."]) {
+        NSRange range = [wifiAddress rangeOfString:@"." options:NSBackwardsSearch];
+        NSString *subnet = [wifiAddress substringToIndex:range.location];
+        NSMutableArray *prospectiveClients = [self getCandidates:subnet];
+        NSMutableArray *checkedClients = [[NSMutableArray alloc] init];
+        NSMutableArray *foundClients = [[NSMutableArray alloc] init];
         
-        [_portScanQueue cancelAllOperations];
+        [self.portScanQueue cancelAllOperations];
         
-        for (NSUInteger i = 0; i < [addresses count]; i++) {
-            NSString *strUrl = [NSString stringWithFormat:@"http://%@:8080/",
-                                [addresses objectAtIndex:i]];
+        for (NSUInteger i = 0; i < [prospectiveClients count]; i++) {
+            NSString *strUrl = [NSString stringWithFormat:@"http://%@:8080/info/getLocations",
+                                [prospectiveClients objectAtIndex:i]];
             
             //NSLog(@"scanning %@", [addresses objectAtIndex:i]);
             NSURL *url = [NSURL URLWithString:strUrl];
             
             NSURLRequest *request = [[NSURLRequest alloc] initWithURL:url
-                                                          cachePolicy:NSURLRequestUseProtocolCachePolicy
+                                                          cachePolicy:1
                                                       timeoutInterval:3];
             
-            [NSURLConnection sendAsynchronousRequest:request queue:_portScanQueue completionHandler:
+            [self makeRequest:request queue:self.portScanQueue completionHandler:
              ^(NSURLResponse *response, NSData *data, NSError *connectionError)
              {
-
+                 id client = [prospectiveClients objectAtIndex:i];
                  if (data.length > 0 && connectionError == nil) {
-                     ViewController* vc = [[ViewController alloc] init];
-                     [vc pushClient:[addresses objectAtIndex:i]];
+                     NSDictionary *json = [NSJSONSerialization JSONObjectWithData:data options:0 error:NULL];
+                     if (json[@"locations"]) {
+                         for (id item in json[@"locations"]) {
+                             NSString *appendage = @"";
+                             if ([[item objectForKey:@"clientAddr"] isEqualToString:@"0"]) {
+                                 appendage = [NSString stringWithFormat:@"clientAddr=%@",
+                                              [item objectForKey:@"clientAddr"]];
+                             }
+
+                             NSDictionary *clientInfo = @{@"address" : client,
+                                                          @"url": [NSString stringWithFormat:@"http://%@:8080/", client],
+                                                          @"name" : [item objectForKey:@"locationName"],
+                                                          @"appendage": appendage};
+                             
+                             [foundClients addObject:clientInfo];
+                         }
+                         
+                     }
+                 }
+                 
+                 [checkedClients addObject:client];
+                 if ([checkedClients count] == [prospectiveClients count]){
+                     [self sendClients:foundClients];
+                     NSLog(@"Completed Scanning");
                  }
              }];
-            
         }
         
     }
 
 }
 
+-(void) sendClients:(NSMutableArray*) clients {
+    
+    NSString *ssid = [self fetchSSID];
+    NSMutableDictionary *netClients = [[NSMutableDictionary alloc] init];
+    [netClients setObject:clients forKey:ssid];
+    NSLog(@"%@", netClients);
+    
+    ViewController* vc = [[ViewController alloc] init];
+    [vc pushClients:clients];
+}
+
+-(void) makeRequest:(NSURLRequest*)request queue:(NSOperationQueue*)queue completionHandler:(void(^)(NSURLResponse *response, NSData *data, NSError *error))handler
+{
+    __block NSURLResponse *response = nil;
+    __block NSError *error = nil;
+    __block NSData *data = nil;
+    
+    NSBlockOperation *blockOperation = [NSBlockOperation blockOperationWithBlock:^{
+        data = [NSURLConnection sendSynchronousRequest:request
+                                     returningResponse:&response
+                                                 error:&error];
+    }];
+    
+    blockOperation.completionBlock = ^{
+        [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+            handler(response, data, error);
+        }];
+    };
+    
+    [queue addOperation:blockOperation];
+}
+
+
+
 - (NSMutableArray *) getCandidates:(NSString *)subnet {
     NSMutableArray *range = [[NSMutableArray alloc] init];
-    for (NSUInteger i = 1; i < 255; i++) {
+    for (NSUInteger i = 1; i < 256; i++) {
         [range addObject:[subnet stringByAppendingString:[NSString stringWithFormat:@".%@",  @(i)]]];
     }
     return range;
@@ -108,6 +171,22 @@
     return address;
 }
 
+- (NSString *)fetchSSID {
+    NSArray *ifs = (__bridge_transfer NSArray *)CNCopySupportedInterfaces();
+    NSLog(@"Supported interfaces: %@", ifs);
+    NSDictionary *info;
+    for (NSString *ifnam in ifs) {
+        info = (__bridge_transfer NSDictionary *)CNCopyCurrentNetworkInfo((__bridge CFStringRef)ifnam);
+        NSLog(@"%@ => %@", ifnam, info);
+        if (info && [info count]) { break; }
+    }
+    #if (TARGET_IPHONE_SIMULATOR)
+        return @"Simulator";
+    #else
+        return info[@"SSID"];
+    #endif
+    
+}
 
 
 
