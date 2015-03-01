@@ -65,7 +65,7 @@
                      if (json[@"locations"]) {
                          for (id item in json[@"locations"]) {
                              NSString *appendage = @"";
-                             if ([[item objectForKey:@"clientAddr"] isEqualToString:@"0"]) {
+                             if (![[item objectForKey:@"clientAddr"] isEqualToString:@"0"]) {
                                  appendage = [NSString stringWithFormat:@"clientAddr=%@",
                                               [item objectForKey:@"clientAddr"]];
                              }
@@ -100,8 +100,9 @@
     [netClients setObject:clients forKey:ssid];
     NSLog(@"%@", netClients);
     
-    ViewController* vc = [[ViewController alloc] init];
-    [vc pushClients:clients];
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"pushClients" object:clients];
+    //ViewController* vc = [[ViewController alloc] init];
+    //[vc pushClients:clients];
 }
 
 -(void) makeRequest:(NSURLRequest*)request queue:(NSOperationQueue*)queue completionHandler:(void(^)(NSURLResponse *response, NSData *data, NSError *error))handler

@@ -13,13 +13,20 @@
 }
 
 @property (nonatomic, strong) NSMutableDictionary *channelList;
+@property (nonatomic, strong) NSMutableDictionary *currentDevice;
+@property (nonatomic, strong) NSMutableArray *devices;
+
 @property (nonatomic, strong) UITableView *mainTableView;
-@property (nonatomic, strong) UIWebView *webView;
+@property (nonatomic, strong) IBOutlet UINavigationBar *navbar;
+@property (nonatomic, strong) UILabel *navTitle;
+@property (nonatomic, strong) UILabel *navSubTitle;
+@property (nonatomic, strong) UIImage *boxCover;
+@property (nonatomic, strong) UILabel *boxTitle;
+@property (nonatomic, strong) UILabel *boxDescription;
 
 @property (nonatomic, strong) NSOperationQueue *whatsPlayingQueue;
 @property (nonatomic, strong) NSTimer *whatsPlayingTimer;
 
--(void)pushClients:(NSMutableArray *)clients;
 
 
 @end

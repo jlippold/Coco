@@ -7,6 +7,7 @@
 //
 
 #import "ViewController.h"
+#import "MBProgressHUD.h"
 #import "iNet.h"
 
 
@@ -25,11 +26,24 @@
     [super didReceiveMemoryWarning];
 }
 
+- (void)dealloc
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
 - (void) initiate {
+    
+    _channelList = [[NSMutableDictionary alloc] init];
+    _currentDevice = [[NSMutableDictionary alloc] init];
+    _devices = [[NSMutableArray alloc] init];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(pushClients:)
+                                                 name:@"pushClients"
+                                               object:nil];
+    
+    
     [self loadChannelList];
-    if (!_channelList) {
-        _channelList = [[NSMutableDictionary alloc] init];
-    }
     [self createViews];
     
     _whatsPlayingQueue = [[NSOperationQueue alloc] init];
@@ -42,15 +56,83 @@
         });
     } else {
         NSLog(@"Channel list loaded from disk");
-        
-        iNet* inet = [[iNet alloc] init];
-        [inet findClients];
-        
-//        [self startWhatsPlayingTimer];
+        [self startWhatsPlayingTimer];
     }
 }
 
 - (void) createViews {
+    
+    //nav bar
+    CGRect navBarFrame = CGRectMake(0, 0, [[UIScreen mainScreen] bounds].size.width, 64.0);
+    [[UINavigationBar appearance] setShadowImage:[[UIImage alloc] init]];
+    _navbar = [[UINavigationBar alloc] initWithFrame:navBarFrame];
+    //[_navbar setBackgroundImage:[UIImage new] forBarMetrics:UIBarMetricsDefault];
+    //_navbar.translucent = YES;
+    //_navbar.tintColor = [UIColor whiteColor];
+    //_navbar.titleTextAttributes = @{NSForegroundColorAttributeName : [UIColor whiteColor]};
+    
+    _navTitle = [[UILabel alloc] init];
+    _navTitle.translatesAutoresizingMaskIntoConstraints = YES;
+    _navTitle.text = @"Title";
+    _navTitle.font = [UIFont fontWithName:@"Helvetica-Bold" size:17];
+    [_navTitle setTextColor:[UIColor blackColor]];
+    _navTitle.tintColor = [UIColor whiteColor];
+    _navTitle.textAlignment = NSTextAlignmentCenter;
+    _navTitle.frame = CGRectMake(0, 28, [[UIScreen mainScreen] bounds].size.width, 20);
+    
+    _navSubTitle = [[UILabel alloc] init];
+    _navSubTitle.translatesAutoresizingMaskIntoConstraints = YES;
+    _navSubTitle.text = @"subtitle";
+    _navSubTitle.font = [UIFont fontWithName:@"Helvetica" size:15];
+    [_navSubTitle setTextColor: [UIColor blackColor]];
+    _navSubTitle.textAlignment = NSTextAlignmentCenter;
+    _navSubTitle.frame = CGRectMake(0, 44, [[UIScreen mainScreen] bounds].size.width, 20);
+    [_navSubTitle setFont:[UIFont systemFontOfSize:14]];
+    
+    [_navbar addSubview:_navTitle];
+    [_navbar addSubview:_navSubTitle];
+    
+    UINavigationItem *navItem = [UINavigationItem alloc];
+    UIBarButtonItem *leftButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRefresh target:self  action:@selector(findClients:)];
+    navItem.leftBarButtonItem = leftButton;
+    
+    UIBarButtonItem *rightButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAction target:self  action:@selector(showDevicePicker:)];
+    navItem.rightBarButtonItem = rightButton;
+    [_navbar pushNavigationItem:navItem animated:false];
+    [self.view addSubview:_navbar];
+    
+
+    _boxCover = [[UIImage alloc] init];
+    UIView *v = [[UIView alloc] initWithFrame:CGRectMake(10, 70, 120, 160)];
+    [v setBackgroundColor:[UIColor redColor]];
+    UIImageView *iv = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 0, 0)];
+    [iv setImage:_boxCover];
+    [v addSubview:iv];
+    [self.view addSubview:v];
+
+    
+    double xOffset = 140;
+    
+    _boxTitle = [[UILabel alloc] init];
+    _boxTitle.translatesAutoresizingMaskIntoConstraints = YES;
+    _boxTitle.text = @"Some Title";
+    _boxTitle.font = [UIFont fontWithName:@"Helvetica-Bold" size:17];
+    [_boxTitle setTextColor:[UIColor blackColor]];
+    _boxTitle.textAlignment = NSTextAlignmentLeft;
+    _boxTitle.frame = CGRectMake(xOffset, 90, [[UIScreen mainScreen] bounds].size.width - xOffset, 14);
+    [self.view addSubview:_boxTitle];
+    
+    _boxDescription = [[UILabel alloc] init];
+    _boxDescription.translatesAutoresizingMaskIntoConstraints = YES;
+    _boxDescription.text = @"Some Description";
+    _boxDescription.font = [UIFont fontWithName:@"Helvetica" size:15];
+    [_boxDescription setTextColor: [UIColor blackColor]];
+    _boxDescription.textAlignment = NSTextAlignmentLeft;
+    _boxDescription.frame = CGRectMake(xOffset, 105, [[UIScreen mainScreen] bounds].size.width - xOffset, 40);
+    [self.view addSubview:_boxDescription];
+    
+    
+    
     _mainTableView = [[UITableView alloc] init];
     [_mainTableView setFrame:CGRectMake(0, 200,
                                         [[UIScreen mainScreen] bounds].size.width,
@@ -59,6 +141,7 @@
     _mainTableView.delegate = self;
     
     [self.view addSubview:_mainTableView];
+    
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
@@ -82,6 +165,26 @@
                                  [item objectForKey:@"chNum"],
                                  [item objectForKey:@"chName"]];
     return cell;
+    
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+    [tableView deselectRowAtIndexPath:indexPath animated:YES];
+    
+    NSInteger section = indexPath.section;
+    NSInteger row = indexPath.row;
+    
+    NSArray *keys = [_channelList allKeys];
+    id key = [keys objectAtIndex: row];
+    id item = _channelList[key];
+    
+    [self changeChannel:item[@"chNum"]];
+    
+    NSLog(@"%@", item );
+    
+}
+
+-(void)changeChannel:(NSString *) chNum {
     
 }
 
@@ -395,8 +498,45 @@
     return [outArray componentsJoinedByString:@","];
 }
 
-- (void)pushClients:(NSMutableArray *)clients {
-    NSLog(@"%@", clients);
+- (IBAction)findClients:(id)sender {
+    _navTitle.text = @"POOP";
+    iNet* inet = [[iNet alloc] init];
+    [inet findClients];
+}
+
+- (void)pushClients:(NSNotification *)notification {
+    _devices = notification.object;
+    [self showDevicePicker:nil];
+}
+
+- (IBAction)showDevicePicker:(id)sender {
+    
+    UIAlertController *view = [UIAlertController
+                               alertControllerWithTitle:@"Choose A Device"
+                               message:@""
+                               preferredStyle:UIAlertControllerStyleActionSheet];
+    
+    for (NSUInteger i = 0; i < [_devices count]; i++) {
+        id item = [_devices objectAtIndex: i];
+        UIAlertAction *action = [UIAlertAction actionWithTitle: item[@"name"] style: UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
+            
+            _currentDevice = item;
+            _navTitle.text = _currentDevice[@"name"];
+            
+            [view dismissViewControllerAnimated:YES completion:nil];
+        }];
+        [view addAction:action];
+    }
+    
+    UIAlertAction* cancel = [UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleDestructive handler:^(UIAlertAction * action) {
+        [view dismissViewControllerAnimated:YES completion:nil];
+        return;
+    }];
+    
+    [view addAction:cancel];
+    
+    UIViewController *vc = [[[[UIApplication sharedApplication] delegate] window] rootViewController];
+    [vc presentViewController:view animated:YES completion:nil];
 }
 
 
