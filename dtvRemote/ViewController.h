@@ -10,6 +10,7 @@
 
 @interface ViewController : UIViewController <UITableViewDataSource,UITableViewDelegate> {
     NSArray* _mainTableData;
+    id channels;
 }
 
 @property (nonatomic, strong) NSMutableDictionary *channelList;
@@ -26,6 +27,8 @@
 
 @property (nonatomic, strong) NSOperationQueue *whatsPlayingQueue;
 @property (nonatomic, strong) NSTimer *whatsPlayingTimer;
+
+
 
 
 

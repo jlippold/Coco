@@ -4,10 +4,9 @@
 //
 //  Created by Jed Lippold on 2/22/15.
 //  Copyright (c) 2015 jed. All rights reserved.
-//   Finds clients on the network
+//  Network Utilities
 
 #import "iNet.h"
-#import "ViewController.h"
 #include "TargetConditionals.h"
 @import SystemConfiguration.CaptiveNetwork;
 
@@ -21,21 +20,18 @@
 
 
 - (void)dealloc {
-   //[self.portScanQueue removeObserver:self forKeyPath:@"Scanner"];
+
 }
 
 
 -(void)findClients {
-    NSLog(@"Scanning");
     
+    NSLog(@"Scanning");
     NSString *wifiAddress = [self getWifiAddress];
 
-    
     self.portScanQueue = [[NSOperationQueue alloc] init];
     self.portScanQueue.name = @"Scanner";
 
-    //[self.portScanQueue addObserver:self forKeyPath:@"Scanner" options:NSKeyValueObservingOptionNew context: NULL];
-    
     if ([wifiAddress containsString:@"."]) {
         NSRange range = [wifiAddress rangeOfString:@"." options:NSBackwardsSearch];
         NSString *subnet = [wifiAddress substringToIndex:range.location];
@@ -99,10 +95,8 @@
     NSMutableDictionary *netClients = [[NSMutableDictionary alloc] init];
     [netClients setObject:clients forKey:ssid];
     NSLog(@"%@", netClients);
-    
     [[NSNotificationCenter defaultCenter] postNotificationName:@"pushClients" object:clients];
-    //ViewController* vc = [[ViewController alloc] init];
-    //[vc pushClients:clients];
+
 }
 
 -(void) makeRequest:(NSURLRequest*)request queue:(NSOperationQueue*)queue completionHandler:(void(^)(NSURLResponse *response, NSData *data, NSError *error))handler

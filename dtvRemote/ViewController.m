@@ -9,7 +9,7 @@
 #import "ViewController.h"
 #import "MBProgressHUD.h"
 #import "iNet.h"
-
+#import "Channels.h"
 
 @interface ViewController ()
 
@@ -26,25 +26,28 @@
     [super didReceiveMemoryWarning];
 }
 
-- (void)dealloc
-{
+- (void)dealloc {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 - (void) initiate {
     
-    _channelList = [[NSMutableDictionary alloc] init];
-    _currentDevice = [[NSMutableDictionary alloc] init];
+    Channels *ch = [[Channels alloc] init];
+    channels = ch;
+    
+    _channelList = [channels loadChannels];
+    
     _devices = [[NSMutableArray alloc] init];
+    _currentDevice = [[NSMutableDictionary alloc] init];
     
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(pushClients:)
-                                                 name:@"pushClients"
-                                               object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(pushClients:)
+                                                 name:@"pushClients" object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(pushLocations:)
+                                                 name:@"pushLocations" object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(pushChannelList:)
+                                                 name:@"pushChannelList" object:nil];
     
-    
-    [self loadChannelList];
-    [self createViews];
+    [self createMainView];
     
     _whatsPlayingQueue = [[NSOperationQueue alloc] init];
     _whatsPlayingQueue.name = @"Whats Playing";
@@ -52,7 +55,7 @@
     
     if ([[_channelList allKeys] count] == 0) {
         dispatch_after(0, dispatch_get_main_queue(), ^{
-            [self populateChannelList];
+            [self promptForZipCode];
         });
     } else {
         NSLog(@"Channel list loaded from disk");
@@ -60,7 +63,7 @@
     }
 }
 
-- (void) createViews {
+- (void) createMainView {
     
     //nav bar
     CGRect navBarFrame = CGRectMake(0, 0, [[UIScreen mainScreen] bounds].size.width, 64.0);
@@ -186,31 +189,6 @@
     
 }
 
-- (NSComparisonResult) psuedoNumericCompare:(NSString *)otherString {
-    
-    NSString *left  = self;
-    NSString *right = otherString;
-    NSInteger leftNumber, rightNumber;
-    
-    
-    NSScanner *leftScanner = [NSScanner scannerWithString:left];
-    NSScanner *rightScanner = [NSScanner scannerWithString:right];
-    
-    // if both begin with numbers, numeric comparison takes precedence
-    if ([leftScanner scanInteger:&leftNumber] && [rightScanner scanInteger:&rightNumber]) {
-        if (leftNumber < rightNumber)
-            return NSOrderedAscending;
-        if (leftNumber > rightNumber)
-            return NSOrderedDescending;
-        
-        // if numeric values tied, compare the rest
-        left = [left substringFromIndex:[leftScanner scanLocation]];
-        right = [right substringFromIndex:[rightScanner scanLocation]];
-    }
-    
-    return [left caseInsensitiveCompare:right];
-}
-
 -(void)changeChannel:(NSString *)chNum {
     //get valid locations for zip code
     NSURL *url = [NSURL URLWithString:
@@ -232,36 +210,7 @@
      }];
 }
 
-- (void) saveChannelList {
-    NSMutableDictionary *dataDict = [[NSMutableDictionary alloc] initWithCapacity:3];
-    if (_channelList != nil) {
-        [dataDict setObject:_channelList forKey:@"channelList"];
-    }
-    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-    NSString *documentsDirectoryPath = [paths objectAtIndex:0];
-    NSString *filePath = [documentsDirectoryPath stringByAppendingPathComponent:@"appData"];
-    [NSKeyedArchiver archiveRootObject:dataDict toFile:filePath];
-}
-
-- (void) loadChannelList {
-    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-    NSString *documentsDirectoryPath = [paths objectAtIndex:0];
-    NSString *filePath = [documentsDirectoryPath stringByAppendingPathComponent:@"appData"];
-    
-    if ([[NSFileManager defaultManager] fileExistsAtPath:filePath]) {
-        NSData *data = [NSData dataWithContentsOfFile:filePath];
-        NSDictionary *savedData = [NSKeyedUnarchiver unarchiveObjectWithData:data];
-        
-        if ([savedData objectForKey:@"channelList"] != nil) {
-            _channelList = [[NSMutableDictionary alloc] initWithDictionary:[savedData objectForKey:@"channelList"]];
-        }
-    }
-    
-}
-
-- (void) populateChannelList {
-    NSLog(@"Loading Channel list...");
-    
+- (void) promptForZipCode {
     UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Guide Listing"
                                                                    message:@"Please enter your 5 digit zipcode" preferredStyle:UIAlertControllerStyleAlert];
     
@@ -278,79 +227,11 @@
          [[NSUserDefaults standardUserDefaults] synchronize];
          
          if ([zip length] != 5) {
-             [self populateChannelList];
+             [self promptForZipCode];
              return;
          }
          
-         //get valid locations for zip code
-         NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"https://www.directv.com/json/zipcode/%@", zip]];
-         [NSURLConnection sendAsynchronousRequest:[NSURLRequest requestWithURL:url]
-                                            queue:[NSOperationQueue mainQueue]
-                                completionHandler:^(NSURLResponse *response,
-                                                    NSData *data,
-                                                    NSError *connectionError)
-          {
-              
-              if (data.length > 0 && connectionError == nil) {
-                  //update channelList with currently playing title
-                  NSDictionary *json = [NSJSONSerialization JSONObjectWithData:data options:0 error:NULL];
-                  NSMutableDictionary *zipCodes = [[NSMutableDictionary alloc] init];
-                  
-                  if (json[@"zipCodes"]) {
-                      for (id item in [json objectForKey: @"zipCodes"]) {
-                          NSString *zip = [item objectForKey:@"zipCode"];
-                          NSDictionary *dictionary = @{@"zipCode" : [item objectForKey:@"zipCode"],
-                                                       @"state" : [item objectForKey:@"state"],
-                                                       @"countyName" : [item objectForKey:@"countyName"],
-                                                       @"timeZone": item[@"timeZone"][@"tzId"] };
-                          [zipCodes setObject:dictionary forKey:zip];
-                      }
-                  }
-                  NSLog(@"%lu", (unsigned long)[zipCodes count]);
-                  
-                  NSArray *foundZipCodes = [zipCodes allKeys];
-                  
-                  if ([foundZipCodes count] == 0 ) {
-                      //somethings wrong, ask again for zip
-                      [self populateChannelList];
-                      return;
-                  } else {
-                      
-                      UIAlertController *view = [UIAlertController
-                                                 alertControllerWithTitle:@"Confirm your location"
-                                                 message:@""
-                                                 preferredStyle:UIAlertControllerStyleActionSheet];
-                      
-                      for (NSUInteger i = 0; i < [foundZipCodes count]; i++) {
-                          
-                          id key = [foundZipCodes objectAtIndex: i];
-                          id item = zipCodes[key];
-                          UIAlertAction *action = [UIAlertAction actionWithTitle: item[@"countyName"] style: UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
-                              
-                              [self loadChannelListFromLocation:item];
-                              
-                              [view dismissViewControllerAnimated:YES completion:nil];
-                          }];
-                          [view addAction:action];
-                      }
-                      
-                      
-                      UIAlertAction* cancel = [UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleDestructive handler:^(UIAlertAction * action) {
-                          [view dismissViewControllerAnimated:YES completion:nil];
-                          [self populateChannelList];
-                          return;
-                      }];
-                      
-                      [view addAction:cancel];
-                      [self presentViewController:view animated:YES completion:nil];
-                  }
-                  
-              } else {
-                  [self populateChannelList];
-                  return;
-              }
-              
-          }];
+         [[NSNotificationCenter defaultCenter] postNotificationName:@"zipChosen" object:zip];
          
      }];
     
@@ -362,67 +243,56 @@
         
     }];
     
-    
     [self presentViewController:alert animated:YES completion:nil];
-
 }
 
-- (void) loadChannelListFromLocation:(id)location {
-    NSLog(@"%@",location);
-    
-    NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:@"https://www.directv.com/guide"]];
-    NSMutableURLRequest *mutableRequest = [request mutableCopy];
-    NSString *cookie = [NSString stringWithFormat:@"dtve-prospect-state=%@; dtve-prospect-zip=%@%%7C%@;",
-                        location[@"state"], location[@"zipCode"],
-                        [location[@"timeZone"] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
-    
-    [mutableRequest addValue:cookie forHTTPHeaderField:@"Cookie"];
-    
-    request = [mutableRequest copy];
-    
-    [NSURLConnection sendAsynchronousRequest:request queue:[NSOperationQueue mainQueue] completionHandler:
-     ^(NSURLResponse *response, NSData *data, NSError *error) {
-         NSString *responseText = [[NSString alloc] initWithData:data encoding:NSASCIIStringEncoding];
-         for (NSString *line in [responseText componentsSeparatedByString:@"\n"]) {
-             NSString *searchTerm = @"var dtvClientData = ";
-             if ([line hasPrefix:@"<!--[if gt IE 8]>"] && [line containsString:searchTerm]) {
-                 NSRange range = [line rangeOfString:searchTerm];
-                 NSString *json = [line substringFromIndex:(range.location + searchTerm.length)];
-                 NSRange endrange = [json rangeOfString:@"};"];
-                 json = [json substringToIndex:endrange.location+1];
-                 [self getJsonFromText:json];
-             }
-         }
-     }];
-    
+- (void) pushLocations:(NSNotification *)notification {
+    NSMutableDictionary *locations = [notification object];
+    [self promptForLocation:locations];
 }
-
-- (void) getJsonFromText:(NSString *)text {
+- (void) promptForLocation:(NSMutableDictionary *) locations {
     
-    NSDictionary *json = [NSJSONSerialization JSONObjectWithData:[text dataUsingEncoding:NSUTF8StringEncoding] options:0 error:NULL];
-    if (json[@"guideData"]) {
-        id root = json[@"guideData"];
-        if (root[@"channels"]) {
-            for (id item in [root objectForKey: @"channels"]) {
-                NSString *paddedId = [NSString stringWithFormat:@"%05ld", (long)[[item objectForKey:@"chNum"] integerValue]];
-                NSDictionary *dictionary = @{@"chId" : [item objectForKey:@"chId"],
-                                             @"chName" : [item objectForKey:@"chName"],
-                                             @"chCall" : [item objectForKey:@"chCall"],
-                                             @"chNum": [item objectForKey:@"chNum"],
-                                             @"chHd": [item objectForKey:@"chHd"],
-                                             @"title": @"Loading..."};
-                
-                [_channelList setObject:dictionary forKey:paddedId];
-            }
+    NSArray *keys = [locations allKeys];
+    
+    if ([keys count] == 0 ) {
+        //somethings wrong, ask again for zip
+        [self promptForZipCode];
+        return;
+    } else {
+        
+        UIAlertController *view = [UIAlertController
+                                   alertControllerWithTitle:@"Confirm your location"
+                                   message:@""
+                                   preferredStyle:UIAlertControllerStyleActionSheet];
+        
+        for (NSUInteger i = 0; i < [locations count]; i++) {
             
+            id key = [keys objectAtIndex: i];
+            id item = locations[key];
+            UIAlertAction *action =
+            [UIAlertAction actionWithTitle: item[@"countyName"] style: UIAlertActionStyleDefault handler:
+             ^(UIAlertAction * action) {
+                 [[NSNotificationCenter defaultCenter] postNotificationName:@"locationChosen" object:item];
+                 [view dismissViewControllerAnimated:YES completion:nil];
+             }];
+            [view addAction:action];
         }
         
+        
+        UIAlertAction* cancel = [UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleDestructive handler:^(UIAlertAction * action) {
+            [view dismissViewControllerAnimated:YES completion:nil];
+            [self promptForZipCode];
+        }];
+        
+        [view addAction:cancel];
+        [self presentViewController:view animated:YES completion:nil];
     }
-    
-    [self saveChannelList];
-    [self startWhatsPlayingTimer];
+}
+
+- (void) pushChannelList:(NSNotification *)notification {
+    _channelList = [notification object];
     [_mainTableView reloadData];
-    
+    [self startWhatsPlayingTimer];
 }
 
 -(void)startWhatsPlayingTimer {
@@ -548,10 +418,11 @@
     [inet findClients];
 }
 
-- (void)pushClients:(NSNotification *)notification {
+- (void) pushClients:(NSNotification *)notification {
     _devices = notification.object;
     [self showDevicePicker:nil];
 }
+
 
 - (IBAction)showDevicePicker:(id)sender {
     

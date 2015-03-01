@@ -18,6 +18,7 @@
 		859D6DA41A9926CA0024FBA4 /* dtvRemoteTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 859D6DA31A9926CA0024FBA4 /* dtvRemoteTests.m */; };
 		859D6DB11A9A8F5E0024FBA4 /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 859D6DB01A9A8F5E0024FBA4 /* CFNetwork.framework */; };
 		859D6DB31A9AA3F60024FBA4 /* iNet.m in Sources */ = {isa = PBXBuildFile; fileRef = 859D6DB21A9AA3F60024FBA4 /* iNet.m */; };
+		85AFB3D61AA35B4A000AEEB4 /* Channels.m in Sources */ = {isa = PBXBuildFile; fileRef = 85AFB3D51AA35B4A000AEEB4 /* Channels.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -50,6 +51,8 @@
 		859D6DB01A9A8F5E0024FBA4 /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = System/Library/Frameworks/CFNetwork.framework; sourceTree = SDKROOT; };
 		859D6DB21A9AA3F60024FBA4 /* iNet.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = iNet.m; sourceTree = "<group>"; };
 		859D6DB41A9AA4040024FBA4 /* iNet.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = iNet.h; sourceTree = "<group>"; };
+		85AFB3D41AA35B38000AEEB4 /* Channels.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Channels.h; sourceTree = "<group>"; };
+		85AFB3D51AA35B4A000AEEB4 /* Channels.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Channels.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -101,6 +104,8 @@
 				859D6D8F1A9926CA0024FBA4 /* ViewController.m */,
 				859D6DB41A9AA4040024FBA4 /* iNet.h */,
 				859D6DB21A9AA3F60024FBA4 /* iNet.m */,
+				85AFB3D41AA35B38000AEEB4 /* Channels.h */,
+				85AFB3D51AA35B4A000AEEB4 /* Channels.m */,
 				859D6D911A9926CA0024FBA4 /* Main.storyboard */,
 				859D6D941A9926CA0024FBA4 /* Images.xcassets */,
 				859D6D961A9926CA0024FBA4 /* LaunchScreen.xib */,
@@ -242,6 +247,7 @@
 				859D6D8D1A9926CA0024FBA4 /* dtvRemote.xcdatamodeld in Sources */,
 				859D6D8A1A9926CA0024FBA4 /* AppDelegate.m in Sources */,
 				859D6D901A9926CA0024FBA4 /* ViewController.m in Sources */,
+				85AFB3D61AA35B4A000AEEB4 /* Channels.m in Sources */,
 				859D6D871A9926CA0024FBA4 /* main.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
