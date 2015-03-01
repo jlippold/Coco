@@ -156,7 +156,8 @@
         cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"SomeId"] ;
         cell.selectionStyle = UITableViewCellSelectionStyleNone;
     }
-    NSArray *keys = [_channelList allKeys];
+    NSArray *keys = [[_channelList allKeys] sortedArrayUsingSelector: @selector(caseInsensitiveCompare:)];
+    
     id aKey = [keys objectAtIndex:indexPath.row];
     
     NSDictionary *item = [_channelList objectForKey:aKey];
@@ -171,10 +172,11 @@
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
     
-    NSInteger section = indexPath.section;
+    //NSInteger section = indexPath.section;
     NSInteger row = indexPath.row;
     
-    NSArray *keys = [_channelList allKeys];
+    NSArray *keys = [[_channelList allKeys] sortedArrayUsingSelector: @selector(caseInsensitiveCompare:)];
+    
     id key = [keys objectAtIndex: row];
     id item = _channelList[key];
     
@@ -184,8 +186,50 @@
     
 }
 
--(void)changeChannel:(NSString *) chNum {
+- (NSComparisonResult) psuedoNumericCompare:(NSString *)otherString {
     
+    NSString *left  = self;
+    NSString *right = otherString;
+    NSInteger leftNumber, rightNumber;
+    
+    
+    NSScanner *leftScanner = [NSScanner scannerWithString:left];
+    NSScanner *rightScanner = [NSScanner scannerWithString:right];
+    
+    // if both begin with numbers, numeric comparison takes precedence
+    if ([leftScanner scanInteger:&leftNumber] && [rightScanner scanInteger:&rightNumber]) {
+        if (leftNumber < rightNumber)
+            return NSOrderedAscending;
+        if (leftNumber > rightNumber)
+            return NSOrderedDescending;
+        
+        // if numeric values tied, compare the rest
+        left = [left substringFromIndex:[leftScanner scanLocation]];
+        right = [right substringFromIndex:[rightScanner scanLocation]];
+    }
+    
+    return [left caseInsensitiveCompare:right];
+}
+
+-(void)changeChannel:(NSString *)chNum {
+    //get valid locations for zip code
+    NSURL *url = [NSURL URLWithString:
+                  [NSString stringWithFormat:@"http://%@:8080/tv/tune?major=%@&%@",
+                   _currentDevice[@"address"], chNum, _currentDevice[@"appendage"] ]];
+    [NSURLConnection sendAsynchronousRequest:[NSURLRequest requestWithURL:url]
+                                       queue:[NSOperationQueue mainQueue]
+                           completionHandler:^(NSURLResponse *response,
+                                               NSData *data,
+                                               NSError *connectionError)
+     {
+         
+         if (data.length > 0 && connectionError == nil) {
+             
+         } else {
+             
+         }
+         
+     }];
 }
 
 - (void) saveChannelList {
@@ -360,7 +404,7 @@
         id root = json[@"guideData"];
         if (root[@"channels"]) {
             for (id item in [root objectForKey: @"channels"]) {
-                
+                NSString *paddedId = [NSString stringWithFormat:@"%05ld", (long)[[item objectForKey:@"chNum"] integerValue]];
                 NSDictionary *dictionary = @{@"chId" : [item objectForKey:@"chId"],
                                              @"chName" : [item objectForKey:@"chName"],
                                              @"chCall" : [item objectForKey:@"chCall"],
@@ -368,7 +412,7 @@
                                              @"chHd": [item objectForKey:@"chHd"],
                                              @"title": @"Loading..."};
                 
-                [_channelList setObject:dictionary forKey:[[item objectForKey:@"chId"] stringValue]];
+                [_channelList setObject:dictionary forKey:paddedId];
             }
             
         }
@@ -452,7 +496,8 @@
                  if (json[@"schedule"]) {
                      for (id item in [json objectForKey: @"schedule"]) {
                          if (item[@"chId"] && item[@"schedules"]) {
-                             NSString *chId = [[item objectForKey:@"chId"] stringValue];
+                             NSString *chId = [NSString stringWithFormat:@"%05ld", (long)[[item objectForKey:@"chNum"] integerValue]];
+                             
                              if (_channelList[chId]) {
                                  NSArray *schedule = [item objectForKey:@"schedules"];
                                  if ([schedule count]> 0) {
@@ -499,7 +544,6 @@
 }
 
 - (IBAction)findClients:(id)sender {
-    _navTitle.text = @"POOP";
     iNet* inet = [[iNet alloc] init];
     [inet findClients];
 }
