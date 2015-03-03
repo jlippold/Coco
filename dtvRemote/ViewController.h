@@ -10,10 +10,13 @@
 
 @interface ViewController : UIViewController <UITableViewDataSource,UITableViewDelegate> {
     NSArray* _mainTableData;
-    id channels;
+    id classChannels;
+    id classGuide;
+    id classClients;
+    id classCommands;
 }
 
-@property (nonatomic, strong) NSMutableDictionary *channelList;
+@property (nonatomic, strong) NSMutableDictionary *channels;
 @property (nonatomic, strong) NSMutableDictionary *currentDevice;
 @property (nonatomic, strong) NSMutableArray *devices;
 
@@ -24,9 +27,6 @@
 @property (nonatomic, strong) UIImage *boxCover;
 @property (nonatomic, strong) UILabel *boxTitle;
 @property (nonatomic, strong) UILabel *boxDescription;
-
-@property (nonatomic, strong) NSOperationQueue *whatsPlayingQueue;
-@property (nonatomic, strong) NSTimer *whatsPlayingTimer;
 
 
 

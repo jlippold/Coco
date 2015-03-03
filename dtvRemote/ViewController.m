@@ -10,6 +10,9 @@
 #import "MBProgressHUD.h"
 #import "iNet.h"
 #import "Channels.h"
+#import "Guide.h"
+#import "Commands.h"
+#import "Clients.h"
 
 @interface ViewController ()
 
@@ -31,35 +34,39 @@
 }
 
 - (void) initiate {
-    
+
     Channels *ch = [[Channels alloc] init];
-    channels = ch;
+    Guide *gd = [[Guide alloc] init];
+    Commands *co = [[Commands alloc] init];
+    Clients *cl = [[Clients alloc]  init];
     
-    _channelList = [channels loadChannels];
+    classChannels = ch;
+    classGuide = gd;
+    classCommands = co;
+    classClients = cl;
+
+    _channels = [classChannels loadChannels];
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"messageUpdatedChannels" object:_channels];
     
     _devices = [[NSMutableArray alloc] init];
     _currentDevice = [[NSMutableDictionary alloc] init];
     
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(pushClients:)
-                                                 name:@"pushClients" object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(pushLocations:)
-                                                 name:@"pushLocations" object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(pushChannelList:)
-                                                 name:@"pushChannelList" object:nil];
+
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageUpdatedClients:)
+                                                 name:@"messageUpdatedClients" object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageUpdatedLocations:)
+                                                 name:@"messageUpdatedLocations" object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageUpdatedChannels:)
+                                                 name:@"messageUpdatedChannels" object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageUpdatedGuide:)
+                                                 name:@"messageUpdatedGuide" object:nil];
     
     [self createMainView];
     
-    _whatsPlayingQueue = [[NSOperationQueue alloc] init];
-    _whatsPlayingQueue.name = @"Whats Playing";
-    _whatsPlayingQueue.maxConcurrentOperationCount = 3;
-    
-    if ([[_channelList allKeys] count] == 0) {
+    if ([[_channels allKeys] count] == 0) {
         dispatch_after(0, dispatch_get_main_queue(), ^{
             [self promptForZipCode];
         });
-    } else {
-        NSLog(@"Channel list loaded from disk");
-        [self startWhatsPlayingTimer];
     }
 }
 
@@ -96,11 +103,13 @@
     [_navbar addSubview:_navSubTitle];
     
     UINavigationItem *navItem = [UINavigationItem alloc];
-    UIBarButtonItem *leftButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRefresh target:self  action:@selector(findClients:)];
+    UIBarButtonItem *leftButton = [[UIBarButtonItem alloc] initWithTitle:@"Room" style:UIBarButtonItemStylePlain target:self action:@selector(findClients:)];
     navItem.leftBarButtonItem = leftButton;
     
-    UIBarButtonItem *rightButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAction target:self  action:@selector(showDevicePicker:)];
+
+    UIBarButtonItem *rightButton = [[UIBarButtonItem alloc] initWithTitle:@"Edit" style:UIBarButtonItemStylePlain target:self action:@selector(showDevicePicker:)];
     navItem.rightBarButtonItem = rightButton;
+    
     [_navbar pushNavigationItem:navItem animated:false];
     [self.view addSubview:_navbar];
     
@@ -148,7 +157,7 @@
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    NSArray *keys = [_channelList allKeys];
+    NSArray *keys = [_channels allKeys];
     return [keys count];
 }
 
@@ -159,11 +168,11 @@
         cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"SomeId"] ;
         cell.selectionStyle = UITableViewCellSelectionStyleNone;
     }
-    NSArray *keys = [[_channelList allKeys] sortedArrayUsingSelector: @selector(caseInsensitiveCompare:)];
+    NSArray *keys = [[_channels allKeys] sortedArrayUsingSelector: @selector(caseInsensitiveCompare:)];
     
     id aKey = [keys objectAtIndex:indexPath.row];
     
-    NSDictionary *item = [_channelList objectForKey:aKey];
+    NSDictionary *item = [_channels objectForKey:aKey];
     cell.textLabel.text = [item objectForKey:@"title"];
     cell.detailTextLabel.text = [NSString stringWithFormat:@"%@ - %@",
                                  [item objectForKey:@"chNum"],
@@ -173,42 +182,34 @@
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+    if ([[_currentDevice allKeys] count] == 0) {
+        UIAlertView *alert = [[UIAlertView alloc]
+                              initWithTitle:@"Please Choose a device"
+                              message:nil
+                              delegate:self
+                              cancelButtonTitle:nil
+                              otherButtonTitles:@"OK", nil];
+        [alert show];
+        return;
+    }
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
     
     //NSInteger section = indexPath.section;
     NSInteger row = indexPath.row;
     
-    NSArray *keys = [[_channelList allKeys] sortedArrayUsingSelector: @selector(caseInsensitiveCompare:)];
+    NSArray *keys = [[_channels allKeys] sortedArrayUsingSelector: @selector(caseInsensitiveCompare:)];
     
     id key = [keys objectAtIndex: row];
-    id item = _channelList[key];
+    id item = _channels[key];
     
-    [self changeChannel:item[@"chNum"]];
+    NSDictionary *channel = @{@"chNum":item[@"chNum"], @"device":_currentDevice};
     
-    NSLog(@"%@", item );
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"messageChangeChannel" object:channel];
+    
     
 }
 
--(void)changeChannel:(NSString *)chNum {
-    //get valid locations for zip code
-    NSURL *url = [NSURL URLWithString:
-                  [NSString stringWithFormat:@"http://%@:8080/tv/tune?major=%@&%@",
-                   _currentDevice[@"address"], chNum, _currentDevice[@"appendage"] ]];
-    [NSURLConnection sendAsynchronousRequest:[NSURLRequest requestWithURL:url]
-                                       queue:[NSOperationQueue mainQueue]
-                           completionHandler:^(NSURLResponse *response,
-                                               NSData *data,
-                                               NSError *connectionError)
-     {
-         
-         if (data.length > 0 && connectionError == nil) {
-             
-         } else {
-             
-         }
-         
-     }];
-}
+
 
 - (void) promptForZipCode {
     UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Guide Listing"
@@ -231,7 +232,7 @@
              return;
          }
          
-         [[NSNotificationCenter defaultCenter] postNotificationName:@"zipChosen" object:zip];
+         [[NSNotificationCenter defaultCenter] postNotificationName:@"messageUpdatedZipCodes" object:zip];
          
      }];
     
@@ -246,7 +247,7 @@
     [self presentViewController:alert animated:YES completion:nil];
 }
 
-- (void) pushLocations:(NSNotification *)notification {
+- (void) messageUpdatedLocations:(NSNotification *)notification {
     NSMutableDictionary *locations = [notification object];
     [self promptForLocation:locations];
 }
@@ -272,7 +273,7 @@
             UIAlertAction *action =
             [UIAlertAction actionWithTitle: item[@"countyName"] style: UIAlertActionStyleDefault handler:
              ^(UIAlertAction * action) {
-                 [[NSNotificationCenter defaultCenter] postNotificationName:@"locationChosen" object:item];
+                 [[NSNotificationCenter defaultCenter] postNotificationName:@"messageUpdatedLocations" object:item];
                  [view dismissViewControllerAnimated:YES completion:nil];
              }];
             [view addAction:action];
@@ -289,142 +290,35 @@
     }
 }
 
-- (void) pushChannelList:(NSNotification *)notification {
-    _channelList = [notification object];
+- (void) messageUpdatedChannels:(NSNotification *)notification {
+    _channels = [notification object];
     [_mainTableView reloadData];
-    [self startWhatsPlayingTimer];
-}
-
--(void)startWhatsPlayingTimer {
-    
-    [self refreshWhatsPlaying];
-    if (!_whatsPlayingTimer) {
-        _whatsPlayingTimer = [NSTimer scheduledTimerWithTimeInterval:30.0 target:self selector:@selector(fireTimer:) userInfo:nil repeats:YES];
-    }
-}
-
--(void)stopWhatsPlayingTimer {
-    [_whatsPlayingTimer invalidate];
-    _whatsPlayingTimer = nil;
-}
-
-- (void)fireTimer:(NSTimer *)timer {
-    [self refreshWhatsPlaying];
-}
-
-- (void) refreshWhatsPlaying {
-    
-    [_whatsPlayingQueue cancelAllOperations];
-    
-    //Get UTC date format
-    NSDate *currentDateTime = [NSDate date];
-    NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
-    [dateFormatter setDateFormat:@"EEE, dd MMM yyyy HH:mm:ss Z"];
-    NSString *localDateString = [dateFormatter stringFromDate:currentDateTime];
-    
-    //build a base URL for all now playing requests
-    NSString *builder = @"https://www.directv.com/json/channelschedule";
-    builder = [builder stringByAppendingString:@"?channels=%@"];
-    builder = [builder stringByAppendingString:@"&startTime=%@"];
-    builder = [builder stringByAppendingString:@"&hours=4"];
-    builder = [builder stringByAppendingString:@"&chIds=%@"];
-    
-    NSLog(@"Base URL: %@", builder);
-    
-    
-    //Download data in 50 channel chunks
-    NSUInteger chunkSize = 50;
-    int requests = ceil((double)[[_channelList allKeys] count]/chunkSize);
-    NSLog(@"Total Channels: %lu", (unsigned long)[[_channelList allKeys] count]);
-    NSLog(@"Requests to make: %d", requests);
-    
-    //add all requests to the queue
-    for (NSUInteger i = 0; i < requests; i++) {
-        
-        NSInteger offset = i*chunkSize;
-        NSString *strUrl = [NSString stringWithFormat:builder,
-                            [self getJoinedArrayByProp:@"chNum" arrayOffset:offset chunkSize:chunkSize],
-                            [localDateString stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding],
-                            [self getJoinedArrayByProp:@"chId" arrayOffset:offset chunkSize:chunkSize]
-                            ];
-        
-        NSLog(@"Request #%lu Fired", (unsigned long)i);
-        
-        NSURL *url = [NSURL URLWithString:strUrl];
-        
-        
-        [NSURLConnection sendAsynchronousRequest:[NSURLRequest requestWithURL:url]
-                                           queue:_whatsPlayingQueue
-                               completionHandler:^(NSURLResponse *response,
-                                                   NSData *data,
-                                                   NSError *connectionError)
-         {
-             
-             if (data.length > 0 && connectionError == nil) {
-                 //update channelList with currently playing title
-                 NSDictionary *json = [NSJSONSerialization JSONObjectWithData:data options:0 error:NULL];
-                 if (json[@"schedule"]) {
-                     for (id item in [json objectForKey: @"schedule"]) {
-                         if (item[@"chId"] && item[@"schedules"]) {
-                             NSString *chId = [NSString stringWithFormat:@"%05ld", (long)[[item objectForKey:@"chNum"] integerValue]];
-                             
-                             if (_channelList[chId]) {
-                                 NSArray *schedule = [item objectForKey:@"schedules"];
-                                 if ([schedule count]> 0) {
-                                     NSDictionary *nowPlaying = schedule[0];
-                                     if (nowPlaying[@"title"]) {
-                                         NSMutableDictionary *subdict = [_channelList[chId] mutableCopy];
-                                         subdict[@"title"] = nowPlaying[@"title"];
-                                         _channelList[chId] = subdict;
-                                     }
-                                 }
-                             }
-                         }
-                     }
-                     
-                 }
-             }
-             
-             //reload the table on the main Queue
-             [[NSOperationQueue mainQueue] addOperationWithBlock:^{
-                 [_mainTableView reloadData];
-             }];
-             
-         }];
-        
-    }
-}
-
-- (NSString *)getJoinedArrayByProp:(NSString *)prop arrayOffset:(NSInteger)offset chunkSize:(NSInteger)size  {
-    //returns a csv list of some property in _channelList for url building
-    NSMutableArray *outArray = [[NSMutableArray alloc] init];
-    
-    NSArray *keys = [_channelList allKeys];
-    NSUInteger totalPossible = [keys count];
-    
-    for (NSUInteger i = offset; i < totalPossible; i++) {
-        id key = [keys objectAtIndex: i];
-        id item = _channelList[key];
-        if (i <= (offset + size)) {
-            [outArray addObject:[item[prop] stringValue]];
-        }
-    }
-    
-    return [outArray componentsJoinedByString:@","];
 }
 
 - (IBAction)findClients:(id)sender {
-    iNet* inet = [[iNet alloc] init];
-    [inet findClients];
+    MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+    hud.mode = MBProgressHUDModeIndeterminate;
+    hud.labelText = @"Searching for devices...";
+
+
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"messageFindClients" object:nil];
 }
 
-- (void) pushClients:(NSNotification *)notification {
+- (void) messageUpdatedClients:(NSNotification *)notification {
     _devices = notification.object;
     [self showDevicePicker:nil];
 }
 
+- (void) messageUpdatedGuide:(NSNotification *)notification {
+    _channels = notification.object;
+    [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+        [_mainTableView reloadData];
+    }];
+}
 
 - (IBAction)showDevicePicker:(id)sender {
+    
+    [MBProgressHUD hideHUDForView:self.view animated:YES];
     
     UIAlertController *view = [UIAlertController
                                alertControllerWithTitle:@"Choose A Device"

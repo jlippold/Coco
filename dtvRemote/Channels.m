@@ -19,11 +19,11 @@
 }
 
 -(id)init {
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(zipChosen:)
-                                                 name:@"zipChosen" object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageUpdatedZipCodes:)
+                                                 name:@"messageUpdatedZipCodes" object:nil];
     
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(locationChosen:)
-                                                 name:@"locationChosen" object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageUpdatedLocations:)
+                                                 name:@"messageUpdatedLocations" object:nil];
     
     return self;
     
@@ -57,7 +57,7 @@
     return channelList;
 }
 
-- (void)zipChosen:(NSNotification *)notification {
+- (void)messageUpdatedZipCodes:(NSNotification *)notification {
     NSString *zipCode = [notification object];
     [self getLocationsForZipCode:zipCode];
 }
@@ -91,13 +91,13 @@
              
          }
          
-         [[NSNotificationCenter defaultCenter] postNotificationName:@"pushLocations" object:locations];
+         [[NSNotificationCenter defaultCenter] postNotificationName:@"messageUpdatedLocations" object:locations];
          
      }];
     
 }
 
-- (void)locationChosen:(NSNotification *)notification {
+- (void)messageUpdatedLocations:(NSNotification *)notification {
     NSMutableDictionary *location = [notification object];
     [self populateChannels:location];
 }
@@ -155,7 +155,7 @@
     
     
     [self save:channelList];
-    [[NSNotificationCenter defaultCenter] postNotificationName:@"pushChannelList" object:channelList];
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"messageUpdatedChannels" object:channelList];
     
 }
 

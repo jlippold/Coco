@@ -15,8 +15,7 @@
  
 }
 
-@property (nonatomic, strong) NSOperationQueue *portScanQueue;
-
--(void)findClients;
+- (NSString *) getWifiAddress;
+- (NSString *)fetchSSID;
 
 @end
