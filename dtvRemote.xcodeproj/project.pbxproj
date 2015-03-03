@@ -11,6 +11,7 @@
 		85428D611AA5379700134A23 /* Commands.m in Sources */ = {isa = PBXBuildFile; fileRef = 85428D601AA5379700134A23 /* Commands.m */; };
 		85428D641AA559CA00134A23 /* Clients.m in Sources */ = {isa = PBXBuildFile; fileRef = 85428D631AA559CA00134A23 /* Clients.m */; };
 		85471B231AA2523200B534B3 /* MBProgressHUD.m in Sources */ = {isa = PBXBuildFile; fileRef = 85471B221AA2523200B534B3 /* MBProgressHUD.m */; };
+		858A4F651AA5FC5600B6226E /* images.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 858A4F641AA5FC5600B6226E /* images.bundle */; };
 		859D6D871A9926CA0024FBA4 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 859D6D861A9926CA0024FBA4 /* main.m */; };
 		859D6D8A1A9926CA0024FBA4 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 859D6D891A9926CA0024FBA4 /* AppDelegate.m */; };
 		859D6D8D1A9926CA0024FBA4 /* dtvRemote.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 859D6D8B1A9926CA0024FBA4 /* dtvRemote.xcdatamodeld */; };
@@ -43,6 +44,7 @@
 		85428D631AA559CA00134A23 /* Clients.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Clients.m; sourceTree = "<group>"; };
 		85471B211AA2523200B534B3 /* MBProgressHUD.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MBProgressHUD.h; sourceTree = "<group>"; };
 		85471B221AA2523200B534B3 /* MBProgressHUD.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MBProgressHUD.m; sourceTree = "<group>"; };
+		858A4F641AA5FC5600B6226E /* images.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = images.bundle; sourceTree = "<group>"; };
 		859D6D811A9926CA0024FBA4 /* dtvRemote.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = dtvRemote.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		859D6D851A9926CA0024FBA4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		859D6D861A9926CA0024FBA4 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
@@ -105,6 +107,7 @@
 		859D6D831A9926CA0024FBA4 /* dtvRemote */ = {
 			isa = PBXGroup;
 			children = (
+				858A4F641AA5FC5600B6226E /* images.bundle */,
 				859D6D881A9926CA0024FBA4 /* AppDelegate.h */,
 				859D6D891A9926CA0024FBA4 /* AppDelegate.m */,
 				85AFB3D41AA35B38000AEEB4 /* Channels.h */,
@@ -240,6 +243,7 @@
 				859D6D931A9926CA0024FBA4 /* Main.storyboard in Resources */,
 				859D6D981A9926CA0024FBA4 /* LaunchScreen.xib in Resources */,
 				859D6D951A9926CA0024FBA4 /* Images.xcassets in Resources */,
+				858A4F651AA5FC5600B6226E /* images.bundle in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -22,8 +22,8 @@
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageUpdatedZipCodes:)
                                                  name:@"messageUpdatedZipCodes" object:nil];
     
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageUpdatedLocations:)
-                                                 name:@"messageUpdatedLocations" object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageSelectedLocation:)
+                                                 name:@"messageSelectedLocation" object:nil];
     
     return self;
     
@@ -97,7 +97,7 @@
     
 }
 
-- (void)messageUpdatedLocations:(NSNotification *)notification {
+- (void)messageSelectedLocation:(NSNotification *)notification {
     NSMutableDictionary *location = [notification object];
     [self populateChannels:location];
 }

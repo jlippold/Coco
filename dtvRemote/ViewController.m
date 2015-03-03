@@ -22,6 +22,7 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    [self setNeedsStatusBarAppearanceUpdate];
     [self initiate];
 }
 
@@ -70,34 +71,63 @@
     }
 }
 
+-(UIStatusBarStyle)preferredStatusBarStyle{
+    return UIStatusBarStyleLightContent;
+}
+
 - (void) createMainView {
     
-    //nav bar
+    UIColor *backgroundColor = [UIColor colorWithRed:30/255.0f green:30/255.0f blue:30/255.0f alpha:1.0f];
+    [self.view setBackgroundColor:backgroundColor];
+    
+    [self createTitleBar];
+    [self createTopSection];
+    [self createTableView];
+    [self createToolbar];
+    
+}
+
+
+- (void) createTitleBar {
+    
+    UIColor *navBGColor = [UIColor colorWithRed:23/255.0f green:23/255.0f blue:23/255.0f alpha:1.0f];
+    UIColor *textColor = [UIColor colorWithRed:193/255.0f green:193/255.0f blue:193/255.0f alpha:1.0f];
+    UIColor *navTint = [UIColor colorWithRed:30/255.0f green:147/255.0f blue:212/255.0f alpha:1.0f];
+    
     CGRect navBarFrame = CGRectMake(0, 0, [[UIScreen mainScreen] bounds].size.width, 64.0);
     [[UINavigationBar appearance] setShadowImage:[[UIImage alloc] init]];
     _navbar = [[UINavigationBar alloc] initWithFrame:navBarFrame];
-    //[_navbar setBackgroundImage:[UIImage new] forBarMetrics:UIBarMetricsDefault];
-    //_navbar.translucent = YES;
-    //_navbar.tintColor = [UIColor whiteColor];
-    //_navbar.titleTextAttributes = @{NSForegroundColorAttributeName : [UIColor whiteColor]};
+    _navbar.barTintColor = navBGColor;
+    
+    _navbar.translucent = NO;
+    _navbar.tintColor = navTint;
+    _navbar.titleTextAttributes = @{NSForegroundColorAttributeName : textColor};
     
     _navTitle = [[UILabel alloc] init];
     _navTitle.translatesAutoresizingMaskIntoConstraints = YES;
-    _navTitle.text = @"Title";
+    _navTitle.text = @"Living Room";
     _navTitle.font = [UIFont fontWithName:@"Helvetica-Bold" size:17];
-    [_navTitle setTextColor:[UIColor blackColor]];
-    _navTitle.tintColor = [UIColor whiteColor];
+    [_navTitle setTextColor:textColor];
+    _navTitle.tintColor = navTint;
     _navTitle.textAlignment = NSTextAlignmentCenter;
     _navTitle.frame = CGRectMake(0, 28, [[UIScreen mainScreen] bounds].size.width, 20);
     
     _navSubTitle = [[UILabel alloc] init];
     _navSubTitle.translatesAutoresizingMaskIntoConstraints = YES;
-    _navSubTitle.text = @"subtitle";
-    _navSubTitle.font = [UIFont fontWithName:@"Helvetica" size:15];
-    [_navSubTitle setTextColor: [UIColor blackColor]];
+    _navSubTitle.text = @"202 - CNN";
+    _navSubTitle.font = [UIFont fontWithName:@"Helvetica" size:14];
+    [_navSubTitle setTextColor: textColor];
     _navSubTitle.textAlignment = NSTextAlignmentCenter;
     _navSubTitle.frame = CGRectMake(0, 44, [[UIScreen mainScreen] bounds].size.width, 20);
     [_navSubTitle setFont:[UIFont systemFontOfSize:14]];
+    
+    NSDictionary* barButtonItemAttributes =  @{NSFontAttributeName: [UIFont fontWithName:@"Helvetica" size:14.0f],
+                                               NSForegroundColorAttributeName: navTint};
+    
+    [[UIBarButtonItem appearance] setTitleTextAttributes: barButtonItemAttributes forState:UIControlStateNormal];
+    [[UIBarButtonItem appearance] setTitleTextAttributes: barButtonItemAttributes forState:UIControlStateHighlighted];
+    [[UIBarButtonItem appearance] setTitleTextAttributes: barButtonItemAttributes forState:UIControlStateSelected];
+    [[UIBarButtonItem appearance] setTitleTextAttributes: barButtonItemAttributes forState:UIControlStateDisabled];
     
     [_navbar addSubview:_navTitle];
     [_navbar addSubview:_navSubTitle];
@@ -106,54 +136,185 @@
     UIBarButtonItem *leftButton = [[UIBarButtonItem alloc] initWithTitle:@"Room" style:UIBarButtonItemStylePlain target:self action:@selector(findClients:)];
     navItem.leftBarButtonItem = leftButton;
     
-
     UIBarButtonItem *rightButton = [[UIBarButtonItem alloc] initWithTitle:@"Edit" style:UIBarButtonItemStylePlain target:self action:@selector(showDevicePicker:)];
     navItem.rightBarButtonItem = rightButton;
     
     [_navbar pushNavigationItem:navItem animated:false];
     [self.view addSubview:_navbar];
-    
+}
 
+- (void) createTopSection {
+
+    UIColor *textColor = [UIColor colorWithRed:193/255.0f green:193/255.0f blue:193/255.0f alpha:1.0f];
+    UIColor *boxBackgroundColor = [UIColor colorWithRed:28/255.0f green:28/255.0f blue:28/255.0f alpha:1.0f];
+    UIColor *tint = [UIColor colorWithRed:30/255.0f green:147/255.0f blue:212/255.0f alpha:1.0f];
+    
     _boxCover = [[UIImage alloc] init];
-    UIView *v = [[UIView alloc] initWithFrame:CGRectMake(10, 70, 120, 160)];
-    [v setBackgroundColor:[UIColor redColor]];
+    UIView *v = [[UIView alloc] initWithFrame:CGRectMake(5, 70, 120, 140)];
+    [v setBackgroundColor:boxBackgroundColor];
     UIImageView *iv = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 0, 0)];
     [iv setImage:_boxCover];
     [v addSubview:iv];
     [self.view addSubview:v];
-
+    
     
     double xOffset = 140;
     
     _boxTitle = [[UILabel alloc] init];
     _boxTitle.translatesAutoresizingMaskIntoConstraints = YES;
-    _boxTitle.text = @"Some Title";
+    _boxTitle.text = @"Spaceballs 3: The search for spaceballs 2";
     _boxTitle.font = [UIFont fontWithName:@"Helvetica-Bold" size:17];
-    [_boxTitle setTextColor:[UIColor blackColor]];
+    [_boxTitle setTextColor:textColor];
     _boxTitle.textAlignment = NSTextAlignmentLeft;
-    _boxTitle.frame = CGRectMake(xOffset, 90, [[UIScreen mainScreen] bounds].size.width - xOffset, 14);
+    _boxTitle.frame = CGRectMake(xOffset, 82, [[UIScreen mainScreen] bounds].size.width - xOffset, 14);
     [self.view addSubview:_boxTitle];
     
+    
+    _playBar = [[UIToolbar alloc] init];
+    //_playBar.clipsToBounds = YES;
+    
+    _playBar.tintColor = textColor;
+    _playBar.frame = CGRectMake(xOffset, 106, [[UIScreen mainScreen] bounds].size.width - (xOffset+5), 40);
+    [_playBar setBackgroundImage:[UIImage new] forToolbarPosition:UIToolbarPositionAny barMetrics:UIBarMetricsDefault];
+    
+    UIBarButtonItem *flex = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:self action:nil ];
+    UIBarButtonItem *fit = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFixedSpace target:self action:nil ];
+    fit.width = 15.0f;
+    
+    UIBarButtonItem *rewindButton = [[UIBarButtonItem alloc]
+                                     initWithImage:[UIImage imageNamed:@"images.bundle/rewind.png"]
+                                     style:UIBarButtonItemStylePlain target:self action:@selector(rewind:)];
+    
+    _playButton = [[UIBarButtonItem alloc]
+                   initWithImage:[UIImage imageNamed:@"images.bundle/pause"]
+                   style:UIBarButtonItemStylePlain target:self action:@selector(playPause:) ];
+    
+    _playButton.tintColor = textColor;
+    
+    UIBarButtonItem *forwardButton = [[UIBarButtonItem alloc]
+                                      initWithImage:[UIImage imageNamed:@"images.bundle/forward.png"]
+                                      style:UIBarButtonItemStylePlain target:self action:@selector(forward:) ];
+    
+    
+    NSArray *buttons = [NSArray arrayWithObjects: flex, rewindButton, flex, _playButton, flex, forwardButton, flex, nil];
+    [_playBar setItems: buttons animated:NO];
+    
+    [self.view addSubview:_playBar];
+    
+    
+    //seekbar
+    _seekBar = [[UISlider alloc] init];
+    _seekBar.frame = CGRectMake(xOffset, 146, [[UIScreen mainScreen] bounds].size.width - (xOffset+5), 10);
+    _seekBar.minimumValue = 0.0;
+    _seekBar.maximumValue = 100.0;
+    _seekBar.value = 20;
+    [_seekBar setMaximumTrackTintColor:textColor];
+    [_seekBar setMinimumTrackTintColor:tint];
+    
+    _seekBar.tintColor = textColor;
+    _seekBar.thumbTintColor = textColor;
+    
+    [_seekBar setThumbImage:[UIImage imageNamed:@"images.bundle/scrubber"] forState:UIControlStateNormal];
+    [_seekBar setThumbImage:[UIImage imageNamed:@"images.bundle/scrubber"] forState:UIControlStateSelected];
+    [_seekBar setThumbImage:[UIImage imageNamed:@"images.bundle/scrubber"] forState:UIControlStateHighlighted];
+    
+    [self.view addSubview:_seekBar];
+
     _boxDescription = [[UILabel alloc] init];
     _boxDescription.translatesAutoresizingMaskIntoConstraints = YES;
-    _boxDescription.text = @"Some Description";
-    _boxDescription.font = [UIFont fontWithName:@"Helvetica" size:15];
-    [_boxDescription setTextColor: [UIColor blackColor]];
+    _boxDescription.numberOfLines = 3;
+    _boxDescription.text = @"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
+    _boxDescription.font = [UIFont fontWithName:@"Helvetica" size:14];
+    [_boxDescription setTextColor: textColor];
     _boxDescription.textAlignment = NSTextAlignmentLeft;
-    _boxDescription.frame = CGRectMake(xOffset, 105, [[UIScreen mainScreen] bounds].size.width - xOffset, 40);
+    _boxDescription.frame = CGRectMake(xOffset, 165, [[UIScreen mainScreen] bounds].size.width - xOffset, 40);
     [self.view addSubview:_boxDescription];
+}
+
+- (void) createTableView {
+    double tableXOffset = 215;
+    double toolbarHeight = 40;
     
-    
+    UIColor *seperatorColor = [UIColor colorWithRed:40/255.0f green:40/255.0f blue:40/255.0f alpha:1.0f];
+    UIColor *backgroundColor = [UIColor colorWithRed:30/255.0f green:30/255.0f blue:30/255.0f alpha:1.0f];
     
     _mainTableView = [[UITableView alloc] init];
-    [_mainTableView setFrame:CGRectMake(0, 200,
+    [_mainTableView setFrame:CGRectMake(0, tableXOffset,
                                         [[UIScreen mainScreen] bounds].size.width,
-                                        [[UIScreen mainScreen] bounds].size.height-200)];
+                                        [[UIScreen mainScreen] bounds].size.height-(tableXOffset+ toolbarHeight))];
     _mainTableView.dataSource = self;
     _mainTableView.delegate = self;
     
+    _mainTableView.separatorColor = seperatorColor;
+    _mainTableView.backgroundColor = backgroundColor;
+    
     [self.view addSubview:_mainTableView];
     
+}
+
+
+- (void) createToolbar {
+    
+    double toolbarHeight = 40;
+    double overlayHeight = 15;
+    UIColor *textColor = [UIColor colorWithRed:193/255.0f green:193/255.0f blue:193/255.0f alpha:1.0f];
+    
+    UIView *overlay = [[UIView alloc] init];
+    overlay.frame = CGRectMake(0, [[UIScreen mainScreen] bounds].size.height - (toolbarHeight + overlayHeight),
+                               [[UIScreen mainScreen] bounds].size.width, overlayHeight);
+    overlay.opaque = YES;
+    overlay.alpha = .6;
+    overlay.backgroundColor = [UIColor blackColor];
+    
+     _overlayLabel = [[UILabel alloc] init];
+    _overlayLabel.textColor = textColor;
+    _overlayLabel.frame = overlay.frame;
+    _overlayLabel.text = @"Last updated at 9:30 am";
+    _overlayLabel.font = [UIFont fontWithName:@"Helvetica" size:12];
+    _overlayLabel.textAlignment = NSTextAlignmentCenter;
+
+    [self.view addSubview:overlay];
+    [self.view addSubview:_overlayLabel];
+    
+    _toolBar = [[UIToolbar alloc] init];
+    _toolBar.clipsToBounds = YES;
+    _toolBar.frame = CGRectMake(0, [[UIScreen mainScreen] bounds].size.height - toolbarHeight, [[UIScreen mainScreen] bounds].size.width, toolbarHeight);
+    [_toolBar setBackgroundImage:[UIImage new] forToolbarPosition:UIToolbarPositionAny barMetrics:UIBarMetricsDefault];
+    _toolBar.tintColor = textColor;
+    
+    UIBarButtonItem *flex = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:self action:nil ];
+    
+
+    UIBarButtonItem *guideBack = [[UIBarButtonItem alloc]
+                                  initWithImage:[UIImage imageNamed:@"images.bundle/left.png"]
+                                  style:UIBarButtonItemStylePlain target:self action:@selector(filterTap:) ];
+    
+    UIBarButtonItem *guideForward = [[UIBarButtonItem alloc]
+                                     initWithImage:[UIImage imageNamed:@"images.bundle/right"]
+                                     style:UIBarButtonItemStylePlain target:self action:@selector(filterTap:) ];
+    
+    UIBarButtonItem *numberPad = [[UIBarButtonItem alloc]
+                                      initWithImage:[UIImage imageNamed:@"images.bundle/numberpad.png"]
+                                      style:UIBarButtonItemStylePlain target:self action:@selector(numberPadTap:) ];
+    
+    UIBarButtonItem *filter = [[UIBarButtonItem alloc]
+                                  initWithImage:[UIImage imageNamed:@"images.bundle/filter.png"]
+                                  style:UIBarButtonItemStylePlain target:self action:@selector(filterTap:) ];
+    
+    UIBarButtonItem *commands = [[UIBarButtonItem alloc]
+                               initWithImage:[UIImage imageNamed:@"images.bundle/commands.png"]
+                               style:UIBarButtonItemStylePlain target:self action:@selector(filterTap:) ];
+    
+    UIBarButtonItem *sort = [[UIBarButtonItem alloc]
+                                 initWithImage:[UIImage imageNamed:@"images.bundle/sort.png"]
+                                 style:UIBarButtonItemStylePlain target:self action:@selector(sortTap:) ];
+    
+    
+    NSArray *buttons = [NSArray arrayWithObjects:  commands, flex , sort, flex, filter, flex, numberPad, flex, guideBack, flex, guideForward, nil];
+    [_toolBar setItems:buttons animated:NO];
+    
+    [self.view addSubview:_toolBar];
+
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
@@ -161,9 +322,24 @@
     return [keys count];
 }
 
+- (void)tableView:(UITableView *)tableView willDisplayCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath {
+    UIColor *backgroundColor = [UIColor colorWithRed:28/255.0f green:28/255.0f blue:28/255.0f alpha:1.0f];
+    UIColor *textColor = [UIColor colorWithRed:193/255.0f green:193/255.0f blue:193/255.0f alpha:1.0f];
+    UIColor *tintColor = [UIColor colorWithRed:30/255.0f green:147/255.0f blue:212/255.0f alpha:1.0f];
+    
+    cell.accessoryType = UITableViewCellAccessoryCheckmark;
+    cell.backgroundColor = backgroundColor;
+    [cell.textLabel setTextColor: textColor];
+    [cell.detailTextLabel setTextColor:textColor];
+    [cell setTintColor:tintColor];
+
+}
+
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"SomeId"];
+    cell.accessoryType = UITableViewCellAccessoryCheckmark;
+    
     if (cell == nil) {
         cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"SomeId"] ;
         cell.selectionStyle = UITableViewCellSelectionStyleNone;
@@ -273,7 +449,7 @@
             UIAlertAction *action =
             [UIAlertAction actionWithTitle: item[@"countyName"] style: UIAlertActionStyleDefault handler:
              ^(UIAlertAction * action) {
-                 [[NSNotificationCenter defaultCenter] postNotificationName:@"messageUpdatedLocations" object:item];
+                 [[NSNotificationCenter defaultCenter] postNotificationName:@"messageSelectedLocation" object:item];
                  [view dismissViewControllerAnimated:YES completion:nil];
              }];
             [view addAction:action];
@@ -348,7 +524,13 @@
     [vc presentViewController:view animated:YES completion:nil];
 }
 
-
-
-
+- (IBAction)rewind:(id)sender {
+    
+}
+- (IBAction)forward:(id)sender {
+    
+}
+- (IBAction)playPause:(id)sender {
+    
+}
 @end
