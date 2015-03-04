@@ -338,15 +338,12 @@
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"SomeId"];
-    UIColor *cellColor = [UIColor colorWithRed:193/255.0f green:193/255.0f blue:193/255.0f alpha:1.0f];
-    cell.accessoryType = UITableViewCellAccessoryCheckmark;
-    
     if (cell == nil) {
         cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"SomeId"] ;
-        cell.selectionStyle = UITableViewCellSelectionStyleNone;
     }
-    NSArray *keys = [[_channels allKeys] sortedArrayUsingSelector: @selector(caseInsensitiveCompare:)];
     
+    //cell data
+    NSArray *keys = [[_channels allKeys] sortedArrayUsingSelector: @selector(caseInsensitiveCompare:)];
     id aKey = [keys objectAtIndex:indexPath.row];
     
     NSDictionary *item = [_channels objectForKey:aKey];
@@ -354,20 +351,34 @@
     cell.detailTextLabel.text = [NSString stringWithFormat:@"%@ - %@",
                                  [item objectForKey:@"chNum"],
                                  [item objectForKey:@"chName"]];
-    
-
     cell.indentationLevel = 1;
     cell.indentationWidth = 2;
     
-    UIImage *image = [[UIImage imageNamed:@"images.bundle/progress1.png"]
-                      imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
     
-
+    //channel image
+    UIImage *image = [UIImage imageNamed:@"images.bundle/channel.png"];
     cell.imageView.image = image;
-
-    cell.imageView.tintColor = cellColor;
+    cell.imageView.tintColor = [UIColor clearColor];
     
-        [cell setNeedsLayout];
+    //set progress indicator
+    cell.accessoryType = UITableViewCellAccessoryCheckmark;
+    UIColor *tintColor = [UIColor colorWithRed:193/255.0f green:193/255.0f blue:193/255.0f alpha:1.0f];
+    
+    UIImage *progressImage = [[UIImage imageNamed:@"images.bundle/progress1.png"] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
+
+    UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
+    CGRect frame = CGRectMake(0.0, 0.0, progressImage.size.width, progressImage.size.height);
+    button.frame = frame;
+    [button setBackgroundImage:progressImage forState:UIControlStateNormal];
+    button.backgroundColor = [UIColor clearColor];
+    button.tintColor = tintColor;
+    cell.accessoryView = button;
+    
+    
+
+
+    
+    [cell setNeedsLayout];
         
     return cell;
     
