@@ -338,6 +338,7 @@
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"SomeId"];
+    UIColor *cellColor = [UIColor colorWithRed:193/255.0f green:193/255.0f blue:193/255.0f alpha:1.0f];
     cell.accessoryType = UITableViewCellAccessoryCheckmark;
     
     if (cell == nil) {
@@ -353,6 +354,21 @@
     cell.detailTextLabel.text = [NSString stringWithFormat:@"%@ - %@",
                                  [item objectForKey:@"chNum"],
                                  [item objectForKey:@"chName"]];
+    
+
+    cell.indentationLevel = 1;
+    cell.indentationWidth = 2;
+    
+    UIImage *image = [[UIImage imageNamed:@"images.bundle/progress1.png"]
+                      imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
+    
+
+    cell.imageView.image = image;
+
+    cell.imageView.tintColor = cellColor;
+    
+        [cell setNeedsLayout];
+        
     return cell;
     
 }
