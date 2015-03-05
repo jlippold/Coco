@@ -143,6 +143,7 @@
                 NSDictionary *dictionary = @{@"chId" : [item objectForKey:@"chId"],
                                              @"chName" : [item objectForKey:@"chName"],
                                              @"chCall" : [item objectForKey:@"chCall"],
+                                             @"chLogoId" : [item objectForKey:@"chLogoId"],
                                              @"chNum": [item objectForKey:@"chNum"],
                                              @"chHd": [item objectForKey:@"chHd"],
                                              @"title": @"Loading..."};

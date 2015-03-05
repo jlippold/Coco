@@ -8,6 +8,8 @@
 
 #import "ViewController.h"
 #import "MBProgressHUD.h"
+#import <SDWebImage/UIImageView+WebCache.h>
+
 #import "iNet.h"
 #import "Channels.h"
 #import "Guide.h"
@@ -356,9 +358,12 @@
     
     
     //channel image
-    UIImage *image = [UIImage imageNamed:@"images.bundle/channel.png"];
-    cell.imageView.image = image;
-    cell.imageView.tintColor = [UIColor clearColor];
+    NSString *url = [NSString stringWithFormat:@"https://www.directv.com/images/logos/channels/dark/medium/%03d.png",
+                     [[item objectForKey:@"chLogoId"] intValue]];
+    
+    [cell.imageView sd_setImageWithURL:[NSURL URLWithString:url]
+                   placeholderImage:[UIImage new]];
+    
     
     //set progress indicator
     cell.accessoryType = UITableViewCellAccessoryCheckmark;
