@@ -70,6 +70,8 @@
         dispatch_after(0, dispatch_get_main_queue(), ^{
             [self promptForZipCode];
         });
+    } else {
+        //check cache channel images anyways
     }
 }
 
@@ -329,19 +331,36 @@
     UIColor *textColor = [UIColor colorWithRed:193/255.0f green:193/255.0f blue:193/255.0f alpha:1.0f];
     UIColor *tintColor = [UIColor colorWithRed:30/255.0f green:147/255.0f blue:212/255.0f alpha:1.0f];
     
-    cell.accessoryType = UITableViewCellAccessoryCheckmark;
+    cell.indentationLevel = 1;
+    cell.indentationWidth = 2;
+    
+    //cell.accessoryType = UITableViewCellAccessoryCheckmark;
     cell.backgroundColor = backgroundColor;
     [cell.textLabel setTextColor: textColor];
     [cell.detailTextLabel setTextColor:textColor];
     [cell setTintColor:tintColor];
+    
+
 
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     
+    
+    UIColor *textColor = [UIColor colorWithRed:193/255.0f green:193/255.0f blue:193/255.0f alpha:1.0f];
+    
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"SomeId"];
     if (cell == nil) {
-        cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"SomeId"] ;
+        cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"SomeId"];
+        UILabel *label = [[UILabel alloc] init];
+        label.text = @"";
+        label.textColor = textColor;
+        label.font = [UIFont fontWithName:@"Helvetica" size:12];
+        label.numberOfLines = 2;
+        [label setTag:1];
+            label.textAlignment = NSTextAlignmentCenter;
+        [label setFrame:CGRectMake([[UIScreen mainScreen] bounds].size.width - 50, 0, 50, 30)];
+        [cell.contentView addSubview: label];
     }
     
     //cell data
@@ -349,27 +368,41 @@
     id aKey = [keys objectAtIndex:indexPath.row];
     
     NSDictionary *item = [_channels objectForKey:aKey];
-    cell.textLabel.text = [item objectForKey:@"title"];
+    cell.textLabel.text = [item objectForKey:@"showTitle"];
     cell.detailTextLabel.text = [NSString stringWithFormat:@"%@ - %@",
                                  [item objectForKey:@"chNum"],
                                  [item objectForKey:@"chName"]];
-    cell.indentationLevel = 1;
-    cell.indentationWidth = 2;
+    
+    UILabel *l2 = (UILabel *)[cell viewWithTag:1];
+    l2.text =  [NSString stringWithFormat:@"%@\n%@", [[item objectForKey:@"chNum"] stringValue], @"-12:43"];
     
     
     //channel image
-    NSString *url = [NSString stringWithFormat:@"https://www.directv.com/images/logos/channels/dark/medium/%03d.png",
-                     [[item objectForKey:@"chLogoId"] intValue]];
+    UIImage *image = [UIImage new];
+    NSString *cacheDirectory = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) lastObject];
+    NSString *imagePath =[cacheDirectory stringByAppendingPathComponent:
+                          [NSString stringWithFormat:@"%@.png", [item objectForKey:@"chLogoId"]]];
     
-    [cell.imageView sd_setImageWithURL:[NSURL URLWithString:url]
-                   placeholderImage:[UIImage new]];
-    
-    
+    if ([[NSFileManager defaultManager] fileExistsAtPath:imagePath]) {
+        image = [UIImage imageWithContentsOfFile:imagePath];
+    }
+    cell.imageView.image = image;
+
+
+
+
+    /*    
     //set progress indicator
+
     cell.accessoryType = UITableViewCellAccessoryCheckmark;
     UIColor *tintColor = [UIColor colorWithRed:193/255.0f green:193/255.0f blue:193/255.0f alpha:1.0f];
     
-    UIImage *progressImage = [[UIImage imageNamed:@"images.bundle/progress1.png"] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
+    UIImage *progressImage = [UIImage new];
+    if ([item objectForKey:@"showProgress"] && false) {
+        progressImage = [[UIImage imageNamed:
+                                   [NSString stringWithFormat:@"images.bundle/%@", [item objectForKey:@"showProgress"]]]
+                                  imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
+    }
 
     UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
     CGRect frame = CGRectMake(0.0, 0.0, progressImage.size.width, progressImage.size.height);
@@ -378,7 +411,7 @@
     button.backgroundColor = [UIColor clearColor];
     button.tintColor = tintColor;
     cell.accessoryView = button;
-    
+    */
     
 
 

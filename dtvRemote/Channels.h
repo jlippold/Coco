@@ -10,7 +10,7 @@
 
 @interface Channels : NSObject
 
-@property (nonatomic, strong) NSOperationQueue *portScanQueue;
+@property (nonatomic, strong) NSOperationQueue *channelImagesQueue;
 
 - (id)init;
 - (void)save:(NSMutableDictionary *) channelList;

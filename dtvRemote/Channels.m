@@ -25,6 +25,10 @@
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageSelectedLocation:)
                                                  name:@"messageSelectedLocation" object:nil];
     
+    _channelImagesQueue = [[NSOperationQueue alloc] init];
+    _channelImagesQueue.name = @"Channel Images Cache";
+    _channelImagesQueue.maxConcurrentOperationCount = 5;
+    
     return self;
     
 }
@@ -134,6 +138,7 @@
 - (void) readJSONFromHTMLBody:(NSString *)text {
     
     NSMutableDictionary *channelList = [[NSMutableDictionary alloc] init];
+    
     NSDictionary *json = [NSJSONSerialization JSONObjectWithData:[text dataUsingEncoding:NSUTF8StringEncoding] options:0 error:NULL];
     if (json[@"guideData"]) {
         id root = json[@"guideData"];
@@ -147,7 +152,7 @@
                                              @"chNum": [item objectForKey:@"chNum"],
                                              @"chHd": [item objectForKey:@"chHd"],
                                              @"title": @"Loading..."};
-                
+    
                 [channelList setObject:dictionary forKey:paddedId];
             }
             
@@ -156,8 +161,38 @@
     
     
     [self save:channelList];
-    [[NSNotificationCenter defaultCenter] postNotificationName:@"messageUpdatedChannels" object:channelList];
+    [self downloadChannelImages:channelList];
+    
+
     
 }
 
+- (void) downloadChannelImages:(NSMutableDictionary *)channelList {
+    
+    NSString *cacheDirectory = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) lastObject];
+    NSArray *keys = [channelList allKeys];
+    
+    for (id channel in keys) {
+        
+        NSString *channelId =  [channelList[channel] objectForKey:@"chLogoId"];
+        NSURL *location = [NSURL URLWithString:[NSString stringWithFormat:@"https://www.directv.com/images/logos/channels/dark/medium/%03d.png", [channelId intValue]]];
+        
+        NSString *imagePath =[cacheDirectory stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.png",channelId]];
+        
+        if (![[NSFileManager defaultManager] fileExistsAtPath:imagePath]) {
+            [NSURLConnection sendAsynchronousRequest:[NSURLRequest requestWithURL:location]
+                                               queue:_channelImagesQueue
+                                   completionHandler:^(NSURLResponse *response,
+                                                       NSData *data,
+                                                       NSError *connectionError)
+             {
+                 if (data.length > 0 && connectionError == nil) {
+                     [data writeToFile:imagePath atomically:NO];
+                 }
+                 
+             }];
+        }
+    }
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"messageUpdatedChannels" object:channelList];
+}
 @end

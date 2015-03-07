@@ -7,6 +7,7 @@
 //
 
 #import "Guide.h"
+#include <math.h>
 
 @implementation Guide
 
@@ -129,11 +130,63 @@
                                  NSArray *schedule = [item objectForKey:@"schedules"];
                                  if ([schedule count]> 0) {
                                      NSDictionary *nowPlaying = schedule[0];
-                                     if (nowPlaying[@"title"]) {
-                                         NSMutableDictionary *subdict = [_channels[chId] mutableCopy];
-                                         subdict[@"title"] = nowPlaying[@"title"];
-                                         _channels[chId] = subdict;
+                                     NSMutableDictionary *subdict = [_channels[chId] mutableCopy];
+                                     if (nowPlaying[@"programID"]) {
+                                         subdict[@"showId"] = nowPlaying[@"programID"];
                                      }
+                                     if (nowPlaying[@"title"]) {
+                                         subdict[@"showTitle"] = nowPlaying[@"title"];
+                                     }
+                                     if (nowPlaying[@"primaryImageUrl"]) {
+                                         subdict[@"showCover"] = nowPlaying[@"primaryImageUrl"];
+                                     }
+                                     if (nowPlaying[@"mainCategory"]) {
+                                         subdict[@"showCategory"] = nowPlaying[@"mainCategory"];
+                                     }
+                                     if (nowPlaying[@"hd"]) {
+                                         subdict[@"showHD"] = nowPlaying[@"hd"];
+                                     }
+                                     if (nowPlaying[@"duration"] && nowPlaying[@"airTime"]) {
+                                         
+                                         NSDateFormatter* dateFormatter = [[NSDateFormatter alloc] init];
+                                         [dateFormatter setDateFormat:@"yyyy-MM-dd'T'HH:mm:ss.SSSZ"];
+                                         NSDate *startDate = [dateFormatter dateFromString:nowPlaying[@"airTime"]];
+                                         NSInteger duration = [nowPlaying[@"duration"] intValue];
+                                         
+                                         if (startDate && duration) {
+                                             
+                                             NSDate *endDate = [startDate dateByAddingTimeInterval:duration*60];
+                                             [dateFormatter setTimeZone:[NSTimeZone defaultTimeZone]];
+                                             NSDate *now = [[NSDate alloc] init];
+                                             
+                                             double completed = [now timeIntervalSinceDate:startDate] / 60;
+                                             double percentage = (completed/duration);
+                                             double whole = percentage * 100.0;
+                                             NSUInteger rounded = floor((whole+10)/20) * 20;
+                                             double eights = percentage * 8;
+                                             NSUInteger roundedEights = (NSInteger) roundf(eights);
+                                             
+                                             /*
+                                             NSLog(@"completed: %lu duration: %lu percentage: %lu rounded: %lu eights: %lu" ,
+                                                   (unsigned long)completed,
+                                                   (unsigned long)duration,
+                                                   (unsigned long)percentage,
+                                                   rounded,
+                                                   roundedEights);
+                                             
+                                             NSLog(@"Start: %@ End: %@ Completed %ld/%lD", startDate, endDate, (long)completed, (long)duration);
+                                             */
+                                             
+                                             //needs to ignore shows that havent started? (why are there negatives here?)
+                                             if (roundedEights < 8) {
+                                                 subdict[@"showProgress"] =
+                                                    [NSString stringWithFormat:@"progress%lu.png", roundedEights];
+                                             }
+
+                                         }
+
+                                     }
+                                     _channels[chId] = subdict;
                                  }
                              }
                          }
