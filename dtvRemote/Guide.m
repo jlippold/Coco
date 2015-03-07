@@ -62,7 +62,7 @@
 
 - (void) refreshGuide {
     
-    ///This should only post complete when all requests are completed
+    NSMutableDictionary *guide = [[NSMutableDictionary alloc] init];
     
     if ([[_channels allKeys] count] == 0) {
         return;
@@ -76,9 +76,14 @@
         dt = _guideTime;
     }
     
+    dt = [self getHalfHourIncrement:dt];
+    
+    
     NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
     [dateFormatter setDateFormat:@"EEE, dd MMM yyyy HH:mm:ss Z"];
     NSString *localDateString = [dateFormatter stringFromDate:dt];
+
+    NSLog(@"DT: %@", localDateString);
     
     //build a base URL for all now playing requests
     NSString *builder = @"https://www.directv.com/json/channelschedule";
@@ -87,7 +92,7 @@
     builder = [builder stringByAppendingString:@"&hours=4"];
     builder = [builder stringByAppendingString:@"&chIds=%@"];
     
-    NSLog(@"Base URL: %@", builder);
+
     
     
     //Download data in 50 channel chunks
@@ -127,10 +132,13 @@
                              NSString *chId = [NSString stringWithFormat:@"%05ld", (long)[[item objectForKey:@"chNum"] integerValue]];
                              
                              if (_channels[chId]) {
+                                 
                                  NSArray *schedule = [item objectForKey:@"schedules"];
-                                 if ([schedule count]> 0) {
+                                 if ([schedule count] > 0) {
+                                     
                                      NSDictionary *nowPlaying = schedule[0];
                                      NSMutableDictionary *subdict = [_channels[chId] mutableCopy];
+                                     
                                      if (nowPlaying[@"programID"]) {
                                          subdict[@"showId"] = nowPlaying[@"programID"];
                                      }
@@ -218,6 +226,24 @@
     }
     
     return [outArray componentsJoinedByString:@","];
+}
+
+- (NSDate *)getHalfHourIncrement:(NSDate *)date {
+
+    NSCalendar *calendar = [NSCalendar currentCalendar];
+    [calendar setTimeZone:[NSTimeZone localTimeZone]];
+    NSDateComponents *components = [calendar componentsInTimeZone:[NSTimeZone localTimeZone] fromDate:date];
+    NSInteger minute = [components minute];
+    [components setValue:0 forComponent:NSCalendarUnitSecond];
+    
+    if (minute < 30) { //round down to hour
+        [components setValue:0 forComponent:NSCalendarUnitMinute];
+    } else { //round down to half hour
+        [components setValue:30 forComponent:NSCalendarUnitMinute];
+    }
+    
+    return  [calendar dateFromComponents:components];
+    
 }
 
 
