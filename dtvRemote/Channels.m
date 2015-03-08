@@ -144,7 +144,6 @@
         id root = json[@"guideData"];
         if (root[@"channels"]) {
             for (id item in [root objectForKey: @"channels"]) {
-                NSString *paddedId = [NSString stringWithFormat:@"%05ld", (long)[[item objectForKey:@"chNum"] integerValue]];
                 NSDictionary *dictionary = @{@"chId" : [item objectForKey:@"chId"],
                                              @"chName" : [item objectForKey:@"chName"],
                                              @"chCall" : [item objectForKey:@"chCall"],
@@ -153,7 +152,7 @@
                                              @"chHd": [item objectForKey:@"chHd"],
                                              @"title": @"Loading..."};
     
-                [channelList setObject:dictionary forKey:paddedId];
+                [channelList setObject:dictionary forKey:[[item objectForKey:@"chId"] stringValue]];
             }
             
         }

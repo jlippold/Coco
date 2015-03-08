@@ -18,6 +18,7 @@
 
 @property (nonatomic, strong) NSMutableDictionary *channels;
 @property (nonatomic, strong) NSMutableDictionary *currentDevice;
+@property (nonatomic, strong) NSMutableDictionary *guide;
 @property (nonatomic, strong) NSMutableArray *devices;
 
 @property (nonatomic, strong) UITableView *mainTableView;

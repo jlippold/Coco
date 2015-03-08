@@ -78,7 +78,6 @@
     
     dt = [self getHalfHourIncrement:dt];
     
-    
     NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
     [dateFormatter setDateFormat:@"EEE, dd MMM yyyy HH:mm:ss Z"];
     NSString *localDateString = [dateFormatter stringFromDate:dt];
@@ -124,86 +123,95 @@
          {
              
              if (data.length > 0 && connectionError == nil) {
-                 //update channelList with currently playing title
+
                  NSDictionary *json = [NSJSONSerialization JSONObjectWithData:data options:0 error:NULL];
-                 if (json[@"schedule"]) {
-                     for (id item in [json objectForKey: @"schedule"]) {
-                         if (item[@"chId"] && item[@"schedules"]) {
-                             NSString *chId = [NSString stringWithFormat:@"%05ld", (long)[[item objectForKey:@"chNum"] integerValue]];
+                 
+                 for (id channel in [json objectForKey: @"schedule"]) {
+                     
+                     
+                     NSArray *channelSchedule = [channel objectForKey:@"schedules"];
+                     
+                     NSString *chId = [[channel objectForKey:@"chId"] stringValue];
+                     
+                     if ((long)[[channel objectForKey:@"chNum"] integerValue] == 22) {
+                         NSLog(@"22!");
+                     }
+                     int i;
+                     for (i = 0; i < [channelSchedule count]; i++) {
+
+                         id show = [channelSchedule objectAtIndex:i];
+                         
+                         NSDateFormatter* dateFormatter = [[NSDateFormatter alloc] init];
+                         [dateFormatter setDateFormat:@"yyyy-MM-dd'T'HH:mm:ss.SSSZ"];
+                         NSDate *startDate = [dateFormatter dateFromString:show[@"airTime"]];
+                         NSInteger duration = [show[@"duration"] intValue];
+                         
+                         bool isPlaying = [self isNowPlaying:startDate duration:duration];
+                         bool isAdded = [[guide allKeys] containsObject:chId];
+                         
+                         if (isPlaying && !isAdded) {
                              
-                             if (_channels[chId]) {
-                                 
-                                 NSArray *schedule = [item objectForKey:@"schedules"];
-                                 if ([schedule count] > 0) {
-                                     
-                                     NSDictionary *nowPlaying = schedule[0];
-                                     NSMutableDictionary *subdict = [_channels[chId] mutableCopy];
-                                     
-                                     if (nowPlaying[@"programID"]) {
-                                         subdict[@"showId"] = nowPlaying[@"programID"];
-                                     }
-                                     if (nowPlaying[@"title"]) {
-                                         subdict[@"showTitle"] = nowPlaying[@"title"];
-                                     }
-                                     if (nowPlaying[@"primaryImageUrl"]) {
-                                         subdict[@"showCover"] = nowPlaying[@"primaryImageUrl"];
-                                     }
-                                     if (nowPlaying[@"mainCategory"]) {
-                                         subdict[@"showCategory"] = nowPlaying[@"mainCategory"];
-                                     }
-                                     if (nowPlaying[@"hd"]) {
-                                         subdict[@"showHD"] = nowPlaying[@"hd"];
-                                     }
-                                     if (nowPlaying[@"duration"] && nowPlaying[@"airTime"]) {
-                                         
-                                         NSDateFormatter* dateFormatter = [[NSDateFormatter alloc] init];
-                                         [dateFormatter setDateFormat:@"yyyy-MM-dd'T'HH:mm:ss.SSSZ"];
-                                         NSDate *startDate = [dateFormatter dateFromString:nowPlaying[@"airTime"]];
-                                         NSInteger duration = [nowPlaying[@"duration"] intValue];
-                                         
-                                         if (startDate && duration) {
-                                             
-                                             NSDate *endDate = [startDate dateByAddingTimeInterval:duration*60];
-                                             [dateFormatter setTimeZone:[NSTimeZone defaultTimeZone]];
-                                             NSDate *now = [[NSDate alloc] init];
-                                             
-                                             double completed = [now timeIntervalSinceDate:startDate] / 60;
-                                             double percentage = (completed/duration);
-                                             double whole = percentage * 100.0;
-                                             NSUInteger rounded = floor((whole+10)/20) * 20;
-                                             double eights = percentage * 8;
-                                             NSUInteger roundedEights = (NSInteger) roundf(eights);
-                                             
-                                             /*
-                                             NSLog(@"completed: %lu duration: %lu percentage: %lu rounded: %lu eights: %lu" ,
-                                                   (unsigned long)completed,
-                                                   (unsigned long)duration,
-                                                   (unsigned long)percentage,
-                                                   rounded,
-                                                   roundedEights);
-                                             
-                                             NSLog(@"Start: %@ End: %@ Completed %ld/%lD", startDate, endDate, (long)completed, (long)duration);
-                                             */
-                                             
-                                             //needs to ignore shows that havent started? (why are there negatives here?)
-                                             if (roundedEights < 8) {
-                                                 subdict[@"showProgress"] =
-                                                    [NSString stringWithFormat:@"progress%lu.png", roundedEights];
-                                             }
-
-                                         }
-
-                                     }
-                                     _channels[chId] = subdict;
-                                 }
+                             NSMutableDictionary *guideItem = [[NSMutableDictionary alloc] init];
+                             
+                             
+                             if (show[@"programID"]) {
+                                 guideItem[@"programID"] = show[@"programID"];
                              }
+                             if (show[@"title"]) {
+                                 guideItem[@"title"] = show[@"title"];
+                             }
+                             if (show[@"primaryImageUrl"]) {
+                                 guideItem[@"boxcover"] = show[@"primaryImageUrl"];
+                             }
+                             if (show[@"mainCategory"]) {
+                                 guideItem[@"category"] = show[@"mainCategory"];
+                             }
+                             if (show[@"hd"]) {
+                                 guideItem[@"hd"] = show[@"hd"];
+                             }
+                             
+                             guideItem[@"starts"] = startDate;
+                             guideItem[@"ends"] = [startDate dateByAddingTimeInterval:duration*60];
+                             
+                             guideItem[@"upNext"] = @"Not Available";
+                             if (i < [channelSchedule count]-1) {
+                                 id nextShow = [channelSchedule objectAtIndex:i+1];
+                                 guideItem[@"upNext"] = nextShow[@"title"];
+                             }
+                             
+                             [guide setObject:guideItem forKey:chId];
+                             
                          }
+                         
+                         /*
+                          
+                          
+                          [dateFormatter setTimeZone:[NSTimeZone defaultTimeZone]];
+                          NSDate *now = [[NSDate alloc] init];
+                          
+                          double completed = [now timeIntervalSinceDate:startDate] / 60;
+                          double percentage = (completed/duration);
+                          double whole = percentage * 100.0;
+                          
+                          NSLog(@"completed: %lu duration: %lu percentage: %lu rounded: %lu eights: %lu" ,
+                          (unsigned long)completed,
+                          (unsigned long)duration,
+                          (unsigned long)percentage,
+                          rounded,
+                          roundedEights);
+                          
+                          NSLog(@"Start: %@ End: %@ Completed %ld/%lD", startDate, endDate, (long)completed, (long)duration);
+                          
+                          */
                      }
                      
+                     
                  }
+
+                 
              }
              
-            [[NSNotificationCenter defaultCenter] postNotificationName:@"messageUpdatedGuide" object:_channels];
+            [[NSNotificationCenter defaultCenter] postNotificationName:@"messageUpdatedGuide" object:guide];
              
          }];
         
@@ -244,6 +252,14 @@
     
     return  [calendar dateFromComponents:components];
     
+}
+
+- (BOOL)isNowPlaying:(NSDate *)startDate duration:(NSInteger)duration {
+    NSDateFormatter* dateFormatter = [[NSDateFormatter alloc] init];
+    NSDate *endDate = [startDate dateByAddingTimeInterval:duration*60];
+    [dateFormatter setTimeZone:[NSTimeZone defaultTimeZone]];
+    NSDate *now = [[NSDate alloc] init];
+    return ([endDate timeIntervalSinceDate:now] > 0);
 }
 
 

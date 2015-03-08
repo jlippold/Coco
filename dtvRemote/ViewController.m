@@ -49,6 +49,8 @@
     classClients = cl;
 
     _channels = [classChannels loadChannels];
+    _guide = [[NSMutableDictionary alloc] init];
+    
     [[NSNotificationCenter defaultCenter] postNotificationName:@"messageUpdatedChannels" object:_channels];
     
     _devices = [[NSMutableArray alloc] init];
@@ -291,27 +293,27 @@
 
     UIBarButtonItem *guideBack = [[UIBarButtonItem alloc]
                                   initWithImage:[UIImage imageNamed:@"images.bundle/left.png"]
-                                  style:UIBarButtonItemStylePlain target:self action:@selector(filterTap:) ];
+                                  style:UIBarButtonItemStylePlain target:self action:@selector(stub:) ];
     
     UIBarButtonItem *guideForward = [[UIBarButtonItem alloc]
                                      initWithImage:[UIImage imageNamed:@"images.bundle/right"]
-                                     style:UIBarButtonItemStylePlain target:self action:@selector(filterTap:) ];
+                                     style:UIBarButtonItemStylePlain target:self action:@selector(stub:) ];
     
     UIBarButtonItem *numberPad = [[UIBarButtonItem alloc]
                                       initWithImage:[UIImage imageNamed:@"images.bundle/numberpad.png"]
-                                      style:UIBarButtonItemStylePlain target:self action:@selector(numberPadTap:) ];
+                                      style:UIBarButtonItemStylePlain target:self action:@selector(stub:) ];
     
     UIBarButtonItem *filter = [[UIBarButtonItem alloc]
                                   initWithImage:[UIImage imageNamed:@"images.bundle/filter.png"]
-                                  style:UIBarButtonItemStylePlain target:self action:@selector(filterTap:) ];
+                                  style:UIBarButtonItemStylePlain target:self action:@selector(stub:) ];
     
     UIBarButtonItem *commands = [[UIBarButtonItem alloc]
                                initWithImage:[UIImage imageNamed:@"images.bundle/commands.png"]
-                               style:UIBarButtonItemStylePlain target:self action:@selector(filterTap:) ];
+                               style:UIBarButtonItemStylePlain target:self action:@selector(stub:) ];
     
     UIBarButtonItem *sort = [[UIBarButtonItem alloc]
                                  initWithImage:[UIImage imageNamed:@"images.bundle/sort.png"]
-                                 style:UIBarButtonItemStylePlain target:self action:@selector(sortTap:) ];
+                                 style:UIBarButtonItemStylePlain target:self action:@selector(stub:) ];
     
     
     NSArray *buttons = [NSArray arrayWithObjects:  commands, flex , sort, flex, filter, flex, numberPad, flex, guideBack, flex, guideForward, nil];
@@ -348,6 +350,7 @@
     
     
     UIColor *textColor = [UIColor colorWithRed:193/255.0f green:193/255.0f blue:193/255.0f alpha:1.0f];
+    UIColor *backgroundColor = [UIColor colorWithRed:28/255.0f green:28/255.0f blue:28/255.0f alpha:1.0f];
     
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"SomeId"];
     if (cell == nil) {
@@ -357,6 +360,7 @@
         label.textColor = textColor;
         label.font = [UIFont fontWithName:@"Helvetica" size:12];
         label.numberOfLines = 2;
+        label.backgroundColor = backgroundColor;
         [label setTag:1];
             label.textAlignment = NSTextAlignmentCenter;
         [label setFrame:CGRectMake([[UIScreen mainScreen] bounds].size.width - 50, 0, 50, 30)];
@@ -364,24 +368,70 @@
     }
     
     //cell data
-    NSArray *keys = [[_channels allKeys] sortedArrayUsingSelector: @selector(caseInsensitiveCompare:)];
+    NSArray *keys = [_channels allKeys];
     id aKey = [keys objectAtIndex:indexPath.row];
     
-    NSDictionary *item = [_channels objectForKey:aKey];
-    cell.textLabel.text = [item objectForKey:@"showTitle"];
-    cell.detailTextLabel.text = [NSString stringWithFormat:@"%@ - %@",
-                                 [item objectForKey:@"chNum"],
-                                 [item objectForKey:@"chName"]];
+
+    NSDictionary *channel = [_channels objectForKey:aKey];
+    NSDictionary *guideItem = [_guide objectForKey:aKey];
+    
+    NSString *timeLeft= @"";
+    bool showIsEndingSoon = NO;
+    
+    if (guideItem) {
+        cell.textLabel.text = [guideItem objectForKey:@"title"];
+        if ([guideItem objectForKey:@"upNext"]) {
+            cell.detailTextLabel.text = [NSString stringWithFormat:@"next: %@",
+                                         [guideItem objectForKey:@"upNext"]];
+        } else {
+            cell.detailTextLabel.text = @"";
+        }
+        
+        
+        
+        NSDate *now = [NSDate new];
+        NSDate *ends = [guideItem objectForKey:@"ends"];
+        /*
+         NSDate *starts = [guideItem objectForKey:@"starts"];
+         NSTimeInterval duration = [ends timeIntervalSinceDate:starts];
+         NSTimeInterval elasped = [now timeIntervalSinceDate:starts];
+         double percentage = (elasped/duration)*100.0;
+         if (percentage > 75) {
+         showIsEndingSoon = YES;
+         }
+         */
+        
+        NSCalendar *calendar = [NSCalendar currentCalendar];
+        [calendar setTimeZone:[NSTimeZone localTimeZone]];
+        NSUInteger unitFlags = NSCalendarUnitHour | NSCalendarUnitMinute;
+        NSDateComponents *components = [calendar components:unitFlags
+                                                   fromDate: now
+                                                     toDate: ends
+                                                    options:0];
+        
+        timeLeft = [NSString stringWithFormat:@"-%ld:%ld", [components hour], [components minute]];
+        
+        if ([components hour] == 0 && [components minute] <= 10) {
+            showIsEndingSoon = YES;
+        }
+        
+    } else {
+        cell.textLabel.text = @"Not Available";
+        cell.detailTextLabel.text = @"";
+    }
+    
     
     UILabel *l2 = (UILabel *)[cell viewWithTag:1];
-    l2.text =  [NSString stringWithFormat:@"%@\n%@", [[item objectForKey:@"chNum"] stringValue], @"-12:43"];
-    
+    l2.text =  [NSString stringWithFormat:@"%@\n%@", [[channel objectForKey:@"chNum"] stringValue], timeLeft];
+    if (showIsEndingSoon){
+        l2.textColor = [UIColor redColor];
+    }
     
     //channel image
     UIImage *image = [UIImage new];
     NSString *cacheDirectory = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) lastObject];
     NSString *imagePath =[cacheDirectory stringByAppendingPathComponent:
-                          [NSString stringWithFormat:@"%@.png", [item objectForKey:@"chLogoId"]]];
+                          [NSString stringWithFormat:@"%@.png", [channel objectForKey:@"chLogoId"]]];
     
     if ([[NSFileManager defaultManager] fileExistsAtPath:imagePath]) {
         image = [UIImage imageWithContentsOfFile:imagePath];
@@ -438,7 +488,7 @@
     //NSInteger section = indexPath.section;
     NSInteger row = indexPath.row;
     
-    NSArray *keys = [[_channels allKeys] sortedArrayUsingSelector: @selector(caseInsensitiveCompare:)];
+    NSArray *keys = [_channels allKeys];
     
     id key = [keys objectAtIndex: row];
     id item = _channels[key];
@@ -545,13 +595,16 @@
     [[NSNotificationCenter defaultCenter] postNotificationName:@"messageFindClients" object:nil];
 }
 
+- (IBAction)stub:(id)sender {
+    
+}
 - (void) messageUpdatedClients:(NSNotification *)notification {
     _devices = notification.object;
     [self showDevicePicker:nil];
 }
 
 - (void) messageUpdatedGuide:(NSNotification *)notification {
-    _channels = notification.object;
+    _guide = notification.object;
     [[NSOperationQueue mainQueue] addOperationWithBlock:^{
         [_mainTableView reloadData];
     }];
