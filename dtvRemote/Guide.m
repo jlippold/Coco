@@ -91,12 +91,12 @@
     builder = [builder stringByAppendingString:@"&hours=4"];
     builder = [builder stringByAppendingString:@"&chIds=%@"];
     
-
-    
     
     //Download data in 50 channel chunks
     NSUInteger chunkSize = 50;
-    int requests = ceil((double)[[_channels allKeys] count]/chunkSize);
+    __block int requests = ceil((double)[[_channels allKeys] count]/chunkSize);
+    __block int completed = 0;
+    
     NSLog(@"Total Channels: %lu", (unsigned long)[[_channels allKeys] count]);
     NSLog(@"Requests to make: %d", requests);
     
@@ -130,12 +130,8 @@
                      
                      
                      NSArray *channelSchedule = [channel objectForKey:@"schedules"];
-                     
                      NSString *chId = [[channel objectForKey:@"chId"] stringValue];
                      
-                     if ((long)[[channel objectForKey:@"chNum"] integerValue] == 22) {
-                         NSLog(@"22!");
-                     }
                      int i;
                      for (i = 0; i < [channelSchedule count]; i++) {
 
@@ -183,35 +179,17 @@
                              
                          }
                          
-                         /*
-                          
-                          
-                          [dateFormatter setTimeZone:[NSTimeZone defaultTimeZone]];
-                          NSDate *now = [[NSDate alloc] init];
-                          
-                          double completed = [now timeIntervalSinceDate:startDate] / 60;
-                          double percentage = (completed/duration);
-                          double whole = percentage * 100.0;
-                          
-                          NSLog(@"completed: %lu duration: %lu percentage: %lu rounded: %lu eights: %lu" ,
-                          (unsigned long)completed,
-                          (unsigned long)duration,
-                          (unsigned long)percentage,
-                          rounded,
-                          roundedEights);
-                          
-                          NSLog(@"Start: %@ End: %@ Completed %ld/%lD", startDate, endDate, (long)completed, (long)duration);
-                          
-                          */
                      }
                      
                      
                  }
 
-                 
              }
+             completed++;
              
-            [[NSNotificationCenter defaultCenter] postNotificationName:@"messageUpdatedGuide" object:guide];
+             if (completed > requests) {
+                 [[NSNotificationCenter defaultCenter] postNotificationName:@"messageUpdatedGuide" object:guide];
+             }
              
          }];
         

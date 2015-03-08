@@ -170,6 +170,8 @@
     
     NSString *cacheDirectory = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) lastObject];
     NSArray *keys = [channelList allKeys];
+    __block int completed = 0;
+    __block int total = (double)[keys count];
     
     for (id channel in keys) {
         
@@ -188,10 +190,13 @@
                  if (data.length > 0 && connectionError == nil) {
                      [data writeToFile:imagePath atomically:NO];
                  }
-                 
+                 completed++;
+                 if (completed == total) {
+                     [[NSNotificationCenter defaultCenter] postNotificationName:@"messageUpdatedChannels" object:channelList];
+                 }
              }];
         }
     }
-    [[NSNotificationCenter defaultCenter] postNotificationName:@"messageUpdatedChannels" object:channelList];
+    
 }
 @end

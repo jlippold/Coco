@@ -387,8 +387,6 @@
             cell.detailTextLabel.text = @"";
         }
         
-        
-        
         NSDate *now = [NSDate new];
         NSDate *ends = [guideItem objectForKey:@"ends"];
         /*
@@ -437,34 +435,6 @@
         image = [UIImage imageWithContentsOfFile:imagePath];
     }
     cell.imageView.image = image;
-
-
-
-
-    /*    
-    //set progress indicator
-
-    cell.accessoryType = UITableViewCellAccessoryCheckmark;
-    UIColor *tintColor = [UIColor colorWithRed:193/255.0f green:193/255.0f blue:193/255.0f alpha:1.0f];
-    
-    UIImage *progressImage = [UIImage new];
-    if ([item objectForKey:@"showProgress"] && false) {
-        progressImage = [[UIImage imageNamed:
-                                   [NSString stringWithFormat:@"images.bundle/%@", [item objectForKey:@"showProgress"]]]
-                                  imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
-    }
-
-    UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
-    CGRect frame = CGRectMake(0.0, 0.0, progressImage.size.width, progressImage.size.height);
-    button.frame = frame;
-    [button setBackgroundImage:progressImage forState:UIControlStateNormal];
-    button.backgroundColor = [UIColor clearColor];
-    button.tintColor = tintColor;
-    cell.accessoryView = button;
-    */
-    
-
-
     
     [cell setNeedsLayout];
         
@@ -566,6 +536,11 @@
              ^(UIAlertAction * action) {
                  [[NSNotificationCenter defaultCenter] postNotificationName:@"messageSelectedLocation" object:item];
                  [view dismissViewControllerAnimated:YES completion:nil];
+                 
+                 MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+                 hud.mode = MBProgressHUDModeIndeterminate;
+                 hud.labelText = @"Loading Channels...";
+                 
              }];
             [view addAction:action];
         }
@@ -591,7 +566,6 @@
     hud.mode = MBProgressHUDModeIndeterminate;
     hud.labelText = @"Searching for devices...";
 
-
     [[NSNotificationCenter defaultCenter] postNotificationName:@"messageFindClients" object:nil];
 }
 
@@ -605,6 +579,7 @@
 
 - (void) messageUpdatedGuide:(NSNotification *)notification {
     _guide = notification.object;
+    [MBProgressHUD hideHUDForView:self.view animated:YES];
     [[NSOperationQueue mainQueue] addOperationWithBlock:^{
         [_mainTableView reloadData];
     }];
