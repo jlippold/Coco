@@ -161,15 +161,15 @@
     
     [self save:channelList];
     [self downloadChannelImages:channelList];
-    
 
     
 }
 
 - (void) downloadChannelImages:(NSMutableDictionary *)channelList {
-    
+    [self clearCaches];
     NSString *cacheDirectory = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) lastObject];
     NSArray *keys = [channelList allKeys];
+
     __block int completed = 0;
     __block int total = (double)[keys count];
     
@@ -180,23 +180,41 @@
         
         NSString *imagePath =[cacheDirectory stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.png",channelId]];
         
-        if (![[NSFileManager defaultManager] fileExistsAtPath:imagePath]) {
-            [NSURLConnection sendAsynchronousRequest:[NSURLRequest requestWithURL:location]
-                                               queue:_channelImagesQueue
-                                   completionHandler:^(NSURLResponse *response,
-                                                       NSData *data,
-                                                       NSError *connectionError)
-             {
-                 if (data.length > 0 && connectionError == nil) {
-                     [data writeToFile:imagePath atomically:NO];
-                 }
-                 completed++;
-                 if (completed == total) {
-                     [[NSNotificationCenter defaultCenter] postNotificationName:@"messageUpdatedChannels" object:channelList];
-                 }
-             }];
-        }
+        [NSURLConnection sendAsynchronousRequest:[NSURLRequest requestWithURL:location]
+                                           queue:_channelImagesQueue
+                               completionHandler:^(NSURLResponse *response,
+                                                   NSData *data,
+                                                   NSError *connectionError)
+         {
+             if (data.length > 0 && connectionError == nil) {
+                 [data writeToFile:imagePath atomically:NO];
+             }
+             completed++;
+             if (completed >= (total-1)) {
+                 NSLog(@"channels refreshed");
+                 [[NSNotificationCenter defaultCenter] postNotificationName:@"messageUpdatedChannels" object:channelList];
+             } else {
+                 long double progress =(completed*1.0/total*1.0);
+                 //NSLog(@"c: %f", completed*1.0);
+                 NSNumber *nsprogress = [NSNumber numberWithDouble:progress];
+                 [[NSNotificationCenter defaultCenter] postNotificationName:@"messageUpdatedChannelsProgress"
+                                                                     object:nsprogress];
+             }
+             
+         }];
+
     }
     
+}
+
+- (void)clearCaches
+{
+    [[NSURLCache sharedURLCache] removeAllCachedResponses];
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    NSString *cacheDirectory = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) lastObject];
+    NSArray *cacheFiles = [fileManager contentsOfDirectoryAtPath:cacheDirectory error:nil];
+    for (NSString *file in cacheFiles) {
+        [fileManager removeItemAtPath:[cacheDirectory stringByAppendingPathComponent:file] error:nil];
+    }
 }
 @end

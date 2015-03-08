@@ -49,10 +49,8 @@
     classClients = cl;
 
     _channels = [classChannels loadChannels];
+    //_channels = [[NSMutableDictionary alloc] init];
     _guide = [[NSMutableDictionary alloc] init];
-    
-    [[NSNotificationCenter defaultCenter] postNotificationName:@"messageUpdatedChannels" object:_channels];
-    
     _devices = [[NSMutableArray alloc] init];
     _currentDevice = [[NSMutableDictionary alloc] init];
     
@@ -63,8 +61,12 @@
                                                  name:@"messageUpdatedLocations" object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageUpdatedChannels:)
                                                  name:@"messageUpdatedChannels" object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageUpdatedChannelsProgress:)
+                                                 name:@"messageUpdatedChannelsProgress" object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageUpdatedGuide:)
                                                  name:@"messageUpdatedGuide" object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageUpdatedGuideProgress:)
+                                                 name:@"messageUpdatedGuideProgress" object:nil];
     
     [self createMainView];
     
@@ -73,6 +75,7 @@
             [self promptForZipCode];
         });
     } else {
+        [self refreshGuide];
         //check cache channel images anyways
     }
 }
@@ -422,7 +425,8 @@
     UILabel *l2 = (UILabel *)[cell viewWithTag:1];
     l2.text =  [NSString stringWithFormat:@"%@\n%@", [[channel objectForKey:@"chNum"] stringValue], timeLeft];
     if (showIsEndingSoon){
-        l2.textColor = [UIColor redColor];
+        UIColor *red = [UIColor colorWithRed:217/255.0f green:50/255.0f blue:5/255.0f alpha:1.0f];
+        l2.textColor = red;
     }
     
     //channel image
@@ -536,10 +540,7 @@
              ^(UIAlertAction * action) {
                  [[NSNotificationCenter defaultCenter] postNotificationName:@"messageSelectedLocation" object:item];
                  [view dismissViewControllerAnimated:YES completion:nil];
-                 
-                 MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
-                 hud.mode = MBProgressHUDModeIndeterminate;
-                 hud.labelText = @"Loading Channels...";
+                 [self refreshChannels];
                  
              }];
             [view addAction:action];
@@ -556,9 +557,28 @@
     }
 }
 
+- (void) refreshChannels {
+    MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+    hud.mode = MBProgressHUDModeAnnularDeterminate;
+    hud.labelText = @"Downloading Channels";
+    hud.detailsLabelText = @"this only happens once";
+}
+
 - (void) messageUpdatedChannels:(NSNotification *)notification {
     _channels = [notification object];
-    [_mainTableView reloadData];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [_mainTableView reloadData];
+        [MBProgressHUD hideHUDForView:self.view animated:YES];
+        [self refreshGuide];
+    });
+
+}
+
+- (void) messageUpdatedChannelsProgress:(NSNotification *)notification {
+    MBProgressHUD *hud = [MBProgressHUD HUDForView:self.view];
+    hud.mode = MBProgressHUDModeAnnularDeterminate;
+    hud.progress = [[notification object] floatValue];
+    
 }
 
 - (IBAction)findClients:(id)sender {
@@ -569,20 +589,32 @@
     [[NSNotificationCenter defaultCenter] postNotificationName:@"messageFindClients" object:nil];
 }
 
-- (IBAction)stub:(id)sender {
-    
-}
 - (void) messageUpdatedClients:(NSNotification *)notification {
     _devices = notification.object;
     [self showDevicePicker:nil];
 }
 
+- (void) refreshGuide {
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"messageRefreshGuide" object:_channels];
+    MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+    hud.mode = MBProgressHUDModeAnnularDeterminate;
+    hud.labelText = @"Loading Guide Data";
+    hud.detailsLabelText = @""; //time here
+}
+
 - (void) messageUpdatedGuide:(NSNotification *)notification {
     _guide = notification.object;
-    [MBProgressHUD hideHUDForView:self.view animated:YES];
     [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+        [MBProgressHUD hideHUDForView:self.view animated:YES];
         [_mainTableView reloadData];
     }];
+}
+
+- (void) messageUpdatedGuideProgress:(NSNotification *)notification {
+    MBProgressHUD *hud = [MBProgressHUD HUDForView:self.view];
+    hud.mode = MBProgressHUDModeAnnularDeterminate;
+    hud.progress = [[notification object] floatValue];
+    
 }
 
 - (IBAction)showDevicePicker:(id)sender {
@@ -615,6 +647,10 @@
     
     UIViewController *vc = [[[[UIApplication sharedApplication] delegate] window] rootViewController];
     [vc presentViewController:view animated:YES completion:nil];
+}
+
+- (IBAction)stub:(id)sender {
+    
 }
 
 - (IBAction)rewind:(id)sender {

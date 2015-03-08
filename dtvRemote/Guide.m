@@ -14,8 +14,8 @@
 
 -(id) init {
     
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageUpdatedChannels:)
-                                                 name:@"messageUpdatedChannels" object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageRefreshGuide:)
+                                                 name:@"messageRefreshGuide" object:nil];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageSetGuideTime:)
                                                  name:@"messageSetGuideTime" object:nil];
@@ -25,7 +25,7 @@
     _whatsPlayingQueue.name = @"Whats Playing";
     _whatsPlayingQueue.maxConcurrentOperationCount = 3;
     
-    [self startTimer];
+    //[self startTimer];
     
     return self;
 }
@@ -34,7 +34,7 @@
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
-- (void) messageUpdatedChannels:(NSNotification *)notification {
+- (void) messageRefreshGuide:(NSNotification *)notification {
     _channels = [notification object];
     [self refreshGuide];
 }
@@ -94,14 +94,14 @@
     
     //Download data in 50 channel chunks
     NSUInteger chunkSize = 50;
-    __block int requests = ceil((double)[[_channels allKeys] count]/chunkSize);
     __block int completed = 0;
+    __block int total = ceil((double)[[_channels allKeys] count]/chunkSize);
     
     NSLog(@"Total Channels: %lu", (unsigned long)[[_channels allKeys] count]);
-    NSLog(@"Requests to make: %d", requests);
+    NSLog(@"Requests to make: %d", total);
     
     //add all requests to the queue
-    for (NSUInteger i = 0; i < requests; i++) {
+    for (NSUInteger i = 0; i < total; i++) {
         
         NSInteger offset = i*chunkSize;
         NSString *strUrl = [NSString stringWithFormat:builder,
@@ -185,11 +185,19 @@
                  }
 
              }
+
              completed++;
              
-             if (completed > requests) {
+             if (completed >= total) {
+                 NSLog(@"guide updated");
                  [[NSNotificationCenter defaultCenter] postNotificationName:@"messageUpdatedGuide" object:guide];
+             } else {
+                 long double progress =(completed*1.0/total*1.0);
+                 NSNumber *nsprogress = [NSNumber numberWithDouble:progress];
+                 [[NSNotificationCenter defaultCenter] postNotificationName:@"messageUpdatedGuideProgress"
+                                                                     object:nsprogress];
              }
+             
              
          }];
         
