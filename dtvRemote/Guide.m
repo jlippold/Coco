@@ -128,13 +128,17 @@
                  
                  for (id channel in [json objectForKey: @"schedule"]) {
                      
+                    
+                     if ( ![[channel objectForKey:@"chId"] isKindOfClass:[NSNumber class]] ) {
+                         continue;
+                     }
                      
                      NSArray *channelSchedule = [channel objectForKey:@"schedules"];
                      NSString *chId = [[channel objectForKey:@"chId"] stringValue];
                      
                      int i;
                      for (i = 0; i < [channelSchedule count]; i++) {
-
+                         
                          id show = [channelSchedule objectAtIndex:i];
                          
                          NSDateFormatter* dateFormatter = [[NSDateFormatter alloc] init];

@@ -34,28 +34,30 @@
 }
 
 - (void) save:(NSMutableDictionary *) channelList {
-    NSMutableDictionary *dataDict = [[NSMutableDictionary alloc] initWithCapacity:3];
+    NSString *key = @"channelList";
+    NSMutableDictionary *dataDict = [[NSMutableDictionary alloc] init];
     if (channelList != nil) {
-        [dataDict setObject:channelList forKey:@"channelList"];
+        [dataDict setObject:channelList forKey:key];
     }
     NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
     NSString *documentsDirectoryPath = [paths objectAtIndex:0];
-    NSString *filePath = [documentsDirectoryPath stringByAppendingPathComponent:@"appData"];
+    NSString *filePath = [documentsDirectoryPath stringByAppendingPathComponent:key];
     [NSKeyedArchiver archiveRootObject:dataDict toFile:filePath];
 }
 
 - (NSMutableDictionary *) loadChannels {
+    NSString *key = @"channelList";
     NSMutableDictionary *channelList = [[NSMutableDictionary alloc] init];
     NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
     NSString *documentsDirectoryPath = [paths objectAtIndex:0];
-    NSString *filePath = [documentsDirectoryPath stringByAppendingPathComponent:@"appData"];
+    NSString *filePath = [documentsDirectoryPath stringByAppendingPathComponent:key];
     
     if ([[NSFileManager defaultManager] fileExistsAtPath:filePath]) {
         NSData *data = [NSData dataWithContentsOfFile:filePath];
         NSDictionary *savedData = [NSKeyedUnarchiver unarchiveObjectWithData:data];
         
-        if ([savedData objectForKey:@"channelList"] != nil) {
-            channelList = [[NSMutableDictionary alloc] initWithDictionary:[savedData objectForKey:@"channelList"]];
+        if ([savedData objectForKey:key] != nil) {
+            channelList = [[NSMutableDictionary alloc] initWithDictionary:[savedData objectForKey:key]];
         }
     }
     return channelList;

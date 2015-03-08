@@ -17,14 +17,13 @@
 }
 
 @property (nonatomic, strong) NSMutableDictionary *channels;
-@property (nonatomic, strong) NSMutableDictionary *currentDevice;
+@property (nonatomic, strong) NSMutableDictionary *currentClient;
 @property (nonatomic, strong) NSMutableDictionary *guide;
-@property (nonatomic, strong) NSMutableArray *devices;
+@property (nonatomic, strong) NSMutableArray *clients;
 
 @property (nonatomic, strong) UITableView *mainTableView;
 @property (nonatomic, strong) IBOutlet UINavigationBar *navbar;
-@property (nonatomic, strong) UILabel *navTitle;
-@property (nonatomic, strong) UILabel *navSubTitle;
+@property (nonatomic, strong) IBOutlet UINavigationItem *navItem;
 
 @property (nonatomic, strong) UIImage *boxCover;
 @property (nonatomic, strong) UILabel *boxTitle;

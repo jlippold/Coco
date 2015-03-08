@@ -12,4 +12,8 @@
 
 @property (nonatomic, strong) NSOperationQueue *portScanQueue;
 
+- (id)init;
+- (void)save:(NSMutableArray *) clients;
+- (NSMutableArray *)loadClients;
+
 @end

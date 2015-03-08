@@ -25,9 +25,38 @@
 }
 
 
--(void)findClients:(NSNotification *)notification {
+- (void) save:(NSMutableArray *) clients {
+    NSString *key = @"clients";
+    NSMutableDictionary *dataDict = [[NSMutableDictionary alloc] init];
+    if (clients != nil) {
+        [dataDict setObject:clients forKey:key];
+    }
+    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    NSString *documentsDirectoryPath = [paths objectAtIndex:0];
+    NSString *filePath = [documentsDirectoryPath stringByAppendingPathComponent:key];
+    [NSKeyedArchiver archiveRootObject:dataDict toFile:filePath];
+}
+
+- (NSMutableArray *) loadClients {
+    NSString *key = @"clients";
+    NSMutableArray *clients = [[NSMutableArray alloc] init];
+    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    NSString *documentsDirectoryPath = [paths objectAtIndex:0];
+    NSString *filePath = [documentsDirectoryPath stringByAppendingPathComponent:key];
     
-    NSLog(@"Scanning");
+    if ([[NSFileManager defaultManager] fileExistsAtPath:filePath]) {
+        NSData *data = [NSData dataWithContentsOfFile:filePath];
+        NSDictionary *savedData = [NSKeyedUnarchiver unarchiveObjectWithData:data];
+        
+        if ([savedData objectForKey:key] != nil) {
+            clients = [[NSMutableArray alloc] initWithArray:[savedData objectForKey:key] copyItems:YES];
+        }
+    }
+    return clients;
+}
+
+
+-(void)findClients:(NSNotification *)notification {
     
     iNet* inet = [[iNet alloc] init];
     NSString *wifiAddress = [inet getWifiAddress];
@@ -106,6 +135,8 @@
 }
 
 -(void) sendClients:(NSMutableArray*) clients {
+    
+    [self save:clients];
     
     iNet* inet = [[iNet alloc] init];
     NSString *ssid = [inet fetchSSID];

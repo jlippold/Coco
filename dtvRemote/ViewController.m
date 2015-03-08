@@ -49,10 +49,9 @@
     classClients = cl;
 
     _channels = [classChannels loadChannels];
-    //_channels = [[NSMutableDictionary alloc] init];
     _guide = [[NSMutableDictionary alloc] init];
-    _devices = [[NSMutableArray alloc] init];
-    _currentDevice = [[NSMutableDictionary alloc] init];
+    _clients = [classClients loadClients];
+    _currentClient = [[NSMutableDictionary alloc] init];
     
 
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageUpdatedClients:)
@@ -79,7 +78,6 @@
         });
     } else {
         [self refreshGuide];
-        //check cache channel images anyways
     }
 }
 
@@ -114,6 +112,8 @@
     _navbar.tintColor = navTint;
     _navbar.titleTextAttributes = @{NSForegroundColorAttributeName : textColor};
     
+    
+    /*
     _navTitle = [[UILabel alloc] init];
     _navTitle.translatesAutoresizingMaskIntoConstraints = YES;
     _navTitle.text = @"Living Room";
@@ -131,6 +131,7 @@
     _navSubTitle.textAlignment = NSTextAlignmentCenter;
     _navSubTitle.frame = CGRectMake(0, 44, [[UIScreen mainScreen] bounds].size.width, 20);
     [_navSubTitle setFont:[UIFont systemFontOfSize:14]];
+    */
     
     NSDictionary* barButtonItemAttributes =  @{NSFontAttributeName: [UIFont fontWithName:@"Helvetica" size:14.0f],
                                                NSForegroundColorAttributeName: navTint};
@@ -140,17 +141,18 @@
     [[UIBarButtonItem appearance] setTitleTextAttributes: barButtonItemAttributes forState:UIControlStateSelected];
     [[UIBarButtonItem appearance] setTitleTextAttributes: barButtonItemAttributes forState:UIControlStateDisabled];
     
-    [_navbar addSubview:_navTitle];
-    [_navbar addSubview:_navSubTitle];
+
     
-    UINavigationItem *navItem = [UINavigationItem alloc];
+    _navItem = [UINavigationItem alloc];
+    _navItem.title = @"";
+    
     UIBarButtonItem *leftButton = [[UIBarButtonItem alloc] initWithTitle:@"Room" style:UIBarButtonItemStylePlain target:self action:@selector(findClients:)];
-    navItem.leftBarButtonItem = leftButton;
+    _navItem.leftBarButtonItem = leftButton;
     
     UIBarButtonItem *rightButton = [[UIBarButtonItem alloc] initWithTitle:@"Edit" style:UIBarButtonItemStylePlain target:self action:@selector(showDevicePicker:)];
-    navItem.rightBarButtonItem = rightButton;
+    _navItem.rightBarButtonItem = rightButton;
     
-    [_navbar pushNavigationItem:navItem animated:false];
+    [_navbar pushNavigationItem:_navItem animated:false];
     [self.view addSubview:_navbar];
 }
 
@@ -472,7 +474,7 @@
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
-    if ([[_currentDevice allKeys] count] == 0) {
+    if ([[_currentClient allKeys] count] == 0) {
         UIAlertView *alert = [[UIAlertView alloc]
                               initWithTitle:@"Please Choose a device"
                               message:nil
@@ -492,7 +494,7 @@
     id key = [keys objectAtIndex: row];
     id item = _channels[key];
     
-    NSDictionary *channel = @{@"chNum":item[@"chNum"], @"device":_currentDevice};
+    NSDictionary *channel = @{@"chNum":item[@"chNum"], @"device":_currentClient};
     
     [[NSNotificationCenter defaultCenter] postNotificationName:@"messageChangeChannel" object:channel];
     
@@ -586,8 +588,8 @@
     [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
     MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
     hud.mode = MBProgressHUDModeAnnularDeterminate;
-    hud.labelText = @"Downloading Channels";
-    hud.detailsLabelText = @"this only happens once";
+    hud.labelText = @"Downloading channel logos";
+    hud.detailsLabelText = @"for first use";
 }
 
 - (void) messageUpdatedChannels:(NSNotification *)notification {
@@ -608,16 +610,22 @@
     
 }
 
-- (IBAction)findClients:(id)sender {
-    MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
-    hud.mode = MBProgressHUDModeAnnularDeterminate;
-    hud.labelText = @"Searching network for devices...";
+- (IBAction) findClients:(id)sender {
+    
+    if ([_clients count] == 0) {
+        MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+        hud.mode = MBProgressHUDModeAnnularDeterminate;
+        hud.labelText = @"Scanning wifi network for devices...";
+        
+        [[NSNotificationCenter defaultCenter] postNotificationName:@"messageFindClients" object:nil];
+    } else {
+        [self showDevicePicker:nil];
+    }
 
-    [[NSNotificationCenter defaultCenter] postNotificationName:@"messageFindClients" object:nil];
 }
 
 - (void) messageUpdatedClients:(NSNotification *)notification {
-    _devices = notification.object;
+    _clients = notification.object;
     [MBProgressHUD hideHUDForView:self.view animated:YES];
     [self showDevicePicker:nil];
 }
@@ -628,6 +636,46 @@
         hud.mode = MBProgressHUDModeAnnularDeterminate;
         hud.progress = [[notification object] floatValue];
     }];
+}
+
+- (IBAction)showDevicePicker:(id)sender {
+    
+    [MBProgressHUD hideHUDForView:self.view animated:YES];
+    
+    UIAlertController *view = [UIAlertController
+                               alertControllerWithTitle:@""
+                               message:@"Choose a device"
+                               preferredStyle:UIAlertControllerStyleActionSheet];
+    
+    for (NSUInteger i = 0; i < [_clients count]; i++) {
+        id item = [_clients objectAtIndex: i];
+        UIAlertAction *action = [UIAlertAction actionWithTitle: item[@"name"] style: UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
+            
+            _currentClient = item;
+            _navItem.title = _currentClient[@"name"];
+            
+            [view dismissViewControllerAnimated:YES completion:nil];
+        }];
+        [view addAction:action];
+    }
+    
+    UIAlertAction *cancel = [UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:^(UIAlertAction * action) {
+        [view dismissViewControllerAnimated:YES completion:nil];
+        return;
+    }];
+    [view addAction:cancel];
+    
+    UIAlertAction *refresh = [UIAlertAction actionWithTitle:@"Rescan Network" style:UIAlertActionStyleDestructive handler:^(UIAlertAction * action) {
+        [view dismissViewControllerAnimated:YES completion:nil];
+        [_clients removeAllObjects];
+        [self findClients:nil];
+        return;
+    }];
+    [view addAction:refresh];
+
+    
+    UIViewController *vc = [[[[UIApplication sharedApplication] delegate] window] rootViewController];
+    [vc presentViewController:view animated:YES completion:nil];
 }
 
 - (void) refreshGuide {
@@ -661,37 +709,7 @@
     }];
 }
 
-- (IBAction)showDevicePicker:(id)sender {
-    
-    [MBProgressHUD hideHUDForView:self.view animated:YES];
-    
-    UIAlertController *view = [UIAlertController
-                               alertControllerWithTitle:@"Choose A Device"
-                               message:@""
-                               preferredStyle:UIAlertControllerStyleActionSheet];
-    
-    for (NSUInteger i = 0; i < [_devices count]; i++) {
-        id item = [_devices objectAtIndex: i];
-        UIAlertAction *action = [UIAlertAction actionWithTitle: item[@"name"] style: UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
-            
-            _currentDevice = item;
-            _navTitle.text = _currentDevice[@"name"];
-            
-            [view dismissViewControllerAnimated:YES completion:nil];
-        }];
-        [view addAction:action];
-    }
-    
-    UIAlertAction* cancel = [UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleDestructive handler:^(UIAlertAction * action) {
-        [view dismissViewControllerAnimated:YES completion:nil];
-        return;
-    }];
-    
-    [view addAction:cancel];
-    
-    UIViewController *vc = [[[[UIApplication sharedApplication] delegate] window] rootViewController];
-    [vc presentViewController:view animated:YES completion:nil];
-}
+
 
 - (IBAction)stub:(id)sender {
     
