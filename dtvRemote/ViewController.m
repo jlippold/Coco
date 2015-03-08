@@ -59,18 +59,24 @@
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageUpdatedClientsProgress:)
                                                  name:@"messageUpdatedClientsProgress" object:nil];
     
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageUpdatedLocations:)
-                                                 name:@"messageUpdatedLocations" object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageUpdatedChannels:)
                                                  name:@"messageUpdatedChannels" object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageUpdatedChannelsProgress:)
                                                  name:@"messageUpdatedChannelsProgress" object:nil];
+    
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageUpdatedGuide:)
                                                  name:@"messageUpdatedGuide" object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageUpdatedGuideProgress:)
                                                  name:@"messageUpdatedGuideProgress" object:nil];
     
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageUpdatedLocations:)
+                                                 name:@"messageUpdatedLocations" object:nil];
+    
     [self createMainView];
+    
+    if ([_clients count] > 0) {
+        [self selectClient:(int)0];
+    }
     
     if ([[_channels allKeys] count] == 0) {
         dispatch_after(0, dispatch_get_main_queue(), ^{
@@ -146,10 +152,10 @@
     _navItem = [UINavigationItem alloc];
     _navItem.title = @"";
     
-    UIBarButtonItem *leftButton = [[UIBarButtonItem alloc] initWithTitle:@"Room" style:UIBarButtonItemStylePlain target:self action:@selector(findClients:)];
+    UIBarButtonItem *leftButton = [[UIBarButtonItem alloc] initWithTitle:@"Room" style:UIBarButtonItemStylePlain target:self action:@selector(chooseClient:)];
     _navItem.leftBarButtonItem = leftButton;
     
-    UIBarButtonItem *rightButton = [[UIBarButtonItem alloc] initWithTitle:@"Edit" style:UIBarButtonItemStylePlain target:self action:@selector(showDevicePicker:)];
+    UIBarButtonItem *rightButton = [[UIBarButtonItem alloc] initWithTitle:@"Edit" style:UIBarButtonItemStylePlain target:self action:@selector(chooseClient:)];
     _navItem.rightBarButtonItem = rightButton;
     
     [_navbar pushNavigationItem:_navItem animated:false];
@@ -475,14 +481,7 @@
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     if ([[_currentClient allKeys] count] == 0) {
-        UIAlertView *alert = [[UIAlertView alloc]
-                              initWithTitle:@"Please Choose a device"
-                              message:nil
-                              delegate:self
-                              cancelButtonTitle:nil
-                              otherButtonTitles:@"OK", nil];
-        [alert show];
-        return;
+        [self chooseClient:nil];
     }
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
     
@@ -610,7 +609,7 @@
     
 }
 
-- (IBAction) findClients:(id)sender {
+- (IBAction) chooseClient:(id)sender {
     
     if ([_clients count] == 0) {
         MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
@@ -619,7 +618,7 @@
         
         [[NSNotificationCenter defaultCenter] postNotificationName:@"messageFindClients" object:nil];
     } else {
-        [self showDevicePicker:nil];
+        [self showClientPicker:nil];
     }
 
 }
@@ -627,7 +626,7 @@
 - (void) messageUpdatedClients:(NSNotification *)notification {
     _clients = notification.object;
     [MBProgressHUD hideHUDForView:self.view animated:YES];
-    [self showDevicePicker:nil];
+    [self chooseClient:nil];
 }
 
 - (void) messageUpdatedClientsProgress:(NSNotification *)notification {
@@ -638,7 +637,7 @@
     }];
 }
 
-- (IBAction)showDevicePicker:(id)sender {
+- (IBAction)showClientPicker:(id)sender {
     
     [MBProgressHUD hideHUDForView:self.view animated:YES];
     
@@ -651,9 +650,7 @@
         id item = [_clients objectAtIndex: i];
         UIAlertAction *action = [UIAlertAction actionWithTitle: item[@"name"] style: UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
             
-            _currentClient = item;
-            _navItem.title = _currentClient[@"name"];
-            
+            [self selectClient:(int)i];
             [view dismissViewControllerAnimated:YES completion:nil];
         }];
         [view addAction:action];
@@ -668,7 +665,7 @@
     UIAlertAction *refresh = [UIAlertAction actionWithTitle:@"Rescan Network" style:UIAlertActionStyleDestructive handler:^(UIAlertAction * action) {
         [view dismissViewControllerAnimated:YES completion:nil];
         [_clients removeAllObjects];
-        [self findClients:nil];
+        [self chooseClient:nil];
         return;
     }];
     [view addAction:refresh];
@@ -678,6 +675,16 @@
     [vc presentViewController:view animated:YES completion:nil];
 }
 
+- (void) selectClient:(int)index {
+    if ([_clients count] > 0) {
+        _currentClient = [_clients objectAtIndex:index];
+        _navItem.title = _currentClient[@"name"];
+    } else {
+        [_currentClient removeAllObjects];
+        _navItem.title = @"";
+    }
+
+}
 - (void) refreshGuide {
     [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
     CGRect frm = _overlayProgress.frame;
