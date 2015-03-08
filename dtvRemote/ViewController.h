@@ -33,6 +33,7 @@
 
 @property (nonatomic, strong) UIToolbar *playBar;
 @property (nonatomic, strong) UILabel *overlayLabel;
+@property (nonatomic, strong) UIView *overlayProgress;
 @property (nonatomic, strong) IBOutlet UIBarButtonItem *rewindButton;
 @property (nonatomic, strong) IBOutlet UIBarButtonItem *playButton;
 @property (nonatomic, strong) IBOutlet UIBarButtonItem *forwardButton;

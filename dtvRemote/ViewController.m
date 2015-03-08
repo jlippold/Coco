@@ -265,12 +265,28 @@
 - (void) createToolbar {
     
     double toolbarHeight = 40;
-    double overlayHeight = 15;
+    double overlayHeight = 16;
+    double progressHeight = 2;
+    
     UIColor *textColor = [UIColor colorWithRed:193/255.0f green:193/255.0f blue:193/255.0f alpha:1.0f];
     
     UIView *overlay = [[UIView alloc] init];
+    _overlayProgress = [[UIView alloc] init];
+    
+
+    
     overlay.frame = CGRectMake(0, [[UIScreen mainScreen] bounds].size.height - (toolbarHeight + overlayHeight),
                                [[UIScreen mainScreen] bounds].size.width, overlayHeight);
+    
+    _overlayProgress.frame = CGRectMake(0,
+                                        [[UIScreen mainScreen] bounds].size.height -
+                                        (toolbarHeight + progressHeight) ,
+                                        0, progressHeight);
+    
+    _overlayProgress.opaque = YES;
+    _overlayProgress.alpha = .6;
+    _overlayProgress.backgroundColor = [UIColor redColor];
+    
     overlay.opaque = YES;
     overlay.alpha = .6;
     overlay.backgroundColor = [UIColor blackColor];
@@ -283,6 +299,7 @@
     _overlayLabel.textAlignment = NSTextAlignmentCenter;
 
     [self.view addSubview:overlay];
+    [self.view addSubview:_overlayProgress];
     [self.view addSubview:_overlayLabel];
     
     _toolBar = [[UIToolbar alloc] init];
@@ -558,6 +575,7 @@
 }
 
 - (void) refreshChannels {
+    [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
     MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
     hud.mode = MBProgressHUDModeAnnularDeterminate;
     hud.labelText = @"Downloading Channels";
@@ -568,6 +586,7 @@
     _channels = [notification object];
     dispatch_async(dispatch_get_main_queue(), ^{
         [_mainTableView reloadData];
+        [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
         [MBProgressHUD hideHUDForView:self.view animated:YES];
         [self refreshGuide];
     });
@@ -595,26 +614,34 @@
 }
 
 - (void) refreshGuide {
+    [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
+    CGRect frm = _overlayProgress.frame;
+    frm.size.width = 0;
+    _overlayProgress.frame = frm;
+    _overlayProgress.hidden = NO;
+    _overlayLabel.text = @"Refreshing guide data...";
+    
     [[NSNotificationCenter defaultCenter] postNotificationName:@"messageRefreshGuide" object:_channels];
-    MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
-    hud.mode = MBProgressHUDModeAnnularDeterminate;
-    hud.labelText = @"Loading Guide Data";
-    hud.detailsLabelText = @""; //time here
+
 }
 
 - (void) messageUpdatedGuide:(NSNotification *)notification {
     _guide = notification.object;
     [[NSOperationQueue mainQueue] addOperationWithBlock:^{
-        [MBProgressHUD hideHUDForView:self.view animated:YES];
+        _overlayProgress.hidden = YES;
+        _overlayLabel.text = @"Guide updated.";
+        [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
         [_mainTableView reloadData];
     }];
 }
 
 - (void) messageUpdatedGuideProgress:(NSNotification *)notification {
-    MBProgressHUD *hud = [MBProgressHUD HUDForView:self.view];
-    hud.mode = MBProgressHUDModeAnnularDeterminate;
-    hud.progress = [[notification object] floatValue];
-    
+    [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+        float percent = [[notification object] floatValue];
+        CGRect frm = _overlayProgress.frame;
+        frm.size.width = [[UIScreen mainScreen] bounds].size.width * percent;
+        _overlayProgress.frame = frm;
+    }];
 }
 
 - (IBAction)showDevicePicker:(id)sender {
