@@ -96,7 +96,6 @@
     
 }
 
-
 - (void) createTitleBar {
     
     UIColor *navBGColor = [UIColor colorWithRed:23/255.0f green:23/255.0f blue:23/255.0f alpha:1.0f];
@@ -356,7 +355,8 @@
     cell.indentationLevel = 1;
     cell.indentationWidth = 2;
     
-    //cell.accessoryType = UITableViewCellAccessoryCheckmark;
+    cell.accessoryType = UITableViewCellAccessoryCheckmark;
+    
     cell.backgroundColor = backgroundColor;
     [cell.textLabel setTextColor: textColor];
     [cell.detailTextLabel setTextColor:textColor];
@@ -366,10 +366,12 @@
 
 }
 
+
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     
     
     UIColor *textColor = [UIColor colorWithRed:193/255.0f green:193/255.0f blue:193/255.0f alpha:1.0f];
+    UIColor *red = [UIColor colorWithRed:217/255.0f green:50/255.0f blue:5/255.0f alpha:1.0f];
     UIColor *backgroundColor = [UIColor colorWithRed:28/255.0f green:28/255.0f blue:28/255.0f alpha:1.0f];
     
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"SomeId"];
@@ -382,15 +384,16 @@
         label.numberOfLines = 2;
         label.backgroundColor = backgroundColor;
         [label setTag:1];
-            label.textAlignment = NSTextAlignmentCenter;
-        [label setFrame:CGRectMake([[UIScreen mainScreen] bounds].size.width - 50, 0, 50, 30)];
-        [cell.contentView addSubview: label];
+        label.textAlignment = NSTextAlignmentCenter;
+        [label setFrame:CGRectMake([[UIScreen mainScreen] bounds].size.width - 40, 7, 40, 30)];
+        [cell.contentView addSubview:label];
     }
     
     //cell data
     NSArray *keys = [_channels allKeys];
     id aKey = [keys objectAtIndex:indexPath.row];
     
+    cell.accessoryView = [[UIImageView alloc] initWithImage:[UIImage new]];
 
     NSDictionary *channel = [_channels objectForKey:aKey];
     NSDictionary *guideItem = [_guide objectForKey:aKey];
@@ -427,7 +430,7 @@
                                                      toDate: ends
                                                     options:0];
         
-        timeLeft = [NSString stringWithFormat:@"-%ld:%ld", [components hour], [components minute]];
+        timeLeft = [NSString stringWithFormat:@"%02ld:%02ld", [components hour], [components minute]];
         
         if ([components hour] == 0 && [components minute] <= 10) {
             showIsEndingSoon = YES;
@@ -436,14 +439,16 @@
     } else {
         cell.textLabel.text = @"Not Available";
         cell.detailTextLabel.text = @"";
+        showIsEndingSoon = NO;
     }
     
     
     UILabel *l2 = (UILabel *)[cell viewWithTag:1];
-    l2.text =  [NSString stringWithFormat:@"%@\n%@", [[channel objectForKey:@"chNum"] stringValue], timeLeft];
+    l2.text =  [NSString stringWithFormat:@"%04d\n%@", [[channel objectForKey:@"chNum"] intValue], timeLeft];
     if (showIsEndingSoon){
-        UIColor *red = [UIColor colorWithRed:217/255.0f green:50/255.0f blue:5/255.0f alpha:1.0f];
         l2.textColor = red;
+    } else {
+        l2.textColor = textColor;
     }
     
     //channel image
