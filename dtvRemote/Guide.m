@@ -143,7 +143,8 @@
                          NSInteger duration = [show[@"duration"] intValue];
                          
                          bool isPlaying = [self isNowPlaying:startDate duration:duration];
-                         bool isAdded = [[guide allKeys] containsObject:chId];
+                         NSArray *keys = [guide allKeys];
+                         bool isAdded = [keys containsObject:chId];
                          
                          if (isPlaying && !isAdded) {
                              
