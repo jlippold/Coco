@@ -57,6 +57,9 @@
 
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageUpdatedClients:)
                                                  name:@"messageUpdatedClients" object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageUpdatedClientsProgress:)
+                                                 name:@"messageUpdatedClientsProgress" object:nil];
+    
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageUpdatedLocations:)
                                                  name:@"messageUpdatedLocations" object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageUpdatedChannels:)
@@ -607,15 +610,24 @@
 
 - (IBAction)findClients:(id)sender {
     MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
-    hud.mode = MBProgressHUDModeIndeterminate;
-    hud.labelText = @"Searching for devices...";
+    hud.mode = MBProgressHUDModeAnnularDeterminate;
+    hud.labelText = @"Searching network for devices...";
 
     [[NSNotificationCenter defaultCenter] postNotificationName:@"messageFindClients" object:nil];
 }
 
 - (void) messageUpdatedClients:(NSNotification *)notification {
     _devices = notification.object;
+    [MBProgressHUD hideHUDForView:self.view animated:YES];
     [self showDevicePicker:nil];
+}
+
+- (void) messageUpdatedClientsProgress:(NSNotification *)notification {
+    [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+        MBProgressHUD *hud = [MBProgressHUD HUDForView:self.view];
+        hud.mode = MBProgressHUDModeAnnularDeterminate;
+        hud.progress = [[notification object] floatValue];
+    }];
 }
 
 - (void) refreshGuide {

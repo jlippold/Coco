@@ -36,12 +36,18 @@
     self.portScanQueue = [[NSOperationQueue alloc] init];
     self.portScanQueue.name = @"Scanner";
     
+    NSMutableArray *foundClients = [[NSMutableArray alloc] init];
+    
+    __block int completed = 0;
+    __block int total = 0;
+    
     if ([wifiAddress containsString:@"."]) {
         NSRange range = [wifiAddress rangeOfString:@"." options:NSBackwardsSearch];
         NSString *subnet = [wifiAddress substringToIndex:range.location];
         NSMutableArray *prospectiveClients = [self getCandidates:subnet];
-        NSMutableArray *checkedClients = [[NSMutableArray alloc] init];
-        NSMutableArray *foundClients = [[NSMutableArray alloc] init];
+
+        
+        total = (int)[prospectiveClients count];
         
         [self.portScanQueue cancelAllOperations];
         
@@ -81,14 +87,20 @@
                      }
                  }
                  
-                 [checkedClients addObject:client];
-                 if ([checkedClients count] == [prospectiveClients count]){
+                 completed++;
+                 if (completed == total){
                      [self sendClients:foundClients];
                      NSLog(@"Completed Scanning");
+                 } else {
+                     long double progress =(completed*1.0/total*1.0);
+                     NSNumber *nsprogress = [NSNumber numberWithDouble:progress];
+                     [[NSNotificationCenter defaultCenter] postNotificationName:@"messageUpdatedClientsProgress"
+                                                                         object:nsprogress];
                  }
              }];
         }
-        
+    } else {
+        [self sendClients:foundClients];
     }
     
 }
