@@ -29,7 +29,6 @@
 
 
 -(void)changeChannel:(NSString *)chNum device:(NSMutableDictionary *)device  {
-    //get valid locations for zip code
     NSLog(@"%@ set to channel %@", device, chNum);
     NSURL *url = [NSURL URLWithString:
                   [NSString stringWithFormat:@"http://%@:8080/tv/tune?major=%@&%@",
@@ -50,4 +49,31 @@
      }];
 }
 
+-(void)whatsOn:(NSMutableDictionary *) device {
+    
+    NSURL *url = [NSURL URLWithString:
+                  [NSString stringWithFormat:@"http://%@:8080/tv/tune/getTuned?%@",
+                   device[@"address"], device[@"appendage"] ]];
+    [NSURLConnection sendAsynchronousRequest:[NSURLRequest requestWithURL:url]
+                                       queue:[NSOperationQueue mainQueue]
+                           completionHandler:^(NSURLResponse *response,
+                                               NSData *data,
+                                               NSError *connectionError)
+     {
+         
+         if (data.length > 0 && connectionError == nil) {
+             NSDictionary *json = [NSJSONSerialization JSONObjectWithData:data options:0 error:NULL];
+             if ((int)json[@"status"][@"code"] == 200){
+                 if (json[@"major"]){
+                     [[NSNotificationCenter defaultCenter]
+                      postNotificationName:@"messageUpdatedNowPlaying"
+                      object:json[@"major"]];
+                 }
+             }
+         }
+         
+     }];
+    
+ 
+}
 @end

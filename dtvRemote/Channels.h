@@ -16,5 +16,6 @@
 - (void)save:(NSMutableDictionary *) channelList;
 - (NSMutableDictionary *)loadChannels;
 - (void) populateChannels:(NSMutableDictionary *)location;
+- (NSString *)getChannelIdForChannelNumber:(NSString *)chNum channels:(NSMutableDictionary *)channels;
 
 @end

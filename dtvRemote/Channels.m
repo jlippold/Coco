@@ -209,8 +209,7 @@
     
 }
 
-- (void)clearCaches
-{
+- (void)clearCaches {
     [[NSURLCache sharedURLCache] removeAllCachedResponses];
     NSFileManager *fileManager = [NSFileManager defaultManager];
     NSString *cacheDirectory = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) lastObject];
@@ -218,5 +217,16 @@
     for (NSString *file in cacheFiles) {
         [fileManager removeItemAtPath:[cacheDirectory stringByAppendingPathComponent:file] error:nil];
     }
+}
+
+- (NSNumber *)getChannelIdForChannelNumber:(NSString *)chNum channels:(NSMutableDictionary *)channels {
+    NSNumber *returnedChannelId;
+    for (id channel in channels) {
+        if ( [channel[@"chNum"] isEqualToString:chNum]) {
+            returnedChannelId = channel[@"chId"];
+            break;
+        }
+    }
+    return returnedChannelId;
 }
 @end

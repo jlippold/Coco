@@ -52,7 +52,6 @@
     _guide = [[NSMutableDictionary alloc] init];
     _clients = [classClients loadClients];
     _currentClient = [[NSMutableDictionary alloc] init];
-    
 
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageUpdatedClients:)
                                                  name:@"messageUpdatedClients" object:nil];
@@ -71,6 +70,9 @@
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageUpdatedLocations:)
                                                  name:@"messageUpdatedLocations" object:nil];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageUpdatedNowPlaying:)
+                                                 name:@"messageUpdatedNowPlaying" object:nil];
     
     [self createMainView];
     
@@ -118,27 +120,6 @@
     _navbar.tintColor = navTint;
     _navbar.titleTextAttributes = @{NSForegroundColorAttributeName : textColor};
     
-    
-    /*
-    _navTitle = [[UILabel alloc] init];
-    _navTitle.translatesAutoresizingMaskIntoConstraints = YES;
-    _navTitle.text = @"Living Room";
-    _navTitle.font = [UIFont fontWithName:@"Helvetica-Bold" size:17];
-    [_navTitle setTextColor:textColor];
-    _navTitle.tintColor = navTint;
-    _navTitle.textAlignment = NSTextAlignmentCenter;
-    _navTitle.frame = CGRectMake(0, 28, [[UIScreen mainScreen] bounds].size.width, 20);
-    
-    _navSubTitle = [[UILabel alloc] init];
-    _navSubTitle.translatesAutoresizingMaskIntoConstraints = YES;
-    _navSubTitle.text = @"202 - CNN";
-    _navSubTitle.font = [UIFont fontWithName:@"Helvetica" size:14];
-    [_navSubTitle setTextColor: textColor];
-    _navSubTitle.textAlignment = NSTextAlignmentCenter;
-    _navSubTitle.frame = CGRectMake(0, 44, [[UIScreen mainScreen] bounds].size.width, 20);
-    [_navSubTitle setFont:[UIFont systemFontOfSize:14]];
-    */
-    
     NSDictionary* barButtonItemAttributes =  @{NSFontAttributeName: [UIFont fontWithName:@"Helvetica" size:14.0f],
                                                NSForegroundColorAttributeName: navTint};
     
@@ -181,7 +162,7 @@
     
     _boxTitle = [[UILabel alloc] init];
     _boxTitle.translatesAutoresizingMaskIntoConstraints = YES;
-    _boxTitle.text = @"Spaceballs 3: The search for spaceballs 2";
+    _boxTitle.text = @"";
     _boxTitle.font = [UIFont fontWithName:@"Helvetica-Bold" size:17];
     [_boxTitle setTextColor:textColor];
     _boxTitle.textAlignment = NSTextAlignmentLeft;
@@ -226,7 +207,7 @@
     _seekBar.frame = CGRectMake(xOffset, 146, [[UIScreen mainScreen] bounds].size.width - (xOffset+5), 10);
     _seekBar.minimumValue = 0.0;
     _seekBar.maximumValue = 100.0;
-    _seekBar.value = 20;
+    _seekBar.value = 0;
     [_seekBar setMaximumTrackTintColor:textColor];
     [_seekBar setMinimumTrackTintColor:tint];
     
@@ -242,7 +223,7 @@
     _boxDescription = [[UILabel alloc] init];
     _boxDescription.translatesAutoresizingMaskIntoConstraints = YES;
     _boxDescription.numberOfLines = 3;
-    _boxDescription.text = @"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
+    _boxDescription.text = @"";
     _boxDescription.font = [UIFont fontWithName:@"Helvetica" size:14];
     [_boxDescription setTextColor: textColor];
     _boxDescription.textAlignment = NSTextAlignmentLeft;
@@ -683,8 +664,45 @@
         [_currentClient removeAllObjects];
         _navItem.title = @"";
     }
-
+    [self refreshNowPlaying];
 }
+
+- (void) refreshNowPlaying {
+    if ([_clients count] > 0 && [[_currentClient allKeys] count] > 0) {
+        [[NSNotificationCenter defaultCenter] postNotificationName:@"messageRefreshNowPlaying" object:_currentClient];
+    }
+}
+
+-(void) setNowPlaying:(NSNumber *)chId {
+    NSDictionary *channel = [_channels objectForKey:chId];
+    
+    _boxCover = [UIImage new];
+    _boxTitle.text = channel[@"title"];
+    _boxDescription.text = @"";
+    
+}
+
+-(void) clearNowPlaying {
+    _boxCover = [UIImage new];
+    _boxTitle.text = @"";
+    _boxDescription.text = @"";
+}
+
+- (void) messageUpdatedNowPlaying:(NSNotification *)notification {
+    NSString *chNum = notification.object;
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
+        NSString *channelId = [classChannels getChannelIdForChannelNumber:chNum channels:_channels];
+        dispatch_after(0, dispatch_get_main_queue(), ^{
+            if ([channelId isEqualToString:@""]) {
+                [self clearNowPlaying];
+            } else {
+               [self setNowPlaying:channelId];
+            }
+        });
+    });
+}
+
+
 - (void) refreshGuide {
     [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
     CGRect frm = _overlayProgress.frame;
