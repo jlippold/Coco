@@ -219,14 +219,15 @@
     }
 }
 
-- (NSNumber *)getChannelIdForChannelNumber:(NSString *)chNum channels:(NSMutableDictionary *)channels {
-    NSNumber *returnedChannelId;
-    for (id channel in channels) {
-        if ( [channel[@"chNum"] isEqualToString:chNum]) {
-            returnedChannelId = channel[@"chId"];
+- (NSString *)getChannelIdForChannelNumber:(NSString *)chNum channels:(NSMutableDictionary *)channels {
+    NSString *chan = @"";
+    for (NSString *chId in channels) {
+        id channel = [channels objectForKey:chId];
+        if ( [channel[@"chNum"] integerValue] == [chNum integerValue] ) {
+            chan = chId;
             break;
         }
     }
-    return returnedChannelId;
+    return chan;
 }
 @end

@@ -74,6 +74,9 @@
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageUpdatedNowPlaying:)
                                                  name:@"messageUpdatedNowPlaying" object:nil];
     
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageChannelChanged:)
+                                                 name:@"messageChannelChanged" object:nil];
+    
     [self createMainView];
     
     if ([_clients count] > 0) {
@@ -166,7 +169,7 @@
     _boxTitle.font = [UIFont fontWithName:@"Helvetica-Bold" size:17];
     [_boxTitle setTextColor:textColor];
     _boxTitle.textAlignment = NSTextAlignmentLeft;
-    _boxTitle.frame = CGRectMake(xOffset, 82, [[UIScreen mainScreen] bounds].size.width - xOffset, 14);
+    _boxTitle.frame = CGRectMake(xOffset, 82, [[UIScreen mainScreen] bounds].size.width - xOffset, 16);
     [self.view addSubview:_boxTitle];
     
     
@@ -285,7 +288,7 @@
      _overlayLabel = [[UILabel alloc] init];
     _overlayLabel.textColor = textColor;
     _overlayLabel.frame = overlay.frame;
-    _overlayLabel.text = @"Last updated at 9:30 am";
+    _overlayLabel.text = @"";
     _overlayLabel.font = [UIFont fontWithName:@"Helvetica" size:12];
     _overlayLabel.textAlignment = NSTextAlignmentCenter;
 
@@ -673,9 +676,12 @@
     }
 }
 
--(void) setNowPlaying:(NSNumber *)chId {
-    NSDictionary *channel = [_channels objectForKey:chId];
-    
+-(void) setNowPlaying:(NSString *)chId {
+    NSDictionary *channel = [_guide objectForKey:chId];
+    if (!channel) {
+        [self clearNowPlaying];
+        return;
+    }
     _boxCover = [UIImage new];
     _boxTitle.text = channel[@"title"];
     _boxDescription.text = @"";
@@ -689,14 +695,14 @@
 }
 
 - (void) messageUpdatedNowPlaying:(NSNotification *)notification {
-    NSString *chNum = notification.object;
+    NSString *chNum = [notification.object stringValue];
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
         NSString *channelId = [classChannels getChannelIdForChannelNumber:chNum channels:_channels];
         dispatch_after(0, dispatch_get_main_queue(), ^{
             if ([channelId isEqualToString:@""]) {
                 [self clearNowPlaying];
             } else {
-               [self setNowPlaying:channelId];
+                [self setNowPlaying:channelId];
             }
         });
     });
@@ -723,6 +729,10 @@
         [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
         [_mainTableView reloadData];
     }];
+}
+
+- (void) messageChannelChanged:(NSNotification *)notification {
+    [self refreshNowPlaying];
 }
 
 - (void) messageUpdatedGuideProgress:(NSNotification *)notification {
