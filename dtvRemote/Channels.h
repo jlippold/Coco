@@ -17,5 +17,6 @@
 - (NSMutableDictionary *)loadChannels;
 - (void) populateChannels:(NSMutableDictionary *)location;
 - (NSString *)getChannelIdForChannelNumber:(NSString *)chNum channels:(NSMutableDictionary *)channels;
++ (NSMutableDictionary *) sortChannels:(NSMutableDictionary *)channels sortBy:(NSString *)sort;
 
 @end

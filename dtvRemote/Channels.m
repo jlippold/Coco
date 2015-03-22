@@ -230,4 +230,43 @@
     }
     return chan;
 }
+
+
++ (NSMutableDictionary *) sortChannels:(NSMutableDictionary *)channels sortBy:(NSString *)sort {
+    
+    NSMutableDictionary *sortedChannels = [[NSMutableDictionary alloc] init];
+    NSArray *keys = [channels allKeys];
+    
+    if ([sort isEqualToString:@"name"]) {
+        for (id channel in keys) {
+            NSString *chId = [channels[channel] objectForKey:@"chId"];
+            NSString *chName = [channels[channel] objectForKey:@"chName"];
+            NSString *header = [chName substringToIndex:1];
+            
+            if (![sortedChannels objectForKey:header]) {
+                [sortedChannels setObject:[[NSMutableDictionary alloc] init] forKey:header];
+            }
+            
+            [sortedChannels[header] setObject:chId forKey:chName];
+        }
+    }
+    
+    if ([sort isEqualToString:@"number"]) {
+        for (id channel in keys) {
+            NSString *chId = [channels[channel] objectForKey:@"chId"];
+            NSString *chNum = [channels[channel] objectForKey:@"chNum"];
+            int section = floor([chNum intValue]/100)*100;
+            NSString *header = [NSString stringWithFormat:@"%04d-%04d", section, section+100];
+            
+            if (![sortedChannels objectForKey:header]) {
+                [sortedChannels setObject:[[NSMutableDictionary alloc] init] forKey:header];
+            }
+            
+            [sortedChannels[header] setObject:chId forKey:chNum];
+        }
+    }
+
+    
+    return sortedChannels;
+}
 @end

@@ -53,6 +53,7 @@
 
     _channels = [classChannels loadChannels];
     _guide = [[NSMutableDictionary alloc] init];
+    _sortedChannels = [[NSMutableDictionary alloc] init];
     _clients = [classClients loadClients];
     _currentClient = [[NSMutableDictionary alloc] init];
     
@@ -96,8 +97,11 @@
             [self promptForZipCode];
         });
     } else {
+        _sortedChannels = [Channels sortChannels:_channels sortBy:@"number"];
         [self refreshGuide];
     }
+    
+    
     
 
     _timer = [NSTimer scheduledTimerWithTimeInterval:60.0
@@ -352,7 +356,7 @@
     
     UIBarButtonItem *sort = [[UIBarButtonItem alloc]
                                  initWithImage:[UIImage imageNamed:@"images.bundle/sort.png"]
-                                 style:UIBarButtonItemStylePlain target:self action:@selector(stub:) ];
+                             style:UIBarButtonItemStylePlain target:self action:@selector(sortChannels:) ];
     
     
     NSArray *buttons = [NSArray arrayWithObjects:  commands, flex , sort, flex, filter, flex, numberPad, flex, guideBack, flex, guideForward, nil];
@@ -362,9 +366,20 @@
 
 }
 
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
+{
+    return [[_sortedChannels allKeys] count];
+}
+
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    NSArray *keys = [_channels allKeys];
-    return [keys count];
+    NSArray *sections = [[_sortedChannels allKeys] sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
+    NSString *sectionKey = [sections objectAtIndex:section];
+    return [[[_sortedChannels objectForKey:sectionKey] allKeys] count];
+}
+
+-(NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section{
+    NSArray *sections = [[_sortedChannels allKeys] sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
+    return [sections objectAtIndex:section];
 }
 
 - (void)tableView:(UITableView *)tableView willDisplayCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -382,8 +397,6 @@
     [cell.detailTextLabel setTextColor:textColor];
     [cell setTintColor:tintColor];
     
-
-
 }
 
 
@@ -410,13 +423,18 @@
     }
     
     //cell data
-    NSArray *keys = [_channels allKeys];
-    id aKey = [keys objectAtIndex:indexPath.row];
+    NSArray *sections = [[_sortedChannels allKeys] sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
+    NSString *sectionKey = [sections objectAtIndex:indexPath.section];
+    NSMutableDictionary *sectionData = [_sortedChannels objectForKey:sectionKey];
+    NSArray *sectionChannels = [[sectionData allKeys] sortedArrayUsingSelector: @selector(compare:)];
+    id sectionChannelKey = [sectionChannels objectAtIndex:indexPath.row];
+    id chId = [[sectionData objectForKey:sectionChannelKey] stringValue];
     
-    cell.accessoryView = [[UIImageView alloc] initWithImage:[UIImage new]];
+    NSDictionary *channel = _channels[chId];
+    NSDictionary *guideItem = [_guide objectForKey:chId];
+    
 
-    NSDictionary *channel = [_channels objectForKey:aKey];
-    NSDictionary *guideItem = [_guide objectForKey:aKey];
+    cell.accessoryView = [[UIImageView alloc] initWithImage:[UIImage new]];
     
     NSString *timeLeft= @"";
     bool showIsEndingSoon = NO;
@@ -475,17 +493,17 @@
     }
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
     
-    //NSInteger section = indexPath.section;
-    NSInteger row = indexPath.row;
+    NSArray *sections = [[_sortedChannels allKeys] sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
+    NSString *sectionKey = [sections objectAtIndex:indexPath.section];
+    NSMutableDictionary *sectionData = [_sortedChannels objectForKey:sectionKey];
+    NSArray *sectionChannels = [[sectionData allKeys] sortedArrayUsingSelector: @selector(compare:)];
+    id sectionChannelKey = [sectionChannels objectAtIndex:indexPath.row];
+    id chId = [[sectionData objectForKey:sectionChannelKey] stringValue];
     
-    NSArray *keys = [_channels allKeys];
+    NSDictionary *channel = _channels[chId];
+    NSDictionary *props = @{@"chNum":channel[@"chNum"], @"device":_currentClient};
     
-    id key = [keys objectAtIndex: row];
-    id item = _channels[key];
-    
-    NSDictionary *channel = @{@"chNum":item[@"chNum"], @"device":_currentClient};
-    
-    [[NSNotificationCenter defaultCenter] postNotificationName:@"messageChangeChannel" object:channel];
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"messageChangeChannel" object:props];
     
     
 }
@@ -587,6 +605,7 @@
         [_mainTableView reloadData];
         [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
         [MBProgressHUD hideHUDForView:self.view animated:YES];
+        _sortedChannels = [Channels sortChannels:_channels sortBy:@"number"];
         [self refreshGuide];
     });
 
@@ -812,8 +831,33 @@
 - (IBAction)stub:(id)sender {
     
 }
+- (IBAction)sortChannels:(id)sender {
 
-- (IBAction)rewind:(id)sender {
+    UIAlertController *view = [UIAlertController
+                               alertControllerWithTitle:nil
+                               message:@"Sort Channels By"
+                               preferredStyle:UIAlertControllerStyleActionSheet];
+    
+    UIAlertAction* name = [UIAlertAction actionWithTitle:@"Name" style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
+        _sortedChannels = [Channels sortChannels:_channels sortBy:@"name"];
+        [_mainTableView reloadData];
+        [view dismissViewControllerAnimated:YES completion:nil];
+    }];
+    [view addAction:name];
+    
+    UIAlertAction* number = [UIAlertAction actionWithTitle:@"Number" style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
+        _sortedChannels = [Channels sortChannels:_channels sortBy:@"number"];
+        [_mainTableView reloadData];
+        [view dismissViewControllerAnimated:YES completion:nil];
+    }];
+    [view addAction:number];
+    
+    UIAlertAction* cancel = [UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:^(UIAlertAction * action) {
+        [view dismissViewControllerAnimated:YES completion:nil];
+    }];
+    
+    [view addAction:cancel];
+    [self presentViewController:view animated:YES completion:nil];
     
 }
 - (IBAction)forward:(id)sender {

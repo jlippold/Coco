@@ -197,6 +197,8 @@
     }
 }
 
+
+
 - (NSString *)getJoinedArrayByProp:(NSString *)prop arrayOffset:(NSInteger)offset chunkSize:(NSInteger)size  {
     //returns a csv list of some property in _channels for url building
     NSMutableArray *outArray = [[NSMutableArray alloc] init];
