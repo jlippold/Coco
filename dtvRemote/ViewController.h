@@ -8,7 +8,7 @@
 
 #import <UIKit/UIKit.h>
 
-@interface ViewController : UIViewController <UITableViewDataSource,UITableViewDelegate> {
+@interface ViewController : UIViewController <UITableViewDataSource,UITableViewDelegate,UISearchBarDelegate> {
     NSArray* _mainTableData;
     NSDate* _nextRefresh;
     NSString* _currentProgramId;
@@ -27,6 +27,9 @@
 @property (nonatomic, strong) UITableView *mainTableView;
 @property (nonatomic, strong) IBOutlet UINavigationBar *navbar;
 @property (nonatomic, strong) IBOutlet UINavigationItem *navItem;
+@property (nonatomic, strong) UISearchController *searchController;
+@property (nonatomic, strong) UISearchBar *searchBar;
+
 
 @property (nonatomic, strong) UIImageView *boxCover;
 @property (nonatomic, strong) UILabel *boxTitle;

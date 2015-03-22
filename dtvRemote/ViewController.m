@@ -183,7 +183,11 @@
     
     UIView *v = [[UIView alloc] initWithFrame:CGRectMake(5, 70, 120, 180)];
     [v setBackgroundColor:boxBackgroundColor];
-
+    
+    UITapGestureRecognizer *singleFingerTap = [[UITapGestureRecognizer alloc] initWithTarget:self
+                                            action:@selector(dismissKeyboard:)];
+    [v addGestureRecognizer:singleFingerTap];
+    
     _boxCover = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 120, 180)];
     [_boxCover setImage:[UIImage new]];
     [v addSubview:_boxCover];
@@ -215,7 +219,7 @@
     
     UIBarButtonItem *rewindButton = [[UIBarButtonItem alloc]
                                      initWithImage:[UIImage imageNamed:@"images.bundle/rewind.png"]
-                                     style:UIBarButtonItemStylePlain target:self action:@selector(rewind:)];
+                                     style:UIBarButtonItemStylePlain target:self action:@selector(stub:)];
     
     _playButton = [[UIBarButtonItem alloc]
                    initWithImage:[UIImage imageNamed:@"images.bundle/pause"]
@@ -254,13 +258,34 @@
 
     _boxDescription = [[UILabel alloc] init];
     _boxDescription.translatesAutoresizingMaskIntoConstraints = YES;
-    _boxDescription.numberOfLines = 5;
+    _boxDescription.numberOfLines = 4;
     _boxDescription.text = @"";
     _boxDescription.font = [UIFont fontWithName:@"Helvetica" size:12];
     [_boxDescription setTextColor: textColor];
     _boxDescription.textAlignment = NSTextAlignmentLeft;
-    _boxDescription.frame = CGRectMake(xOffset, 165, [[UIScreen mainScreen] bounds].size.width - xOffset, 80);
+    _boxDescription.frame = CGRectMake(xOffset, 165, [[UIScreen mainScreen] bounds].size.width - xOffset, 56);
     [self.view addSubview:_boxDescription];
+    xOffset = xOffset - 10;
+    _searchBar = [[UISearchBar alloc] initWithFrame:CGRectMake(xOffset, 215, [[UIScreen mainScreen] bounds].size.width - xOffset, 44)];
+    
+    _searchBar.searchBarStyle = UISearchBarStyleMinimal;
+    _searchBar.translucent = YES;
+    _searchBar.tintColor = [UIColor whiteColor];
+    _searchBar.backgroundColor = [UIColor clearColor];
+    
+    _searchBar.barStyle = UIBarStyleBlackOpaque;
+    _searchBar.delegate = self;
+    
+    _searchController = [[UISearchController alloc] initWithSearchResultsController:nil];
+    
+    //_searchController.searchResultsUpdater = self;
+    _searchController.dimsBackgroundDuringPresentation = NO;
+    _searchController.hidesNavigationBarDuringPresentation = NO;
+    _searchController.searchBar.frame = _searchBar.frame;
+    _searchBar.enablesReturnKeyAutomatically = NO;
+    
+    [self.view addSubview:_searchBar];
+    
 }
 
 - (void) createTableView {
@@ -269,6 +294,7 @@
     
     UIColor *seperatorColor = [UIColor colorWithRed:40/255.0f green:40/255.0f blue:40/255.0f alpha:1.0f];
     UIColor *backgroundColor = [UIColor colorWithRed:30/255.0f green:30/255.0f blue:30/255.0f alpha:1.0f];
+    
     
     _mainTableView = [[UITableView alloc] init];
     [_mainTableView setFrame:CGRectMake(0, tableXOffset,
@@ -280,6 +306,8 @@
     _mainTableView.separatorColor = seperatorColor;
     _mainTableView.backgroundColor = backgroundColor;
     
+    
+    [self.view addSubview:_searchBar];
     [self.view addSubview:_mainTableView];
     
 }
@@ -366,8 +394,33 @@
 
 }
 
-- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
-{
+- (void)searchBarTextDidBeginEditing:(UISearchBar *)searchBar {
+   // [self doFilter];
+}
+- (void)searchBarTextDoneEditing:(UISearchBar *)searchBar {
+    [searchBar resignFirstResponder];
+}
+- (void)searchBar:(UISearchBar *)searchBar textDidChange:(NSString *)searchText {
+    if ([searchText isEqualToString:@""]) {
+    } else {
+        //[self doFilter];
+    }
+}
+- (void)searchBarSearchButtonClicked:(UISearchBar *)searchBar {
+    [searchBar resignFirstResponder];
+}
+- (BOOL)searchBarShouldEndEditing:(UISearchBar *)searchBar {
+    return YES;
+}
+- (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView {
+    [_searchBar resignFirstResponder];
+}
+
+-(CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section {
+    return  18.0;
+}
+
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
     return [[_sortedChannels allKeys] count];
 }
 
