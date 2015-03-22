@@ -76,7 +76,6 @@
          
          if (data.length > 0 && connectionError == nil) {
              NSDictionary *json = [NSJSONSerialization JSONObjectWithData:data options:0 error:NULL];
-             NSLog(@"%@", json[@"status"][@"code"]);
              NSNumber *statusCode = json[@"status"][@"code"];
              if ([statusCode isEqualToNumber:[NSNumber numberWithInt:200]]){
                      [[NSNotificationCenter defaultCenter] postNotificationName:@"messageUpdatedNowPlaying" object:json[@"major"]];

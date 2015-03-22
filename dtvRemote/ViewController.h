@@ -25,7 +25,7 @@
 @property (nonatomic, strong) IBOutlet UINavigationBar *navbar;
 @property (nonatomic, strong) IBOutlet UINavigationItem *navItem;
 
-@property (nonatomic, strong) UIImage *boxCover;
+@property (nonatomic, strong) UIImageView *boxCover;
 @property (nonatomic, strong) UILabel *boxTitle;
 @property (nonatomic, strong) UILabel *boxDescription;
 
@@ -37,10 +37,10 @@
 @property (nonatomic, strong) IBOutlet UIBarButtonItem *playButton;
 @property (nonatomic, strong) IBOutlet UIBarButtonItem *forwardButton;
 @property (nonatomic, strong) IBOutlet UISlider *seekBar;
-
-
 @property (nonatomic, strong) UIToolbar *toolBar;
 
+
+@property (nonatomic, strong) NSTimer *timer;
 
 @end
 

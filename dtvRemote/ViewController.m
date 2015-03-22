@@ -52,7 +52,9 @@
     _guide = [[NSMutableDictionary alloc] init];
     _clients = [classClients loadClients];
     _currentClient = [[NSMutableDictionary alloc] init];
-
+    
+    _timer = [[NSTimer alloc] init];
+    
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageUpdatedClients:)
                                                  name:@"messageUpdatedClients" object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageUpdatedClientsProgress:)
@@ -90,6 +92,19 @@
     } else {
         [self refreshGuide];
     }
+    
+
+    _timer = [NSTimer scheduledTimerWithTimeInterval:60.0
+                                              target:self
+                                            selector:@selector(onTimerFire:)
+                                            userInfo:nil
+                                             repeats:YES];
+    [_timer fire];
+}
+
+-(void) onTimerFire:(id)sender {
+    NSLog(@"fired");
+    [self refreshNowPlaying:nil];
 }
 
 -(UIStatusBarStyle)preferredStatusBarStyle{
@@ -152,12 +167,12 @@
     UIColor *boxBackgroundColor = [UIColor colorWithRed:28/255.0f green:28/255.0f blue:28/255.0f alpha:1.0f];
     UIColor *tint = [UIColor colorWithRed:30/255.0f green:147/255.0f blue:212/255.0f alpha:1.0f];
     
-    _boxCover = [[UIImage alloc] init];
     UIView *v = [[UIView alloc] initWithFrame:CGRectMake(5, 70, 120, 140)];
     [v setBackgroundColor:boxBackgroundColor];
-    UIImageView *iv = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 0, 0)];
-    [iv setImage:_boxCover];
-    [v addSubview:iv];
+
+    _boxCover = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 120, 140)];
+    [_boxCover setImage:[UIImage new]];
+    [v addSubview:_boxCover];
     [self.view addSubview:v];
     
     
@@ -667,10 +682,10 @@
         [_currentClient removeAllObjects];
         _navItem.title = @"";
     }
-    [self refreshNowPlaying];
+    [self refreshNowPlaying:nil];
 }
 
-- (void) refreshNowPlaying {
+- (void) refreshNowPlaying:(id)sender {
     if ([_clients count] > 0 && [[_currentClient allKeys] count] > 0) {
         [[NSNotificationCenter defaultCenter] postNotificationName:@"messageRefreshNowPlaying" object:_currentClient];
     }
@@ -682,14 +697,55 @@
         [self clearNowPlaying];
         return;
     }
-    _boxCover = [UIImage new];
-    _boxTitle.text = channel[@"title"];
-    _boxDescription.text = @"";
+
+    [self setBoxCoverForChannel:channel[@"boxcover"]];
+    [self setDescriptionForProgramId:channel[@"programID"]];
+}
+
+-(void) setDescriptionForProgramId:(NSString *)programID {
+    NSURL* programURL = [NSURL URLWithString:
+                       [NSString stringWithFormat:@"https://www.directv.com/json/program/flip/%@", programID]];
     
+    [NSURLConnection sendAsynchronousRequest:[NSURLRequest requestWithURL:programURL]
+                                       queue:[[NSOperationQueue alloc] init]
+                           completionHandler:^(NSURLResponse *response,
+                                               NSData *data,
+                                               NSError *connectionError)
+     {
+         if (data.length > 0 && connectionError == nil) {
+             NSDictionary *json = [NSJSONSerialization JSONObjectWithData:data options:0 error:NULL];
+             if (json[@"programDetail"]) {
+                 if (json[@"programDetail"][@"description"]) {
+                     _boxDescription.text = json[@"programDetail"][@"description"];
+                 }
+                 if (json[@"programDetail"][@"title"]) {
+                     _boxTitle.text = json[@"programDetail"][@"title"];
+                 }
+             }
+         }
+     }];
+}
+
+-(void) setBoxCoverForChannel:(NSString *)path {
+    NSURL* imageUrl = [NSURL URLWithString:
+                       [NSString stringWithFormat:@"https://dtvimages.hs.llnwd.net/e1%@", path]];
+    
+    [NSURLConnection sendAsynchronousRequest:[NSURLRequest requestWithURL:imageUrl]
+                                       queue:[[NSOperationQueue alloc] init]
+                           completionHandler:^(NSURLResponse *response,
+                                               NSData *data,
+                                               NSError *connectionError)
+     {
+         if (data.length > 0 && connectionError == nil) {
+             UIImage *image = [UIImage imageWithData:data];
+             [_boxCover setImage:image];
+         }
+     }];
 }
 
 -(void) clearNowPlaying {
-    _boxCover = [UIImage new];
+    return;
+    _boxCover.image = [UIImage new];
     _boxTitle.text = @"";
     _boxDescription.text = @"";
 }
@@ -728,11 +784,12 @@
         _overlayLabel.text = @"Guide updated.";
         [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
         [_mainTableView reloadData];
+        [self refreshNowPlaying:nil];
     }];
 }
 
 - (void) messageChannelChanged:(NSNotification *)notification {
-    [self refreshNowPlaying];
+    [self refreshNowPlaying:nil];
 }
 
 - (void) messageUpdatedGuideProgress:(NSNotification *)notification {
