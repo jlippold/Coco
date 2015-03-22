@@ -268,6 +268,10 @@
     xOffset = xOffset - 10;
     _searchBar = [[UISearchBar alloc] initWithFrame:CGRectMake(xOffset, 215, [[UIScreen mainScreen] bounds].size.width - xOffset, 44)];
     
+    CGRect newFrame = _searchBar.frame;
+    newFrame.size.width -= 200;
+    _searchBar.frame = newFrame;
+    
     _searchBar.searchBarStyle = UISearchBarStyleMinimal;
     _searchBar.translucent = YES;
     _searchBar.tintColor = [UIColor whiteColor];
@@ -395,7 +399,42 @@
 }
 
 - (void)searchBarTextDidBeginEditing:(UISearchBar *)searchBar {
-   // [self doFilter];
+    // [self doFilter];
+    
+    if (_searchBar.tag == 1) {
+        return;
+    }
+    _searchBar.tag = 1;
+    
+    CGRect newFrame = _searchBar.frame;
+    newFrame.size.width += 200;
+    
+    [UIView animateWithDuration:0.25
+                     animations:^{
+                         _searchBar.frame = newFrame;
+                     }];
+   
+}
+
+- (void)searchBarSearchButtonClicked:(UISearchBar *)searchBar {
+    
+    [searchBar resignFirstResponder];
+    
+    if ([searchBar.text isEqualToString:@""]) {
+        NSLog(@"Clear");
+        if (_searchBar.tag == 2) {
+            return;
+        }
+        _searchBar.tag = 2;
+        
+        CGRect newFrame = _searchBar.frame;
+        newFrame.size.width -= 200;
+        [UIView animateWithDuration:0.50
+                         animations:^{
+                             _searchBar.frame = newFrame;
+                         }];
+    }
+
 }
 - (void)searchBarTextDoneEditing:(UISearchBar *)searchBar {
     [searchBar resignFirstResponder];
@@ -406,9 +445,7 @@
         //[self doFilter];
     }
 }
-- (void)searchBarSearchButtonClicked:(UISearchBar *)searchBar {
-    [searchBar resignFirstResponder];
-}
+
 - (BOOL)searchBarShouldEndEditing:(UISearchBar *)searchBar {
     return YES;
 }
@@ -755,22 +792,27 @@
 }
 
 -(void) setNowPlaying:(NSString *)chId {
-    NSDictionary *channel = [_guide objectForKey:chId];
-    if (!channel) {
+    NSDictionary *playing = [_guide objectForKey:chId];
+    NSDictionary *channel = [_channels objectForKey:chId];
+    
+    if (!playing) {
         [self clearNowPlaying];
         return;
     }
     
 
-    NSDictionary *duration = [Guide getDurationForChannel:channel];
+    NSDictionary *duration = [Guide getDurationForChannel:playing];
     _seekBar.value = [duration[@"percentage"] doubleValue];
     
-    if ([_currentProgramId isEqualToString:channel[@"programID"]]) {
+    if ([_currentProgramId isEqualToString:playing[@"programID"]]) {
         return;
     }
-    _currentProgramId = channel[@"programID"];
-    [self setBoxCoverForChannel:channel[@"boxcover"]];
-    [self setDescriptionForProgramId:channel[@"programID"]];
+    _currentProgramId = playing[@"programID"];
+    
+    _boxTitle.text = [channel[@"chNum"] stringValue];
+    
+    [self setBoxCoverForChannel:playing[@"boxcover"]];
+    [self setDescriptionForProgramId:playing[@"programID"]];
     
 }
 
@@ -786,14 +828,29 @@
                                                NSError *connectionError)
      {
          if (data.length > 0 && connectionError == nil) {
-             NSDictionary *json = [NSJSONSerialization JSONObjectWithData:data options:0 error:NULL];
-             if (json[@"programDetail"]) {
-                 if (json[@"programDetail"][@"description"]) {
-                     _boxDescription.text = json[@"programDetail"][@"description"];
+             NSDictionary *show = [NSJSONSerialization JSONObjectWithData:data options:0 error:NULL];
+             if (show[@"programDetail"]) {
+                 
+                 if (show[@"programDetail"][@"description"]) {
+                     _boxDescription.text = show[@"programDetail"][@"description"];
                  }
-                 if (json[@"programDetail"][@"title"]) {
-                     _boxTitle.text = json[@"programDetail"][@"title"];
+                 NSString *title = _boxTitle.text;
+                 
+                 if (show[@"programDetail"][@"title"]) {
+                     title = [NSString stringWithFormat:@"%@: %@ - %@",
+                              _boxTitle.text, show[@"programDetail"][@"title"], show[@"programDetail"][@"episodeTitle"]];
                  }
+                 if (show[@"programDetail"][@"title"] && show[@"programDetail"][@"episodeTitle"]) {
+                     title = [NSString stringWithFormat:@"%@: %@ - %@",
+                              _boxTitle.text, show[@"programDetail"][@"title"], show[@"programDetail"][@"episodeTitle"]];
+                 }
+                 if (show[@"programDetail"][@"title"] && show[@"programDetail"][@"releaseYear"]) {
+                     title = [NSString stringWithFormat:@"%@: %@ (%@)",
+                             _boxTitle.text, show[@"programDetail"][@"title"], show[@"programDetail"][@"releaseYear"]];
+                 }
+                 
+                 _boxTitle.text = title;
+
              }
          }
      }];

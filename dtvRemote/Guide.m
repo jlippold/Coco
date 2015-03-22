@@ -142,12 +142,22 @@
                              
                              NSMutableDictionary *guideItem = [[NSMutableDictionary alloc] init];
                              
-                             
                              if (show[@"programID"]) {
                                  guideItem[@"programID"] = show[@"programID"];
                              }
                              if (show[@"title"]) {
                                  guideItem[@"title"] = show[@"title"];
+                             }
+                             if (show[@"title"] && show[@"episodeTitle"]) {
+                                 guideItem[@"title"] = [NSString stringWithFormat:@"%@ - %@",
+                                                        show[@"title"], show[@"episodeTitle"]];
+                             }
+                             if (show[@"title"] && show[@"releaseYear"]) {
+                                 guideItem[@"title"] = [NSString stringWithFormat:@"%@ (%@)",
+                                                        show[@"title"], show[@"releaseYear"]];
+                             }
+                             if (show[@"starRatingNum"]) {
+                                 guideItem[@"starRating"] = show[@"starRatingNum"];
                              }
                              if (show[@"primaryImageUrl"]) {
                                  guideItem[@"boxcover"] = show[@"primaryImageUrl"];
@@ -157,6 +167,9 @@
                              }
                              if (show[@"hd"]) {
                                  guideItem[@"hd"] = show[@"hd"];
+                             }
+                             if (show[@"rating"]) {
+                                 guideItem[@"mpaaRating"] = show[@"rating"];
                              }
                              
                              guideItem[@"starts"] = startDate;
