@@ -11,10 +11,10 @@
 @interface Guide : NSObject
 
 @property (nonatomic, strong) NSOperationQueue *whatsPlayingQueue;
-@property (nonatomic, strong) NSTimer *whatsPlayingTimer;
 @property (nonatomic, strong) NSMutableDictionary *channels;
 @property (nonatomic, strong) NSDate *guideTime;
 
 - (id)init;
++ (NSDictionary *)getDurationForChannel:(id)guideItem;
 
 @end

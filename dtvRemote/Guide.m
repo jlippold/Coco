@@ -25,8 +25,7 @@
     _whatsPlayingQueue.name = @"Whats Playing";
     _whatsPlayingQueue.maxConcurrentOperationCount = 3;
     
-    //[self startTimer];
-    
+
     return self;
 }
 
@@ -41,22 +40,6 @@
 
 - (void) messageSetGuideTime:(NSNotification *)notification {
     _guideTime = [notification object];
-    [self refreshGuide];
-}
-
--(void)startTimer {
-    [self refreshGuide];
-    if (!_whatsPlayingTimer) {
-        _whatsPlayingTimer = [NSTimer scheduledTimerWithTimeInterval:30.0 target:self selector:@selector(fireTimer:) userInfo:nil repeats:YES];
-    }
-}
-
--(void)stopTimer {
-    [_whatsPlayingTimer invalidate];
-    _whatsPlayingTimer = nil;
-}
-
-- (void)fireTimer:(NSTimer *)timer {
     [self refreshGuide];
 }
 
@@ -77,6 +60,11 @@
     }
     
     dt = [self getHalfHourIncrement:dt];
+    
+    [[NSNotificationCenter defaultCenter]
+        postNotificationName:@"messageNextGuideRefreshTime"
+        object:[dt dateByAddingTimeInterval:(30*60)]];
+    
     
     NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
     [dateFormatter setDateFormat:@"EEE, dd MMM yyyy HH:mm:ss Z"];
@@ -253,5 +241,41 @@
     return ([endDate timeIntervalSinceDate:now] > 0);
 }
 
++ (NSDictionary *)getDurationForChannel:(id)guideItem {
+    
+    NSDate *now = [NSDate new];
+    NSDate *ends = [guideItem objectForKey:@"ends"];
+    NSDate *starts = [guideItem objectForKey:@"starts"];
+    BOOL showIsEndingSoon = NO;
+    
+    NSTimeInterval duration = [ends timeIntervalSinceDate:starts];
+    NSTimeInterval elasped = [now timeIntervalSinceDate:starts];
+    double percentage = (elasped/duration)*100;
+
+    
+    NSCalendar *calendar = [NSCalendar currentCalendar];
+    [calendar setTimeZone:[NSTimeZone localTimeZone]];
+    NSUInteger unitFlags = NSCalendarUnitHour | NSCalendarUnitMinute;
+    NSDateComponents *components = [calendar components:unitFlags
+                                               fromDate: now
+                                                 toDate: ends
+                                                options:0];
+    
+    NSString *timeLeft = [NSString stringWithFormat:@"%02ld:%02ld", [components hour], [components minute]];
+    
+    if ([components hour] == 0 && [components minute] <= 10) {
+        showIsEndingSoon = YES;
+    }
+    
+    NSDictionary *props = @{
+                            @"duration": @(duration),
+                            @"elasped": @(elasped),
+                            @"percentage" : @(percentage),
+                            @"showIsEndingSoon": @(showIsEndingSoon),
+                            @"timeLeft": timeLeft
+                            };
+    
+    return props;
+}
 
 @end

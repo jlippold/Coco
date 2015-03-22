@@ -10,6 +10,8 @@
 
 @interface ViewController : UIViewController <UITableViewDataSource,UITableViewDelegate> {
     NSArray* _mainTableData;
+    NSDate* _nextRefresh;
+    NSString* _currentProgramId;
     id classChannels;
     id classGuide;
     id classClients;

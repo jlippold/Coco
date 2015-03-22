@@ -47,6 +47,9 @@
     classGuide = gd;
     classCommands = co;
     classClients = cl;
+    
+    _nextRefresh = [NSDate date];
+    _currentProgramId = @"";
 
     _channels = [classChannels loadChannels];
     _guide = [[NSMutableDictionary alloc] init];
@@ -64,11 +67,14 @@
                                                  name:@"messageUpdatedChannels" object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageUpdatedChannelsProgress:)
                                                  name:@"messageUpdatedChannelsProgress" object:nil];
-    
+
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageNextGuideRefreshTime:)
+                                                 name:@"messageNextGuideRefreshTime" object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageUpdatedGuide:)
                                                  name:@"messageUpdatedGuide" object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageUpdatedGuideProgress:)
                                                  name:@"messageUpdatedGuideProgress" object:nil];
+    
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageUpdatedLocations:)
                                                  name:@"messageUpdatedLocations" object:nil];
@@ -105,6 +111,10 @@
 -(void) onTimerFire:(id)sender {
     NSLog(@"fired");
     [self refreshNowPlaying:nil];
+    
+    if( [[NSDate date] timeIntervalSinceDate:_nextRefresh] >= 0 ) {
+        [self refreshGuide];
+    }
 }
 
 -(UIStatusBarStyle)preferredStatusBarStyle{
@@ -167,10 +177,10 @@
     UIColor *boxBackgroundColor = [UIColor colorWithRed:28/255.0f green:28/255.0f blue:28/255.0f alpha:1.0f];
     UIColor *tint = [UIColor colorWithRed:30/255.0f green:147/255.0f blue:212/255.0f alpha:1.0f];
     
-    UIView *v = [[UIView alloc] initWithFrame:CGRectMake(5, 70, 120, 140)];
+    UIView *v = [[UIView alloc] initWithFrame:CGRectMake(5, 70, 120, 180)];
     [v setBackgroundColor:boxBackgroundColor];
 
-    _boxCover = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 120, 140)];
+    _boxCover = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 120, 180)];
     [_boxCover setImage:[UIImage new]];
     [v addSubview:_boxCover];
     [self.view addSubview:v];
@@ -184,7 +194,7 @@
     _boxTitle.font = [UIFont fontWithName:@"Helvetica-Bold" size:17];
     [_boxTitle setTextColor:textColor];
     _boxTitle.textAlignment = NSTextAlignmentLeft;
-    _boxTitle.frame = CGRectMake(xOffset, 82, [[UIScreen mainScreen] bounds].size.width - xOffset, 16);
+    _boxTitle.frame = CGRectMake(xOffset, 82, [[UIScreen mainScreen] bounds].size.width - xOffset, 18);
     [self.view addSubview:_boxTitle];
     
     
@@ -240,17 +250,17 @@
 
     _boxDescription = [[UILabel alloc] init];
     _boxDescription.translatesAutoresizingMaskIntoConstraints = YES;
-    _boxDescription.numberOfLines = 3;
+    _boxDescription.numberOfLines = 5;
     _boxDescription.text = @"";
-    _boxDescription.font = [UIFont fontWithName:@"Helvetica" size:14];
+    _boxDescription.font = [UIFont fontWithName:@"Helvetica" size:12];
     [_boxDescription setTextColor: textColor];
     _boxDescription.textAlignment = NSTextAlignmentLeft;
-    _boxDescription.frame = CGRectMake(xOffset, 165, [[UIScreen mainScreen] bounds].size.width - xOffset, 40);
+    _boxDescription.frame = CGRectMake(xOffset, 165, [[UIScreen mainScreen] bounds].size.width - xOffset, 80);
     [self.view addSubview:_boxDescription];
 }
 
 - (void) createTableView {
-    double tableXOffset = 215;
+    double tableXOffset = 255;
     double toolbarHeight = 40;
     
     UIColor *seperatorColor = [UIColor colorWithRed:40/255.0f green:40/255.0f blue:40/255.0f alpha:1.0f];
@@ -420,31 +430,12 @@
             cell.detailTextLabel.text = @"";
         }
         
-        NSDate *now = [NSDate new];
-        NSDate *ends = [guideItem objectForKey:@"ends"];
-        /*
-         NSDate *starts = [guideItem objectForKey:@"starts"];
-         NSTimeInterval duration = [ends timeIntervalSinceDate:starts];
-         NSTimeInterval elasped = [now timeIntervalSinceDate:starts];
-         double percentage = (elasped/duration)*100.0;
-         if (percentage > 75) {
-         showIsEndingSoon = YES;
-         }
-         */
-        
-        NSCalendar *calendar = [NSCalendar currentCalendar];
-        [calendar setTimeZone:[NSTimeZone localTimeZone]];
-        NSUInteger unitFlags = NSCalendarUnitHour | NSCalendarUnitMinute;
-        NSDateComponents *components = [calendar components:unitFlags
-                                                   fromDate: now
-                                                     toDate: ends
-                                                    options:0];
-        
-        timeLeft = [NSString stringWithFormat:@"%02ld:%02ld", [components hour], [components minute]];
-        
-        if ([components hour] == 0 && [components minute] <= 10) {
+        NSDictionary *duration = [Guide getDurationForChannel:guideItem];
+        if ((int)duration[@"showIsEndingSoon"] == 1) {
             showIsEndingSoon = YES;
         }
+
+        timeLeft = duration[@"timeLeft"];
         
     } else {
         cell.textLabel.text = @"Not Available";
@@ -697,17 +688,27 @@
         [self clearNowPlaying];
         return;
     }
+    
 
+    NSDictionary *duration = [Guide getDurationForChannel:channel];
+    _seekBar.value = [duration[@"percentage"] doubleValue];
+    
+    if ([_currentProgramId isEqualToString:channel[@"programID"]]) {
+        return;
+    }
+    _currentProgramId = channel[@"programID"];
     [self setBoxCoverForChannel:channel[@"boxcover"]];
     [self setDescriptionForProgramId:channel[@"programID"]];
+    
 }
 
 -(void) setDescriptionForProgramId:(NSString *)programID {
+
     NSURL* programURL = [NSURL URLWithString:
                        [NSString stringWithFormat:@"https://www.directv.com/json/program/flip/%@", programID]];
     
     [NSURLConnection sendAsynchronousRequest:[NSURLRequest requestWithURL:programURL]
-                                       queue:[[NSOperationQueue alloc] init]
+                                       queue:[NSOperationQueue mainQueue]
                            completionHandler:^(NSURLResponse *response,
                                                NSData *data,
                                                NSError *connectionError)
@@ -731,7 +732,7 @@
                        [NSString stringWithFormat:@"https://dtvimages.hs.llnwd.net/e1%@", path]];
     
     [NSURLConnection sendAsynchronousRequest:[NSURLRequest requestWithURL:imageUrl]
-                                       queue:[[NSOperationQueue alloc] init]
+                                       queue:[NSOperationQueue mainQueue]
                            completionHandler:^(NSURLResponse *response,
                                                NSData *data,
                                                NSError *connectionError)
@@ -743,8 +744,9 @@
      }];
 }
 
+
+
 -(void) clearNowPlaying {
-    return;
     _boxCover.image = [UIImage new];
     _boxTitle.text = @"";
     _boxDescription.text = @"";
@@ -775,6 +777,10 @@
     
     [[NSNotificationCenter defaultCenter] postNotificationName:@"messageRefreshGuide" object:_channels];
 
+}
+
+- (void) messageNextGuideRefreshTime:(NSNotification *)notification {
+    _nextRefresh = [notification object];
 }
 
 - (void) messageUpdatedGuide:(NSNotification *)notification {
