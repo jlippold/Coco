@@ -9,6 +9,7 @@
 #import "ViewController.h"
 #import "MBProgressHUD.h"
 #import <SDWebImage/UIImageView+WebCache.h>
+#import <QuartzCore/QuartzCore.h>
 
 #import "iNet.h"
 #import "Channels.h"
@@ -289,6 +290,59 @@
     _searchBar.enablesReturnKeyAutomatically = NO;
     
     [self.view addSubview:_searchBar];
+    
+    UILabel *hdLabel = [[UILabel alloc] init];
+    hdLabel.text = @"HD";
+    hdLabel.font = [UIFont fontWithName:@"Helvetica-Bold" size:16];
+    [hdLabel setBackgroundColor:[UIColor blackColor]];
+    hdLabel.layer.cornerRadius = 5;
+    hdLabel.layer.masksToBounds = YES;
+    
+    [hdLabel setTextColor:textColor];
+    hdLabel.textAlignment = NSTextAlignmentCenter;
+    hdLabel.frame = CGRectMake(_searchBar.frame.origin.x + _searchBar.frame.size.width + 10,
+                               223,
+                               44,
+                               29);
+
+    [self.view addSubview:hdLabel];
+    
+
+    UILabel *ratingLabel = [[UILabel alloc] init];
+    ratingLabel.text = @"TV-MA";
+    ratingLabel.font = [UIFont fontWithName:@"Helvetica-Bold" size:16];
+    [ratingLabel setBackgroundColor:[UIColor blackColor]];
+    ratingLabel.layer.cornerRadius = 5;
+    ratingLabel.layer.masksToBounds = YES;
+    [ratingLabel setTextColor:textColor];
+    ratingLabel.textAlignment = NSTextAlignmentCenter;
+    ratingLabel.frame = CGRectMake(
+                                   hdLabel.frame.origin.x + hdLabel.frame.size.width + 10,
+                                   223,
+                                   64,
+                                   29);
+    
+    [self.view addSubview:ratingLabel];
+    
+    UILabel *stars = [[UILabel alloc] init];
+    stars.text = @"★★★★★";
+    stars.font = [UIFont fontWithName:@"Helvetica-Bold" size:16];
+    stars.clipsToBounds = YES;
+    
+    stars.adjustsFontSizeToFitWidth = NO;
+    stars.lineBreakMode = NSLineBreakByClipping;
+    stars.layer.masksToBounds = YES;
+    [stars setTextColor:textColor];
+    stars.textAlignment = NSTextAlignmentLeft;
+    stars.frame = CGRectMake(
+                                   ratingLabel.frame.origin.x + ratingLabel.frame.size.width + 10,
+                                   223,
+                                   36,
+                                   29);
+    
+    [self.view addSubview:stars];
+    
+    
     
 }
 
