@@ -59,6 +59,12 @@
     _currentClient = [[NSMutableDictionary alloc] init];
     
     _timer = [[NSTimer alloc] init];
+
+
+    xOffset = 140;
+    searchBarMinWidth = 74;
+    searchBarMaxWidth = [[UIScreen mainScreen] bounds].size.width - xOffset;
+
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageUpdatedClients:)
                                                  name:@"messageUpdatedClients" object:nil];
@@ -185,17 +191,15 @@
     UIView *v = [[UIView alloc] initWithFrame:CGRectMake(5, 70, 120, 180)];
     [v setBackgroundColor:boxBackgroundColor];
     
-    UITapGestureRecognizer *singleFingerTap = [[UITapGestureRecognizer alloc] initWithTarget:self
-                                            action:@selector(dismissKeyboard:)];
-    [v addGestureRecognizer:singleFingerTap];
+    //UITapGestureRecognizer *singleFingerTap = [[UITapGestureRecognizer alloc] initWithTarget:self
+    //action:@selector(dismissKeyboard:)];
+    //[v addGestureRecognizer:singleFingerTap];
     
     _boxCover = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 120, 180)];
     [_boxCover setImage:[UIImage new]];
     [v addSubview:_boxCover];
     [self.view addSubview:v];
     
-    
-    double xOffset = 140;
     
     _boxTitle = [[UILabel alloc] init];
     _boxTitle.translatesAutoresizingMaskIntoConstraints = YES;
@@ -266,13 +270,8 @@
     _boxDescription.textAlignment = NSTextAlignmentLeft;
     _boxDescription.frame = CGRectMake(xOffset, 165, [[UIScreen mainScreen] bounds].size.width - xOffset, 56);
     [self.view addSubview:_boxDescription];
-    xOffset = xOffset - 10;
-    _searchBar = [[UISearchBar alloc] initWithFrame:CGRectMake(xOffset, 215, [[UIScreen mainScreen] bounds].size.width - xOffset, 44)];
-    
-    CGRect newFrame = _searchBar.frame;
-    newFrame.size.width -= 200;
-    _searchBar.frame = newFrame;
-    
+
+    _searchBar = [[UISearchBar alloc] initWithFrame:CGRectMake(xOffset - 10, 215, searchBarMinWidth, 44)];
     _searchBar.searchBarStyle = UISearchBarStyleMinimal;
     _searchBar.translucent = YES;
     _searchBar.tintColor = [UIColor whiteColor];
@@ -293,51 +292,59 @@
     
     UILabel *hdLabel = [[UILabel alloc] init];
     hdLabel.text = @"HD";
-    hdLabel.font = [UIFont fontWithName:@"Helvetica-Bold" size:16];
+    hdLabel.font = [UIFont fontWithName:@"Helvetica-Bold" size:14];
     [hdLabel setBackgroundColor:[UIColor blackColor]];
     hdLabel.layer.cornerRadius = 5;
     hdLabel.layer.masksToBounds = YES;
     
     [hdLabel setTextColor:textColor];
     hdLabel.textAlignment = NSTextAlignmentCenter;
-    hdLabel.frame = CGRectMake(_searchBar.frame.origin.x + _searchBar.frame.size.width + 10,
+    hdLabel.frame = CGRectMake(7,
                                223,
-                               44,
-                               29);
+                               31,
+                               24);
 
     [self.view addSubview:hdLabel];
     
 
     UILabel *ratingLabel = [[UILabel alloc] init];
     ratingLabel.text = @"TV-MA";
-    ratingLabel.font = [UIFont fontWithName:@"Helvetica-Bold" size:16];
-    [ratingLabel setBackgroundColor:[UIColor blackColor]];
-    ratingLabel.layer.cornerRadius = 5;
-    ratingLabel.layer.masksToBounds = YES;
+    ratingLabel.font = [UIFont fontWithName:@"Helvetica-Bold" size:14];
+    [ratingLabel setBackgroundColor:[UIColor clearColor]];
     [ratingLabel setTextColor:textColor];
     ratingLabel.textAlignment = NSTextAlignmentCenter;
     ratingLabel.frame = CGRectMake(
-                                   hdLabel.frame.origin.x + hdLabel.frame.size.width + 10,
+                                   _searchBar.frame.origin.x + searchBarMinWidth + 10,
                                    223,
                                    64,
                                    29);
     
+
+    
     [self.view addSubview:ratingLabel];
     
-    UILabel *stars = [[UILabel alloc] init];
-    stars.text = @"★★★★★";
-    stars.font = [UIFont fontWithName:@"Helvetica-Bold" size:16];
-    stars.clipsToBounds = YES;
+    float rating = 0.5;
+    UIColor *gold = [UIColor colorWithRed:0.941 green:0.812 blue:0.376 alpha:1]; /*#f0cf60*/
     
+
+    UILabel *stars = [[UILabel alloc] init];
+    UIFont *font = [UIFont fontWithName:@"Helvetica-Bold" size:16];
+    NSDictionary *userAttributes = @{NSFontAttributeName: font,
+                                     NSForegroundColorAttributeName: gold};
+    NSString *text = @"★★★★★";
+    stars.text = text;
+    stars.font = [UIFont fontWithName:@"Helvetica-Bold" size:16];
+    const CGSize textSize = [text sizeWithAttributes: userAttributes];
+    stars.clipsToBounds = YES;
     stars.adjustsFontSizeToFitWidth = NO;
     stars.lineBreakMode = NSLineBreakByClipping;
     stars.layer.masksToBounds = YES;
-    [stars setTextColor:textColor];
+    [stars setTextColor:gold];
     stars.textAlignment = NSTextAlignmentLeft;
     stars.frame = CGRectMake(
-                                   ratingLabel.frame.origin.x + ratingLabel.frame.size.width + 10,
+                                   [[UIScreen mainScreen] bounds].size.width - textSize.width - 10 ,
                                    223,
-                                   36,
+                                   textSize.width * rating,
                                    29);
     
     [self.view addSubview:stars];
@@ -461,7 +468,7 @@
     _searchBar.tag = 1;
     
     CGRect newFrame = _searchBar.frame;
-    newFrame.size.width += 200;
+    newFrame.size.width = searchBarMaxWidth;
     
     [UIView animateWithDuration:0.25
                      animations:^{
@@ -482,7 +489,7 @@
         _searchBar.tag = 2;
         
         CGRect newFrame = _searchBar.frame;
-        newFrame.size.width -= 200;
+        newFrame.size.width = searchBarMinWidth;
         [UIView animateWithDuration:0.50
                          animations:^{
                              _searchBar.frame = newFrame;

@@ -16,6 +16,10 @@
     id classGuide;
     id classClients;
     id classCommands;
+    
+    double searchBarMaxWidth;
+    double searchBarMinWidth;
+    double xOffset;
 }
 
 @property (nonatomic, strong) NSMutableDictionary *channels;
@@ -29,6 +33,8 @@
 @property (nonatomic, strong) IBOutlet UINavigationItem *navItem;
 @property (nonatomic, strong) UISearchController *searchController;
 @property (nonatomic, strong) UISearchBar *searchBar;
+
+
 
 
 @property (nonatomic, strong) UIImageView *boxCover;

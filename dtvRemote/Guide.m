@@ -45,7 +45,7 @@
 
 - (void) refreshGuide {
     
-    NSMutableDictionary *guide = [[NSMutableDictionary alloc] init];
+
     
     if ([[_channels allKeys] count] == 0) {
         return;
@@ -84,6 +84,7 @@
     NSUInteger chunkSize = 50;
     __block int completed = 0;
     __block int total = ceil((double)[[_channels allKeys] count]/chunkSize);
+    __block NSMutableDictionary *guide = [[NSMutableDictionary alloc] init];
     
     NSLog(@"Total Channels: %lu", (unsigned long)[[_channels allKeys] count]);
     NSLog(@"Requests to make: %d", total);
