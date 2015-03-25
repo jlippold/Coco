@@ -10,4 +10,7 @@
 
 @interface Commands : NSObject
 
++ (void)changeChannel:(NSString *)chNum device:(NSMutableDictionary *)device;
++ (void)whatsOnDevice:(NSDictionary *) device;
+
 @end

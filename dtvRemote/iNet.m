@@ -10,13 +10,9 @@
 #include "TargetConditionals.h"
 @import SystemConfiguration.CaptiveNetwork;
 
-@interface iNet ()
-
-@end
-
 @implementation iNet
 
-- (NSString *) getWifiAddress {
++ (NSString *) getWifiAddress {
     
     NSString *address = @"error";
     struct ifaddrs *interfaces = NULL;

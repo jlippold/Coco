@@ -10,13 +10,14 @@
 
 @interface Channels : NSObject
 
-@property (nonatomic, strong) NSOperationQueue *channelImagesQueue;
++ (void)save:(NSMutableDictionary *) channelList;
++ (NSMutableDictionary *)load;
 
-- (id)init;
-- (void)save:(NSMutableDictionary *) channelList;
-- (NSMutableDictionary *)loadChannels;
-- (void) populateChannels:(NSMutableDictionary *)location;
-- (NSString *)getChannelIdForChannelNumber:(NSString *)chNum channels:(NSMutableDictionary *)channels;
++ (void) getLocationsForZipCode:(NSString *)zipCode;
++ (void) populateChannels:(NSMutableDictionary *)location;
++ (void) downloadChannelImages:(NSMutableDictionary *)channelList;
+
++ (NSString *)getChannelIdForChannelNumber:(NSString *)chNum channels:(NSMutableDictionary *)channels;
 + (NSMutableDictionary *) sortChannels:(NSMutableDictionary *)channels sortBy:(NSString *)sort;
 
 @end

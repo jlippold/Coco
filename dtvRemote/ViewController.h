@@ -12,10 +12,6 @@
     NSArray* _mainTableData;
     NSDate* _nextRefresh;
     NSString* _currentProgramId;
-    id classChannels;
-    id classGuide;
-    id classClients;
-    id classCommands;
     
     double searchBarMaxWidth;
     double searchBarMinWidth;

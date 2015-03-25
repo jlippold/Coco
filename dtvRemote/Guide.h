@@ -7,14 +7,20 @@
 //
 
 #import <Foundation/Foundation.h>
+NSDate *guideTime;
 
 @interface Guide : NSObject
 
-@property (nonatomic, strong) NSOperationQueue *whatsPlayingQueue;
-@property (nonatomic, strong) NSMutableDictionary *channels;
-@property (nonatomic, strong) NSDate *guideTime;
-
-- (id)init;
 + (NSDictionary *)getDurationForChannel:(id)guideItem;
+
++ (void) refreshGuide:(NSMutableDictionary *)channels
+               sorted:(NSMutableDictionary *)sortedChannels
+              forTime:(NSDate *)time;
+
++ (NSString *)getJoinedArrayByProp:(NSString *)propS
+                       arrayOffset:(NSInteger)offset
+                         chunkSize:(NSInteger)size
+                          channels:(NSMutableDictionary *)channels
+                    sortedChannels:(NSMutableDictionary *)sortedChannels;
 
 @end

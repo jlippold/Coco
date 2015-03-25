@@ -8,32 +8,9 @@
 
 #import "Channels.h"
 
-@interface Channels ()
-
-@end
-
 @implementation Channels
 
-- (void)dealloc {
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
-}
-
--(id)init {
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageUpdatedZipCodes:)
-                                                 name:@"messageUpdatedZipCodes" object:nil];
-    
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageSelectedLocation:)
-                                                 name:@"messageSelectedLocation" object:nil];
-    
-    _channelImagesQueue = [[NSOperationQueue alloc] init];
-    _channelImagesQueue.name = @"Channel Images Cache";
-    _channelImagesQueue.maxConcurrentOperationCount = 5;
-    
-    return self;
-    
-}
-
-- (void) save:(NSMutableDictionary *) channelList {
++ (void)save:(NSMutableDictionary *) channelList {
     NSString *key = @"channelList";
     NSMutableDictionary *dataDict = [[NSMutableDictionary alloc] init];
     if (channelList != nil) {
@@ -45,7 +22,7 @@
     [NSKeyedArchiver archiveRootObject:dataDict toFile:filePath];
 }
 
-- (NSMutableDictionary *) loadChannels {
++ (NSMutableDictionary *) load {
     NSString *key = @"channelList";
     NSMutableDictionary *channelList = [[NSMutableDictionary alloc] init];
     NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
@@ -63,12 +40,8 @@
     return channelList;
 }
 
-- (void)messageUpdatedZipCodes:(NSNotification *)notification {
-    NSString *zipCode = [notification object];
-    [self getLocationsForZipCode:zipCode];
-}
 
-- (void) getLocationsForZipCode:(NSString *)zipCode {
++ (void) getLocationsForZipCode:(NSString *)zipCode {
     
     //get valid locations for zip code
     NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"https://www.directv.com/json/zipcode/%@", zipCode]];
@@ -103,11 +76,7 @@
     
 }
 
-- (void)messageSelectedLocation:(NSNotification *)notification {
-    NSMutableDictionary *location = [notification object];
-    [self populateChannels:location];
-}
-- (void) populateChannels:(NSMutableDictionary *)location {
++ (void) populateChannels:(NSMutableDictionary *)location {
     NSLog(@"%@",location);
     
     NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:@"https://www.directv.com/guide"]];
@@ -130,48 +99,57 @@
                  NSString *json = [line substringFromIndex:(range.location + searchTerm.length)];
                  NSRange endrange = [json rangeOfString:@"};"];
                  json = [json substringToIndex:endrange.location+1];
-                 [self readJSONFromHTMLBody:json];
+                 
+                 NSMutableDictionary *channelList = [[NSMutableDictionary alloc] init];
+                 
+                 NSDictionary *jsonchannels = [NSJSONSerialization JSONObjectWithData:[json dataUsingEncoding:NSUTF8StringEncoding] options:0 error:NULL];
+                 
+                 if (jsonchannels[@"guideData"]) {
+                     id root = jsonchannels[@"guideData"];
+                     if (root[@"channels"]) {
+                         for (id item in [root objectForKey: @"channels"]) {
+                             NSDictionary *dictionary = @{@"chId" : [item objectForKey:@"chId"],
+                                                          @"chName" : [item objectForKey:@"chName"],
+                                                          @"chCall" : [item objectForKey:@"chCall"],
+                                                          @"chLogoId" : [item objectForKey:@"chLogoId"],
+                                                          @"chNum": [item objectForKey:@"chNum"],
+                                                          @"chHd": [item objectForKey:@"chHd"],
+                                                          @"title": @"Loading..."};
+                             
+                             [channelList setObject:dictionary forKey:[[item objectForKey:@"chId"] stringValue]];
+                         }
+                         
+                     }
+                 }
+                 
+                 
+                 [Channels save:channelList];
+                 
+                 [[NSNotificationCenter defaultCenter] postNotificationName:@"messageDownloadChannelLogos"
+                                                                     object:channelList];
              }
          }
      }];
 }
 
 
-- (void) readJSONFromHTMLBody:(NSString *)text {
-    
-    NSMutableDictionary *channelList = [[NSMutableDictionary alloc] init];
-    
-    NSDictionary *json = [NSJSONSerialization JSONObjectWithData:[text dataUsingEncoding:NSUTF8StringEncoding] options:0 error:NULL];
-    if (json[@"guideData"]) {
-        id root = json[@"guideData"];
-        if (root[@"channels"]) {
-            for (id item in [root objectForKey: @"channels"]) {
-                NSDictionary *dictionary = @{@"chId" : [item objectForKey:@"chId"],
-                                             @"chName" : [item objectForKey:@"chName"],
-                                             @"chCall" : [item objectForKey:@"chCall"],
-                                             @"chLogoId" : [item objectForKey:@"chLogoId"],
-                                             @"chNum": [item objectForKey:@"chNum"],
-                                             @"chHd": [item objectForKey:@"chHd"],
-                                             @"title": @"Loading..."};
-    
-                [channelList setObject:dictionary forKey:[[item objectForKey:@"chId"] stringValue]];
-            }
-            
-        }
-    }
++ (void) readJSONFromHTMLBody:(NSString *)text {
     
     
-    [self save:channelList];
-    [self downloadChannelImages:channelList];
-
+    
     
 }
 
-- (void) downloadChannelImages:(NSMutableDictionary *)channelList {
++ (void) downloadChannelImages:(NSMutableDictionary *)channelList {
     [self clearCaches];
+    
+    NSOperationQueue *channelImagesQueue = [[NSOperationQueue alloc] init];
+    channelImagesQueue.name = @"Channel Images Cache";
+    channelImagesQueue.maxConcurrentOperationCount = 5;
+    
     NSString *cacheDirectory = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) lastObject];
     NSArray *keys = [channelList allKeys];
-
+    
     __block int completed = 0;
     __block int total = (double)[keys count];
     
@@ -183,7 +161,7 @@
         NSString *imagePath =[cacheDirectory stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.png",channelId]];
         
         [NSURLConnection sendAsynchronousRequest:[NSURLRequest requestWithURL:location]
-                                           queue:_channelImagesQueue
+                                           queue:channelImagesQueue
                                completionHandler:^(NSURLResponse *response,
                                                    NSData *data,
                                                    NSError *connectionError)
@@ -204,12 +182,12 @@
              }
              
          }];
-
+        
     }
     
 }
 
-- (void)clearCaches {
++ (void)clearCaches {
     [[NSURLCache sharedURLCache] removeAllCachedResponses];
     NSFileManager *fileManager = [NSFileManager defaultManager];
     NSString *cacheDirectory = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) lastObject];
@@ -219,7 +197,7 @@
     }
 }
 
-- (NSString *)getChannelIdForChannelNumber:(NSString *)chNum channels:(NSMutableDictionary *)channels {
++ (NSString *)getChannelIdForChannelNumber:(NSString *)chNum channels:(NSMutableDictionary *)channels {
     NSString *chan = @"";
     for (NSString *chId in channels) {
         id channel = [channels objectForKey:chId];
@@ -265,7 +243,7 @@
             [sortedChannels[header] setObject:chId forKey:chNum];
         }
     }
-
+    
     
     return sortedChannels;
 }

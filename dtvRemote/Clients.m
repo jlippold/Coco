@@ -11,59 +11,12 @@
 
 @implementation Clients
 
-@synthesize portScanQueue = _portScanQueue;
-
--(id) init {
++ (void)searchWifiForDevices {
     
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(findClients:)
-                                                 name:@"messageFindClients" object:nil];
-    return self;
-}
 
-- (void) dealloc {
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
-}
-
-
-- (void) save:(NSMutableArray *) clients {
-    NSString *key = @"clients";
-    NSMutableDictionary *dataDict = [[NSMutableDictionary alloc] init];
-    if (clients != nil) {
-        [dataDict setObject:clients forKey:key];
-    }
-    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-    NSString *documentsDirectoryPath = [paths objectAtIndex:0];
-    NSString *filePath = [documentsDirectoryPath stringByAppendingPathComponent:key];
-    [NSKeyedArchiver archiveRootObject:dataDict toFile:filePath];
-}
-
-- (NSMutableArray *) loadClients {
-    NSString *key = @"clients";
-    NSMutableArray *clients = [[NSMutableArray alloc] init];
-    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-    NSString *documentsDirectoryPath = [paths objectAtIndex:0];
-    NSString *filePath = [documentsDirectoryPath stringByAppendingPathComponent:key];
-    
-    if ([[NSFileManager defaultManager] fileExistsAtPath:filePath]) {
-        NSData *data = [NSData dataWithContentsOfFile:filePath];
-        NSDictionary *savedData = [NSKeyedUnarchiver unarchiveObjectWithData:data];
-        
-        if ([savedData objectForKey:key] != nil) {
-            clients = [[NSMutableArray alloc] initWithArray:[savedData objectForKey:key] copyItems:YES];
-        }
-    }
-    return clients;
-}
-
-
--(void)findClients:(NSNotification *)notification {
-    
-    iNet* inet = [[iNet alloc] init];
-    NSString *wifiAddress = [inet getWifiAddress];
-    inet = nil;
-    
-    self.portScanQueue = [[NSOperationQueue alloc] init];
-    self.portScanQueue.name = @"Scanner";
+    NSString *wifiAddress = [iNet getWifiAddress];
+    NSOperationQueue *portScanQueue = [[NSOperationQueue alloc] init];
+    portScanQueue.name = @"Scanner";
     
     NSMutableArray *foundClients = [[NSMutableArray alloc] init];
     
@@ -74,11 +27,11 @@
         NSRange range = [wifiAddress rangeOfString:@"." options:NSBackwardsSearch];
         NSString *subnet = [wifiAddress substringToIndex:range.location];
         NSMutableArray *prospectiveClients = [self getCandidates:subnet];
-
+        
         
         total = (int)[prospectiveClients count];
         
-        [self.portScanQueue cancelAllOperations];
+        [portScanQueue cancelAllOperations];
         
         for (NSUInteger i = 0; i < [prospectiveClients count]; i++) {
             NSString *strUrl = [NSString stringWithFormat:@"http://%@:8080/info/getLocations",
@@ -91,7 +44,7 @@
                                                           cachePolicy:1
                                                       timeoutInterval:3];
             
-            [self makeRequest:request queue:self.portScanQueue completionHandler:
+            [self makeRequest:request queue:portScanQueue completionHandler:
              ^(NSURLResponse *response, NSData *data, NSError *connectionError)
              {
                  id client = [prospectiveClients objectAtIndex:i];
@@ -134,7 +87,40 @@
     
 }
 
--(void) sendClients:(NSMutableArray*) clients {
+
++ (void) save:(NSMutableArray *) clients {
+    NSString *key = @"clients";
+    NSMutableDictionary *dataDict = [[NSMutableDictionary alloc] init];
+    if (clients != nil) {
+        [dataDict setObject:clients forKey:key];
+    }
+    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    NSString *documentsDirectoryPath = [paths objectAtIndex:0];
+    NSString *filePath = [documentsDirectoryPath stringByAppendingPathComponent:key];
+    [NSKeyedArchiver archiveRootObject:dataDict toFile:filePath];
+}
+
++ (NSMutableArray *) load {
+    NSString *key = @"clients";
+    NSMutableArray *clients = [[NSMutableArray alloc] init];
+    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    NSString *documentsDirectoryPath = [paths objectAtIndex:0];
+    NSString *filePath = [documentsDirectoryPath stringByAppendingPathComponent:key];
+    
+    if ([[NSFileManager defaultManager] fileExistsAtPath:filePath]) {
+        NSData *data = [NSData dataWithContentsOfFile:filePath];
+        NSDictionary *savedData = [NSKeyedUnarchiver unarchiveObjectWithData:data];
+        
+        if ([savedData objectForKey:key] != nil) {
+            clients = [[NSMutableArray alloc] initWithArray:[savedData objectForKey:key] copyItems:YES];
+        }
+    }
+    return clients;
+}
+
+
+
++ (void) sendClients:(NSMutableArray*) clients {
     
     [self save:clients];
     
@@ -149,7 +135,7 @@
     
 }
 
--(void) makeRequest:(NSURLRequest*)request queue:(NSOperationQueue*)queue completionHandler:(void(^)(NSURLResponse *response, NSData *data, NSError *error))handler
++ (void) makeRequest:(NSURLRequest*)request queue:(NSOperationQueue*)queue completionHandler:(void(^)(NSURLResponse *response, NSData *data, NSError *error))handler
 {
     __block NSURLResponse *response = nil;
     __block NSError *error = nil;
@@ -172,7 +158,7 @@
 
 
 
-- (NSMutableArray *) getCandidates:(NSString *)subnet {
++ (NSMutableArray *) getCandidates:(NSString *)subnet {
     NSMutableArray *range = [[NSMutableArray alloc] init];
     for (NSUInteger i = 1; i < 256; i++) {
         [range addObject:[subnet stringByAppendingString:[NSString stringWithFormat:@".%@",  @(i)]]];

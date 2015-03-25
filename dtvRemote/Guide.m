@@ -11,65 +11,35 @@
 
 @implementation Guide
 
-
--(id) init {
++ (void) refreshGuide:(NSMutableDictionary *)channels sorted:(NSMutableDictionary *)sortedChannels forTime:(NSDate *)time {
     
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageRefreshGuide:)
-                                                 name:@"messageRefreshGuide" object:nil];
+    NSOperationQueue *whatsPlayingQueue = [[NSOperationQueue alloc] init];
+    whatsPlayingQueue.name = @"Whats Playing";
+    whatsPlayingQueue.maxConcurrentOperationCount = 3;
     
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageSetGuideTime:)
-                                                 name:@"messageSetGuideTime" object:nil];
-    
-    
-    _whatsPlayingQueue = [[NSOperationQueue alloc] init];
-    _whatsPlayingQueue.name = @"Whats Playing";
-    _whatsPlayingQueue.maxConcurrentOperationCount = 3;
-    
-
-    return self;
-}
-
-- (void) dealloc {
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
-}
-
-- (void) messageRefreshGuide:(NSNotification *)notification {
-    _channels = [notification object];
-    [self refreshGuide];
-}
-
-- (void) messageSetGuideTime:(NSNotification *)notification {
-    _guideTime = [notification object];
-    [self refreshGuide];
-}
-
-- (void) refreshGuide {
-    
-
-    
-    if ([[_channels allKeys] count] == 0) {
+    if ([[channels allKeys] count] == 0) {
         return;
     }
     
-    [_whatsPlayingQueue cancelAllOperations];
+    [whatsPlayingQueue cancelAllOperations];
     
-
+    
     NSDate *dt = [NSDate date];
-    if (_guideTime != nil) {
-        dt = _guideTime;
+    if (time != nil) {
+        dt = time;
     }
     
     dt = [self getHalfHourIncrement:dt];
     
     [[NSNotificationCenter defaultCenter]
-        postNotificationName:@"messageNextGuideRefreshTime"
-        object:[dt dateByAddingTimeInterval:(30*60)]];
+     postNotificationName:@"messageNextGuideRefreshTime"
+     object:[dt dateByAddingTimeInterval:(30*60)]];
     
     
     NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
     [dateFormatter setDateFormat:@"EEE, dd MMM yyyy HH:mm:ss Z"];
     NSString *localDateString = [dateFormatter stringFromDate:dt];
-
+    
     NSLog(@"DT: %@", localDateString);
     
     //build a base URL for all now playing requests
@@ -81,12 +51,12 @@
     
     
     //Download data in 50 channel chunks
-    NSUInteger chunkSize = 50;
+    NSUInteger chunkSize = 200;
     __block int completed = 0;
-    __block int total = ceil((double)[[_channels allKeys] count]/chunkSize);
+    __block int total = ceil((double)[[channels allKeys] count]/chunkSize);
     __block NSMutableDictionary *guide = [[NSMutableDictionary alloc] init];
     
-    NSLog(@"Total Channels: %lu", (unsigned long)[[_channels allKeys] count]);
+    NSLog(@"Total Channels: %lu", (unsigned long)[[channels allKeys] count]);
     NSLog(@"Requests to make: %d", total);
     
     //add all requests to the queue
@@ -94,9 +64,9 @@
         
         NSInteger offset = i*chunkSize;
         NSString *strUrl = [NSString stringWithFormat:builder,
-                            [self getJoinedArrayByProp:@"chNum" arrayOffset:offset chunkSize:chunkSize],
+                            [self getJoinedArrayByProp:@"chNum" arrayOffset:offset chunkSize:chunkSize channels:channels sortedChannels:sortedChannels],
                             [localDateString stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding],
-                            [self getJoinedArrayByProp:@"chId" arrayOffset:offset chunkSize:chunkSize]
+                            [self getJoinedArrayByProp:@"chId" arrayOffset:offset chunkSize:chunkSize channels:channels sortedChannels:sortedChannels]
                             ];
         
         //NSLog(@"Request #%lu Fired", (unsigned long)i);
@@ -105,19 +75,19 @@
         
         
         [NSURLConnection sendAsynchronousRequest:[NSURLRequest requestWithURL:url]
-                                           queue:_whatsPlayingQueue
+                                           queue:whatsPlayingQueue
                                completionHandler:^(NSURLResponse *response,
                                                    NSData *data,
                                                    NSError *connectionError)
          {
              
              if (data.length > 0 && connectionError == nil) {
-
+                 
                  NSDictionary *json = [NSJSONSerialization JSONObjectWithData:data options:0 error:NULL];
                  
                  for (id channel in [json objectForKey: @"schedule"]) {
                      
-                    
+                     
                      if ( ![[channel objectForKey:@"chId"] isKindOfClass:[NSNumber class]] ) {
                          continue;
                      }
@@ -190,9 +160,9 @@
                      
                      
                  }
-
+                 
              }
-
+             
              completed++;
              
              if (completed >= total) {
@@ -200,9 +170,12 @@
                  [[NSNotificationCenter defaultCenter] postNotificationName:@"messageUpdatedGuide" object:guide];
              } else {
                  long double progress =(completed*1.0/total*1.0);
+                 //NSLog(@"progress %Lf", progress);
                  NSNumber *nsprogress = [NSNumber numberWithDouble:progress];
                  [[NSNotificationCenter defaultCenter] postNotificationName:@"messageUpdatedGuideProgress"
                                                                      object:nsprogress];
+                 [[NSNotificationCenter defaultCenter] postNotificationName:@"messageUpdatedGuidePartial"
+                                                                     object:guide];
              }
              
              
@@ -211,28 +184,41 @@
     }
 }
 
-
-
-- (NSString *)getJoinedArrayByProp:(NSString *)prop arrayOffset:(NSInteger)offset chunkSize:(NSInteger)size  {
++ (NSString *)getJoinedArrayByProp:(NSString *)prop
+                       arrayOffset:(NSInteger)offset
+                         chunkSize:(NSInteger)size
+                          channels:(NSMutableDictionary *)channels
+                    sortedChannels:(NSMutableDictionary *)sortedChannels {
     //returns a csv list of some property in _channels for url building
     NSMutableArray *outArray = [[NSMutableArray alloc] init];
     
-    NSArray *keys = [_channels allKeys];
-    NSUInteger totalPossible = [keys count];
+    NSUInteger overallCounter = 0;
     
-    for (NSUInteger i = offset; i < totalPossible; i++) {
-        id key = [keys objectAtIndex: i];
-        id item = _channels[key];
-        if (i <= (offset + size)) {
-            [outArray addObject:[item[prop] stringValue]];
+    NSArray *sections = [[sortedChannels allKeys] sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
+    
+    for (NSUInteger x = 0; x < [sections count]; x++) {
+        
+        NSString *sectionKey = [sections objectAtIndex:x];
+        NSMutableDictionary *sectionData = [sortedChannels objectForKey:sectionKey];
+        NSArray *sectionChannels = [[sectionData allKeys] sortedArrayUsingSelector: @selector(compare:)];
+        
+        for (NSUInteger y = 0; y < [sectionChannels count]; y++) {
+            
+            id sectionChannelKey = [sectionChannels objectAtIndex:y];
+            id chId = [[sectionData objectForKey:sectionChannelKey] stringValue];
+            NSDictionary *channel = channels[chId];
+            if (overallCounter <= (offset + size)) {
+                [outArray addObject:[channel[prop] stringValue]];
+            }
+            overallCounter++;
         }
     }
     
     return [outArray componentsJoinedByString:@","];
 }
 
-- (NSDate *)getHalfHourIncrement:(NSDate *)date {
-
++ (NSDate *)getHalfHourIncrement:(NSDate *)date {
+    
     NSCalendar *calendar = [NSCalendar currentCalendar];
     [calendar setTimeZone:[NSTimeZone localTimeZone]];
     NSDateComponents *components = [calendar componentsInTimeZone:[NSTimeZone localTimeZone] fromDate:date];
@@ -249,7 +235,7 @@
     
 }
 
-- (BOOL)isNowPlaying:(NSDate *)startDate duration:(NSInteger)duration {
++ (BOOL)isNowPlaying:(NSDate *)startDate duration:(NSInteger)duration {
     NSDateFormatter* dateFormatter = [[NSDateFormatter alloc] init];
     NSDate *endDate = [startDate dateByAddingTimeInterval:duration*60];
     [dateFormatter setTimeZone:[NSTimeZone defaultTimeZone]];
@@ -267,7 +253,7 @@
     NSTimeInterval duration = [ends timeIntervalSinceDate:starts];
     NSTimeInterval elasped = [now timeIntervalSinceDate:starts];
     double percentage = (elasped/duration)*100;
-
+    
     
     NSCalendar *calendar = [NSCalendar currentCalendar];
     [calendar setTimeZone:[NSTimeZone localTimeZone]];
