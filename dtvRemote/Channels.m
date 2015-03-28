@@ -113,8 +113,7 @@
                                                           @"chCall" : [item objectForKey:@"chCall"],
                                                           @"chLogoId" : [item objectForKey:@"chLogoId"],
                                                           @"chNum": [item objectForKey:@"chNum"],
-                                                          @"chHd": [item objectForKey:@"chHd"],
-                                                          @"title": @"Loading..."};
+                                                          @"chHd": [item objectForKey:@"chHd"]};
                              
                              [channelList setObject:dictionary forKey:[[item objectForKey:@"chId"] stringValue]];
                          }

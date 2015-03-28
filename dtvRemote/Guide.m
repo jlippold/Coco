@@ -87,7 +87,7 @@
     NSString *builder = @"https://www.directv.com/json/channelschedule";
     builder = [builder stringByAppendingString:@"?channels=%@"];
     builder = [builder stringByAppendingString:@"&startTime=%@"];
-    builder = [builder stringByAppendingString:@"&hours=1"];
+    builder = [builder stringByAppendingString:@"&hours=4"];
     builder = [builder stringByAppendingString:@"&chIds=%@"];
     
     
@@ -257,10 +257,13 @@
 }
 
 + (BOOL)isNowPlaying:(NSDate *)startDate duration:(NSInteger)duration {
-    NSDateFormatter* dateFormatter = [[NSDateFormatter alloc] init];
-    NSDate *endDate = [startDate dateByAddingTimeInterval:duration*60];
-    [dateFormatter setTimeZone:[NSTimeZone defaultTimeZone]];
+//    NSDateFormatter* dateFormatter = [[NSDateFormatter alloc] init];
+ //   [dateFormatter setTimeZone:[NSTimeZone defaultTimeZone]];
     NSDate *now = [[NSDate alloc] init];
+    if ([startDate timeIntervalSinceDate:now] > 0) {
+        return NO;
+    }
+    NSDate *endDate = [startDate dateByAddingTimeInterval:duration*60];
     return ([endDate timeIntervalSinceDate:now] > 0);
 }
 
