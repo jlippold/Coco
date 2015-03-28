@@ -132,14 +132,6 @@
      }];
 }
 
-
-+ (void) readJSONFromHTMLBody:(NSString *)text {
-    
-    
-    
-    
-}
-
 + (void) downloadChannelImages:(NSMutableDictionary *)channelList {
     [self clearCaches];
     

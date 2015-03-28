@@ -13,21 +13,20 @@
 
 + (void)searchWifiForDevices {
     
-
     NSString *wifiAddress = [iNet getWifiAddress];
+    __block NSMutableDictionary *clients = [Clients loadClientList];
+    
     NSOperationQueue *portScanQueue = [[NSOperationQueue alloc] init];
     portScanQueue.name = @"Scanner";
-    
-    NSMutableArray *foundClients = [[NSMutableArray alloc] init];
-    
+
     __block int completed = 0;
     __block int total = 0;
     
     if ([wifiAddress containsString:@"."]) {
         NSRange range = [wifiAddress rangeOfString:@"." options:NSBackwardsSearch];
+        NSString *ssid = [iNet fetchSSID];
         NSString *subnet = [wifiAddress substringToIndex:range.location];
         NSMutableArray *prospectiveClients = [self getCandidates:subnet];
-        
         
         total = (int)[prospectiveClients count];
         
@@ -57,13 +56,23 @@
                                  appendage = [NSString stringWithFormat:@"clientAddr=%@",
                                               [item objectForKey:@"clientAddr"]];
                              }
+                             NSString *clientId = [NSString stringWithFormat:@"%@-%@", [item objectForKey:@"locationName"], [item objectForKey:@"clientAddr"]];
                              
-                             NSDictionary *clientInfo = @{@"address" : client,
+                             
+                             NSMutableDictionary *clientInfo = @{@"id" : clientId,
+                                                          @"address" : client,
                                                           @"url": [NSString stringWithFormat:@"http://%@:8080/", client],
                                                           @"name" : [item objectForKey:@"locationName"],
                                                           @"appendage": appendage};
                              
-                             [foundClients addObject:clientInfo];
+                             if (!clients[ssid]) {
+                                 NSMutableDictionary *newClient = [[NSMutableDictionary alloc] init];
+                                 [clients setObject:newClient forKey:ssid];
+                             }
+                             
+                             if (!clients[ssid][clientId]) {
+                                 [clients[ssid] setObject:clientInfo forKey:clientId];
+                             }
                          }
                          
                      }
@@ -71,7 +80,7 @@
                  
                  completed++;
                  if (completed == total){
-                     [self sendClients:foundClients];
+                     [self sendClients:clients];
                      NSLog(@"Completed Scanning");
                  } else {
                      long double progress =(completed*1.0/total*1.0);
@@ -82,13 +91,13 @@
              }];
         }
     } else {
-        [self sendClients:foundClients];
+        [self sendClients:clients];
     }
     
 }
 
 
-+ (void) save:(NSMutableArray *) clients {
++ (void) saveClientList:(NSMutableDictionary *) clients {
     NSString *key = @"clients";
     NSMutableDictionary *dataDict = [[NSMutableDictionary alloc] init];
     if (clients != nil) {
@@ -100,9 +109,9 @@
     [NSKeyedArchiver archiveRootObject:dataDict toFile:filePath];
 }
 
-+ (NSMutableArray *) load {
++ (NSMutableDictionary *) loadClientList {
     NSString *key = @"clients";
-    NSMutableArray *clients = [[NSMutableArray alloc] init];
+    NSMutableDictionary *clients = [[NSMutableDictionary alloc] init];
     NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
     NSString *documentsDirectoryPath = [paths objectAtIndex:0];
     NSString *filePath = [documentsDirectoryPath stringByAppendingPathComponent:key];
@@ -112,7 +121,7 @@
         NSDictionary *savedData = [NSKeyedUnarchiver unarchiveObjectWithData:data];
         
         if ([savedData objectForKey:key] != nil) {
-            clients = [[NSMutableArray alloc] initWithArray:[savedData objectForKey:key] copyItems:YES];
+            clients = [[NSMutableDictionary alloc] initWithDictionary:[savedData objectForKey:key] copyItems:YES];
         }
     }
     return clients;
@@ -120,13 +129,11 @@
 
 
 
-+ (void) sendClients:(NSMutableArray*) clients {
++ (void) sendClients:(NSMutableDictionary *) clients {
     
-    [self save:clients];
+    [self saveClientList:clients];
     
-    iNet* inet = [[iNet alloc] init];
-    NSString *ssid = [inet fetchSSID];
-    inet = nil;
+    NSString *ssid = [iNet fetchSSID];
     
     NSMutableDictionary *netClients = [[NSMutableDictionary alloc] init];
     [netClients setObject:clients forKey:ssid];
@@ -135,7 +142,8 @@
     
 }
 
-+ (void) makeRequest:(NSURLRequest*)request queue:(NSOperationQueue*)queue completionHandler:(void(^)(NSURLResponse *response, NSData *data, NSError *error))handler
++ (void) makeRequest:(NSURLRequest*)request queue:(NSOperationQueue*)queue
+   completionHandler:(void(^)(NSURLResponse *response, NSData *data, NSError *error))handler
 {
     __block NSURLResponse *response = nil;
     __block NSError *error = nil;
@@ -166,4 +174,51 @@
     return range;
 }
 
++ (NSDictionary *) getClient {
+    
+    NSMutableDictionary *clients = self.loadClientList;
+    NSString *ssid = [iNet fetchSSID];
+    NSString *clientId = self.getClientId;
+    
+    if (!clients[ssid] || [clientId isEqualToString:@""]) {
+        return nil;
+    }
+    
+    if (clients[ssid][clientId]) {
+        return clients[ssid][clientId];
+    } else {
+        return nil;
+    }
+}
+
++ (NSString *) getClientId {
+    NSString *key = @"clientId";
+    NSString *clientId = @"";
+    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    NSString *documentsDirectoryPath = [paths objectAtIndex:0];
+    NSString *filePath = [documentsDirectoryPath stringByAppendingPathComponent:key];
+    
+    if ([[NSFileManager defaultManager] fileExistsAtPath:filePath]) {
+        NSData *data = [NSData dataWithContentsOfFile:filePath];
+        NSDictionary *savedData = [NSKeyedUnarchiver unarchiveObjectWithData:data];
+        
+        if ([savedData objectForKey:key] != nil) {
+            clientId = [savedData objectForKey:key];
+        }
+    }
+    
+    return  clientId;
+}
+
++ (void) setCurrentClientId:(NSString *)clientId {
+    NSString *key = @"clientId";
+    NSMutableDictionary *dataDict = [[NSMutableDictionary alloc] init];
+    if (clientId != nil) {
+        [dataDict setObject:clientId forKey:key];
+    }
+    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    NSString *documentsDirectoryPath = [paths objectAtIndex:0];
+    NSString *filePath = [documentsDirectoryPath stringByAppendingPathComponent:key];
+    [NSKeyedArchiver archiveRootObject:dataDict toFile:filePath];
+}
 @end

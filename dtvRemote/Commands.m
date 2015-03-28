@@ -10,11 +10,11 @@
 
 @implementation Commands
 
-+ (void)changeChannel:(NSString *)chNum device:(NSMutableDictionary *)device  {
-    NSLog(@"%@ set to channel %@", device, chNum);
++ (void)changeChannel:(NSString *)chNum device:(NSMutableDictionary *)client  {
+    NSLog(@"%@ set to channel %@", client, chNum);
     NSURL *url = [NSURL URLWithString:
                   [NSString stringWithFormat:@"http://%@:8080/tv/tune?major=%@&%@",
-                   device[@"address"], chNum, device[@"appendage"] ]];
+                   client[@"address"], chNum, client[@"appendage"] ]];
     [NSURLConnection sendAsynchronousRequest:[NSURLRequest requestWithURL:url]
                                        queue:[NSOperationQueue mainQueue]
                            completionHandler:^(NSURLResponse *response,
@@ -36,11 +36,11 @@
      }];
 }
 
-+ (void)whatsOnDevice:(NSDictionary *) device {
++ (void)whatsOnDevice:(NSDictionary *) client {
     
     NSURL *url = [NSURL URLWithString:
                   [NSString stringWithFormat:@"http://%@:8080/tv/getTuned?%@",
-                   device[@"address"], device[@"appendage"] ]];
+                   client[@"address"], client[@"appendage"] ]];
     [NSURLConnection sendAsynchronousRequest:[NSURLRequest requestWithURL:url]
                                        queue:[NSOperationQueue mainQueue]
                            completionHandler:^(NSURLResponse *response,

@@ -20,17 +20,17 @@
 
 @property (nonatomic, strong) NSMutableDictionary *channels;
 @property (nonatomic, strong) NSMutableDictionary *sortedChannels;
-@property (nonatomic, strong) NSMutableDictionary *currentClient;
 @property (nonatomic, strong) NSMutableDictionary *guide;
-@property (nonatomic, strong) NSMutableArray *clients;
+@property (nonatomic, strong) NSMutableDictionary *clients;
+@property (nonatomic, strong) NSDictionary *currentClient;
+@property (nonatomic, strong) NSString *ssid;
+
 
 @property (nonatomic, strong) UITableView *mainTableView;
 @property (nonatomic, strong) IBOutlet UINavigationBar *navbar;
 @property (nonatomic, strong) IBOutlet UINavigationItem *navItem;
 @property (nonatomic, strong) UISearchController *searchController;
 @property (nonatomic, strong) UISearchBar *searchBar;
-
-
 
 
 @property (nonatomic, strong) UIImageView *boxCover;
@@ -49,6 +49,7 @@
 
 
 @property (nonatomic, strong) NSTimer *timer;
+@property (nonatomic, strong) NSTimer *ssidTimer;
 
 @end
 

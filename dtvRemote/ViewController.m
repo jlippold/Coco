@@ -45,11 +45,15 @@
     _channels = [Channels load];
     _guide = [[NSMutableDictionary alloc] init];
     _sortedChannels = [[NSMutableDictionary alloc] init];
-    _clients = [Clients load];
-    _currentClient = [[NSMutableDictionary alloc] init];
+
+    _ssid = [iNet getWifiAddress];
+    _clients = [Clients loadClientList];
+    _currentClient = [Clients getClient];
+    [self displayClient];
+    
+    _ssidTimer = [[NSTimer alloc] init];
     
     _timer = [[NSTimer alloc] init];
-    
     
     xOffset = 140;
     searchBarMinWidth = 74;
@@ -90,9 +94,6 @@
     
     [self createMainView];
     
-    if ([_clients count] > 0) {
-        [self selectClient:(int)0];
-    }
     
     if ([[_channels allKeys] count] == 0) {
         dispatch_after(0, dispatch_get_main_queue(), ^{
@@ -104,23 +105,31 @@
     }
     
     
-    
-    
     _timer = [NSTimer scheduledTimerWithTimeInterval:60.0
                                               target:self
                                             selector:@selector(onTimerFire:)
                                             userInfo:nil
                                              repeats:YES];
+    
+   _ssidTimer = [NSTimer scheduledTimerWithTimeInterval:3.0
+                                                 target:self
+                                               selector:@selector(fetchSSID:)
+                                               userInfo:nil
+                                                repeats:YES];
     [_timer fire];
+    [_ssidTimer fire];
 }
 
 -(void) onTimerFire:(id)sender {
-    NSLog(@"fired");
     [self refreshNowPlaying:nil];
     
     if( [[NSDate date] timeIntervalSinceDate:_nextRefresh] >= 0 ) {
         [self refreshGuide];
     }
+}
+
+-(void) fetchSSID:(id)sender {
+    self.ssid = [iNet fetchSSID];
 }
 
 -(UIStatusBarStyle)preferredStatusBarStyle{
@@ -646,7 +655,7 @@
     id sectionChannelKey = [sectionChannels objectAtIndex:indexPath.row];
     id chId = [[sectionData objectForKey:sectionChannelKey] stringValue];
     
-    [Commands changeChannel:_channels[chId] device:_currentClient];
+    [Commands changeChannel:_channels[chId][@"chNum"] device:_currentClient];
     
     
 }
@@ -767,7 +776,7 @@
 
 - (IBAction) chooseClient:(id)sender {
     
-    if ([_clients count] == 0) {
+    if ([[_clients[self.ssid] allKeys] count] == 0) {
         MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
         hud.mode = MBProgressHUDModeAnnularDeterminate;
         hud.labelText = @"Scanning wifi network for devices...";
@@ -801,11 +810,21 @@
                                message:@"Choose a device"
                                preferredStyle:UIAlertControllerStyleActionSheet];
     
-    for (NSUInteger i = 0; i < [_clients count]; i++) {
-        id item = [_clients objectAtIndex: i];
-        UIAlertAction *action = [UIAlertAction actionWithTitle: item[@"name"] style: UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
+    
+    
+    
+    for (NSString *key in [_clients objectForKey:self.ssid] ) {
+        
+        NSLog(@"%@", key);
+        NSDictionary *client = _clients[self.ssid][key];
+        
+        //id item = [_clients[self.ssid] objectAtIndex: i];
+        UIAlertAction *action = [UIAlertAction actionWithTitle: client[@"name"] style: UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
             
-            [self selectClient:(int)i];
+            [Clients setCurrentClientId:client[@"id"]];
+            _currentClient = [Clients getClient];
+            [self displayClient];
+            
             [view dismissViewControllerAnimated:YES completion:nil];
         }];
         [view addAction:action];
@@ -830,19 +849,18 @@
     [vc presentViewController:view animated:YES completion:nil];
 }
 
-- (void) selectClient:(int)index {
-    if ([_clients count] > 0) {
-        _currentClient = [_clients objectAtIndex:index];
+- (void) displayClient {
+    if (_currentClient) {
         _navItem.title = _currentClient[@"name"];
+        [self refreshNowPlaying:nil];
     } else {
-        [_currentClient removeAllObjects];
         _navItem.title = @"";
+        [self clearNowPlaying];
     }
-    [self refreshNowPlaying:nil];
 }
 
 - (void) refreshNowPlaying:(id)sender {
-    if ([_clients count] > 0 && [[_currentClient allKeys] count] > 0) {
+    if (_currentClient) {
         [Commands whatsOnDevice:_currentClient];
     }
 }

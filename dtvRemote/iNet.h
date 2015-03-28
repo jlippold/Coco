@@ -16,6 +16,6 @@
 }
 
 + (NSString *) getWifiAddress;
-- (NSString *)fetchSSID;
++ (NSString *) fetchSSID;
 
 @end

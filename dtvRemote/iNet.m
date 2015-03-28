@@ -48,9 +48,8 @@
     return address;
 }
 
-- (NSString *)fetchSSID {
++ (NSString *)fetchSSID {
     NSArray *ifs = (__bridge_transfer NSArray *)CNCopySupportedInterfaces();
-    NSLog(@"Supported interfaces: %@", ifs);
     NSDictionary *info;
     for (NSString *ifnam in ifs) {
         info = (__bridge_transfer NSDictionary *)CNCopyCurrentNetworkInfo((__bridge CFStringRef)ifnam);

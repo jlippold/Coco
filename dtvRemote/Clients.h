@@ -11,6 +11,9 @@
 @interface Clients : NSObject
 
 + (void)searchWifiForDevices;
-+ (NSMutableArray *) load;
++ (NSMutableDictionary *) loadClientList;
+
++ (NSDictionary *) getClient;
++ (void) setCurrentClientId:(NSString *)clientId;
 
 @end
