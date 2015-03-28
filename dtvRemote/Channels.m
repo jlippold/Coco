@@ -10,6 +10,7 @@
 
 @implementation Channels
 
+
 + (void)save:(NSMutableDictionary *) channelList {
     NSString *key = @"channelList";
     NSMutableDictionary *dataDict = [[NSMutableDictionary alloc] init];
@@ -39,7 +40,6 @@
     }
     return channelList;
 }
-
 
 + (void) getLocationsForZipCode:(NSString *)zipCode {
     
@@ -85,6 +85,8 @@
                         location[@"state"], location[@"zipCode"],
                         [location[@"timeZone"] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
     
+    [self saveDTVCookie:cookie];
+    
     [mutableRequest addValue:cookie forHTTPHeaderField:@"Cookie"];
     
     request = [mutableRequest copy];
@@ -107,15 +109,34 @@
                  if (jsonchannels[@"guideData"]) {
                      id root = jsonchannels[@"guideData"];
                      if (root[@"channels"]) {
+                         
+                         NSMutableDictionary *deDuplicate = [[NSMutableDictionary alloc] init];
+                         
                          for (id item in [root objectForKey: @"channels"]) {
-                             NSDictionary *dictionary = @{@"chId" : [item objectForKey:@"chId"],
-                                                          @"chName" : [item objectForKey:@"chName"],
-                                                          @"chCall" : [item objectForKey:@"chCall"],
-                                                          @"chLogoId" : [item objectForKey:@"chLogoId"],
-                                                          @"chNum": [item objectForKey:@"chNum"],
-                                                          @"chHd": [item objectForKey:@"chHd"]};
                              
-                             [channelList setObject:dictionary forKey:[[item objectForKey:@"chId"] stringValue]];
+                             id chId = [item objectForKey:@"chId"];
+                             id chNum = [item objectForKey:@"chNum"];
+                             
+                             if (deDuplicate[chNum]) {
+                                 //the channel has already been added
+                                 if ([[[item objectForKey:@"chHd"] stringValue] isEqualToString:@"1"]) {
+                                     //and new channel is in HD, overwrite the old with the new
+                                     [deDuplicate setObject:chId forKey:chNum];
+                                 }
+                             } else {
+                                 //new channel
+                                 [deDuplicate setObject:chId forKey:chNum];
+                             }
+                             
+                             NSDictionary *channel = @{@"chId" : deDuplicate[chNum],
+                                                       @"chName" : [item objectForKey:@"chName"],
+                                                       @"chCall" : [item objectForKey:@"chCall"],
+                                                       @"chLogoId" : [item objectForKey:@"chLogoId"],
+                                                       @"chNum": [item objectForKey:@"chNum"],
+                                                       @"chHd": [item objectForKey:@"chHd"]};
+                             
+                             [channelList setObject:[channel mutableCopy] forKey:[deDuplicate[chNum] stringValue]];
+
                          }
                          
                      }
@@ -238,4 +259,38 @@
     
     return sortedChannels;
 }
+
++ (NSString *) DTVCookie {
+
+    NSString *cookie = @"";
+    
+    NSString *key = @"saveDTVCookie";
+    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    NSString *documentsDirectoryPath = [paths objectAtIndex:0];
+    NSString *filePath = [documentsDirectoryPath stringByAppendingPathComponent:key];
+    
+    if ([[NSFileManager defaultManager] fileExistsAtPath:filePath]) {
+        NSData *data = [NSData dataWithContentsOfFile:filePath];
+        NSDictionary *savedData = [NSKeyedUnarchiver unarchiveObjectWithData:data];
+        
+        if ([savedData objectForKey:key] != nil) {
+            cookie = [savedData objectForKey:key];
+        }
+    }
+    return cookie;
+}
+
++ (void)saveDTVCookie:(NSString *) channelList {
+    NSString *key = @"saveDTVCookie";
+    NSMutableDictionary *dataDict = [[NSMutableDictionary alloc] init];
+    if (channelList != nil) {
+        [dataDict setObject:channelList forKey:key];
+    }
+    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    NSString *documentsDirectoryPath = [paths objectAtIndex:0];
+    NSString *filePath = [documentsDirectoryPath stringByAppendingPathComponent:key];
+    [NSKeyedArchiver archiveRootObject:dataDict toFile:filePath];
+}
+
+
 @end

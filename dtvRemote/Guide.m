@@ -7,13 +7,13 @@
 //
 
 #import "Guide.h"
+#import "Channels.h"
+
 #include <math.h>
 
 @implementation Guide
 
 + (void) refreshGuide:(NSMutableDictionary *)channels sorted:(NSMutableDictionary *)sortedChannels forTime:(NSDate *)time {
-    NSLog(@"Rfreshing guide");
-    //this needs to use gcd when called, now sync
     
     if ([[channels allKeys] count] == 0) {
         return;
@@ -96,7 +96,14 @@
 
     NSURLResponse* response;
     NSError *connectionError;
-    NSData* data = [NSURLConnection sendSynchronousRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:strUrl]]
+    
+    NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:strUrl]];
+    NSMutableURLRequest *mutableRequest = [request mutableCopy];
+    NSString *cookie = [Channels DTVCookie];
+    [mutableRequest addValue:cookie forHTTPHeaderField:@"Cookie"];
+    request = [mutableRequest copy];
+    
+    NSData* data = [NSURLConnection sendSynchronousRequest:request
                                          returningResponse:&response error:&connectionError];
     
     NSMutableDictionary *results = [[NSMutableDictionary alloc] init];
@@ -104,7 +111,7 @@
     if (data.length > 0 && connectionError == nil) {
         
         NSDictionary *json = [NSJSONSerialization JSONObjectWithData:data options:0 error:NULL];
-        
+
         NSMutableDictionary *deDuplicate = [[NSMutableDictionary alloc] init];
         
         for (id channel in [json objectForKey: @"schedule"]) {
@@ -133,7 +140,7 @@
                     
                     if (deDuplicate[chNum]) {
                         //the channel has already been added
-                        if ([[[channel objectForKey:@"chHd"] stringValue] isEqualToString:@"true"]) {
+                        if ([[[channel objectForKey:@"chHd"] stringValue] isEqualToString:@"1"]) {
                             //and new channel is in HD, overwrite the old with the new
                             [deDuplicate setObject:chId forKey:chNum];
                         }

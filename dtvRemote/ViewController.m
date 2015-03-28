@@ -598,7 +598,6 @@
     NSDictionary *channel = _channels[chId];
     NSDictionary *guideItem = [_guide objectForKey:chId];
     
-    
     cell.accessoryView = [[UIImageView alloc] initWithImage:[UIImage new]];
     
     NSString *timeLeft= @"";
@@ -930,7 +929,6 @@
     int rowCounter = 0;
     
     NSArray *sections = [[_sortedChannels allKeys] sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
-    NSLog(@"%@",_sortedChannels);
     for (NSString *sectionKey in sections) {
         NSMutableDictionary *sectionData = [_sortedChannels objectForKey:sectionKey];
         NSArray *sectionChannels = [[sectionData allKeys] sortedArrayUsingSelector: @selector(compare:)];

@@ -19,5 +19,6 @@
 
 + (NSString *)getChannelIdForChannelNumber:(NSString *)chNum channels:(NSMutableDictionary *)channels;
 + (NSMutableDictionary *) sortChannels:(NSMutableDictionary *)channels sortBy:(NSString *)sort;
++ (NSString *) DTVCookie;
 
 @end
