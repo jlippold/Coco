@@ -42,7 +42,8 @@
     _nextRefresh = [NSDate date];
     _currentProgramId = @"";
     
-    _channels = [Channels load];
+    _channels = [Channels load:NO];
+
     _guide = [[NSMutableDictionary alloc] init];
     _sortedChannels = [[NSMutableDictionary alloc] init];
 
@@ -619,6 +620,7 @@
     
     UILabel *l2 = (UILabel *)[cell viewWithTag:1];
     l2.text =  [NSString stringWithFormat:@"%04d\n%@", [[channel objectForKey:@"chNum"] intValue], timeLeft];
+    //l2.text =  [NSString stringWithFormat:@"%@\n%@", [channel objectForKey:@"chCall"] , timeLeft];
     if (showIsEndingSoon){
         l2.textColor = red;
     } else {

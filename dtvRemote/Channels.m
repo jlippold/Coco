@@ -23,7 +23,7 @@
     [NSKeyedArchiver archiveRootObject:dataDict toFile:filePath];
 }
 
-+ (NSMutableDictionary *) load {
++ (NSMutableDictionary *) load:(BOOL)showBlocks {
     NSString *key = @"channelList";
     NSMutableDictionary *channelList = [[NSMutableDictionary alloc] init];
     NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
@@ -38,7 +38,54 @@
             channelList = [[NSMutableDictionary alloc] initWithDictionary:[savedData objectForKey:key]];
         }
     }
+    
+    //remove blocks
+    if (!showBlocks) {
+        NSMutableArray *blocks = [self getUserBlockedChannels:channelList];
+        for (id block in blocks) {
+            [channelList removeObjectForKey:block];
+        }
+        NSLog(@"Removed: %lu", (unsigned long)[blocks count]);
+    }
+    
     return channelList;
+}
+
++ (NSMutableArray *) getUserBlockedChannels:(NSMutableDictionary *)channelList {
+    NSString *key = @"blockedChannels";
+    NSMutableArray *blocks = [[NSMutableArray alloc] init];
+    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    NSString *documentsDirectoryPath = [paths objectAtIndex:0];
+    NSString *filePath = [documentsDirectoryPath stringByAppendingPathComponent:key];
+    
+    if ([[NSFileManager defaultManager] fileExistsAtPath:filePath]) {
+        NSData *data = [NSData dataWithContentsOfFile:filePath];
+        NSDictionary *savedData = [NSKeyedUnarchiver unarchiveObjectWithData:data];
+        
+        if ([savedData objectForKey:key] != nil) {
+            blocks = [[NSMutableArray alloc] initWithArray:[savedData objectForKey:key] copyItems:YES];
+        }
+    }
+    
+    if ([blocks count] == 0) {
+        //load some defaults
+        NSArray *blockCallSigns = [NSArray arrayWithObjects:
+                                   @"CINE", @"CINEHD", @"SONIC", @"PPV", @"DTV",
+                                   @"BSN", @"NHL", @"MLS", @"PPVHD", @"IACHD",
+                                   @"CINE1", @"CINE2", @"CINE3", @"IDEA", @"BEST",
+                                   @"MALL", @"SALE", @"NEW", @"AAN", @"EPL",
+                                   @"UEFA", @"RGBY", @"EPL", @"MAS", @"NBA", @"PTNW", @"ACT", nil];
+        
+        for (id key in channelList) {
+            id channel = [channelList objectForKey:key];
+            if ([channel[@"chAdult"] intValue] == 1 || [blockCallSigns containsObject:channel[@"chCall"]]) {
+                [blocks addObject:[channel[@"chId"] stringValue]];
+            }
+
+        }
+    }
+    return blocks;
+    
 }
 
 + (void) getLocationsForZipCode:(NSString *)zipCode {
@@ -133,7 +180,8 @@
                                                        @"chCall" : [item objectForKey:@"chCall"],
                                                        @"chLogoId" : [item objectForKey:@"chLogoId"],
                                                        @"chNum": [item objectForKey:@"chNum"],
-                                                       @"chHd": [item objectForKey:@"chHd"]};
+                                                       @"chHd": [item objectForKey:@"chHd"],
+                                                       @"chAdult": [item objectForKey:@"chAdult"]};
                              
                              [channelList setObject:[channel mutableCopy] forKey:[deDuplicate[chNum] stringValue]];
 

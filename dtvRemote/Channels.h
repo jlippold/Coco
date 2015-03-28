@@ -11,7 +11,7 @@
 @interface Channels : NSObject
 
 + (void)save:(NSMutableDictionary *) channelList;
-+ (NSMutableDictionary *)load;
++ (NSMutableDictionary *) load:(BOOL)showBlocks;
 
 + (void) getLocationsForZipCode:(NSString *)zipCode;
 + (void) populateChannels:(NSMutableDictionary *)location;
