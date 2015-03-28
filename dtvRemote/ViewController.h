@@ -12,10 +12,13 @@
     NSArray* _mainTableData;
     NSDate* _nextRefresh;
     NSString* _currentProgramId;
-    
+
     double searchBarMaxWidth;
     double searchBarMinWidth;
     double xOffset;
+    
+    BOOL guideIsRefreshing;
+    
 }
 
 @property (nonatomic, strong) NSMutableDictionary *channels;

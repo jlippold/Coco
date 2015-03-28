@@ -49,7 +49,6 @@
     _ssid = [iNet getWifiAddress];
     _clients = [Clients loadClientList];
     _currentClient = [Clients getClient];
-    [self displayClient];
     
     _ssidTimer = [[NSTimer alloc] init];
     
@@ -60,11 +59,55 @@
     searchBarMaxWidth = [[UIScreen mainScreen] bounds].size.width - xOffset;
     
     
+    [self registerForNotifications];
+    [self createMainView];
+    
+    
+    if ([[_channels allKeys] count] == 0) { //run initial setup
+        dispatch_after(0, dispatch_get_main_queue(), ^{
+            [self promptForZipCode];
+        });
+    } else {
+        _sortedChannels = [Channels sortChannels:_channels sortBy:@"number"];
+        [self refreshGuide];
+    }
+    
+    
+    if ([[_currentClient allKeys] count] != 0) {
+        [self refreshNowPlaying:nil scrollToPlayingChanel:YES];
+    }
+
+
+    _timer = [NSTimer scheduledTimerWithTimeInterval:60.0
+                                              target:self
+                                            selector:@selector(onTimerFire:)
+                                            userInfo:nil
+                                             repeats:YES];
+    
+   _ssidTimer = [NSTimer scheduledTimerWithTimeInterval:3.0
+                                                 target:self
+                                               selector:@selector(fetchSSID:)
+                                               userInfo:nil
+                                                repeats:YES];
+    //[_timer fire];
+    //[_ssidTimer fire];
+}
+
+-(void) onTimerFire:(id)sender {
+    [self refreshNowPlaying:nil scrollToPlayingChanel:NO];
+    
+    if( [[NSDate date] timeIntervalSinceDate:_nextRefresh] >= 0 ) {
+        [self refreshGuide];
+    }
+}
+
+- (void) registerForNotifications {
+    
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageUpdatedClients:)
                                                  name:@"messageUpdatedClients" object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageUpdatedClientsProgress:)
                                                  name:@"messageUpdatedClientsProgress" object:nil];
-
+    
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageDownloadChannelLogos:)
                                                  name:@"messageDownloadChannelLogos" object:nil];
     
@@ -86,50 +129,17 @@
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageUpdatedLocations:)
                                                  name:@"messageUpdatedLocations" object:nil];
     
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageUpdatedNowPlaying:)
-                                                 name:@"messageUpdatedNowPlaying" object:nil];
-    
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageChannelChanged:)
                                                  name:@"messageChannelChanged" object:nil];
     
-    [self createMainView];
-    
-    
-    if ([[_channels allKeys] count] == 0) {
-        dispatch_after(0, dispatch_get_main_queue(), ^{
-            [self promptForZipCode];
-        });
-    } else {
-        _sortedChannels = [Channels sortChannels:_channels sortBy:@"number"];
-        [self refreshGuide];
-    }
-    
-    
-    _timer = [NSTimer scheduledTimerWithTimeInterval:60.0
-                                              target:self
-                                            selector:@selector(onTimerFire:)
-                                            userInfo:nil
-                                             repeats:YES];
-    
-   _ssidTimer = [NSTimer scheduledTimerWithTimeInterval:3.0
-                                                 target:self
-                                               selector:@selector(fetchSSID:)
-                                               userInfo:nil
-                                                repeats:YES];
-    [_timer fire];
-    [_ssidTimer fire];
-}
-
--(void) onTimerFire:(id)sender {
-    [self refreshNowPlaying:nil];
-    
-    if( [[NSDate date] timeIntervalSinceDate:_nextRefresh] >= 0 ) {
-        [self refreshGuide];
-    }
 }
 
 -(void) fetchSSID:(id)sender {
     self.ssid = [iNet fetchSSID];
+}
+
+- (void) selectInitialClient {
+    
 }
 
 -(UIStatusBarStyle)preferredStatusBarStyle{
@@ -844,7 +854,6 @@
     }];
     [view addAction:refresh];
     
-    
     UIViewController *vc = [[[[UIApplication sharedApplication] delegate] window] rootViewController];
     [vc presentViewController:view animated:YES completion:nil];
 }
@@ -852,42 +861,96 @@
 - (void) displayClient {
     if (_currentClient) {
         _navItem.title = _currentClient[@"name"];
-        [self refreshNowPlaying:nil];
+        [self refreshNowPlaying:nil scrollToPlayingChanel:YES];
     } else {
         _navItem.title = @"";
         [self clearNowPlaying];
     }
 }
 
-- (void) refreshNowPlaying:(id)sender {
+- (void) refreshNowPlaying:(id)sender scrollToPlayingChanel:(BOOL)scroll {
     if (_currentClient) {
-        [Commands whatsOnDevice:_currentClient];
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
+            NSString *channelNum = [Commands getChannelOnClient:_currentClient];
+            NSString *channelId = [Channels getChannelIdForChannelNumber:channelNum channels:_channels];
+            
+            if ([channelId isEqualToString:@""]) {
+                [self clearNowPlaying];
+            } else {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [self setNowPlaying:channelId chNum:channelNum];
+                    if (scroll) {
+                        [self scrollToChannel:channelNum];
+                    }
+                });
+            }
+        });
     }
 }
 
--(void) setNowPlaying:(NSString *)chId {
-    NSDictionary *playing = [_guide objectForKey:chId];
+-(void) setNowPlaying:(NSString *)chId chNum:(NSString *)chNum {
+
     NSDictionary *channel = [_channels objectForKey:chId];
+    NSLog(@"setting NP");
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
+        NSDictionary *guide = [Guide getNowPlayingForChannel:channel];
+        NSDictionary *guideData = [guide objectForKey:[guide allKeys][0]];
+        NSDictionary *duration = [Guide getDurationForChannel:guideData];
+        
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self setNowPlayingForChannel:channel guideData:guideData duration:duration];
+        });
+    });
+
+}
+
+-(void) setNowPlayingForChannel:(id)channel guideData:(id)guideData duration:(NSDictionary *)duration {
     
-    if (!playing) {
-        [self clearNowPlaying];
-        return;
-    }
-    
-    
-    NSDictionary *duration = [Guide getDurationForChannel:playing];
     _seekBar.value = [duration[@"percentage"] doubleValue];
-    
-    if ([_currentProgramId isEqualToString:playing[@"programID"]]) {
+
+    if ([_currentProgramId isEqualToString:guideData[@"programID"]]) {
         return;
     }
-    _currentProgramId = playing[@"programID"];
     
-    _boxTitle.text = [channel[@"chNum"] stringValue];
+    _currentProgramId = guideData[@"programID"];
+    _boxTitle.text = [NSString stringWithFormat:@"%@: %@",
+                      [channel[@"chNum"] stringValue],
+                      guideData[@"title"]];
     
-    [self setBoxCoverForChannel:playing[@"boxcover"]];
-    [self setDescriptionForProgramId:playing[@"programID"]];
+    _navItem.title = _currentClient[@"name"];
+    [self setBoxCoverForChannel:guideData[@"boxcover"]];
+    [self setDescriptionForProgramId:guideData[@"programID"]];
+}
+
+-(void) scrollToChannel:(NSString *)scrollToChNum {
+    int row = -1;
+    int section = -1;
+
+    int sectionCounter = 0;
+    int rowCounter = 0;
     
+    NSArray *sections = [[_sortedChannels allKeys] sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
+    NSLog(@"%@",_sortedChannels);
+    for (NSString *sectionKey in sections) {
+        NSMutableDictionary *sectionData = [_sortedChannels objectForKey:sectionKey];
+        NSArray *sectionChannels = [[sectionData allKeys] sortedArrayUsingSelector: @selector(compare:)];
+        for (id sectionChannelKey in sectionChannels) {
+            if ([[sectionChannelKey stringValue] isEqualToString:scrollToChNum]) {
+                row = rowCounter;
+                section = sectionCounter;
+            }
+            rowCounter++;
+        }
+        sectionCounter++;
+        rowCounter = 0;
+    }
+    
+    if (row > -1 && section > -1) {
+        NSIndexPath *indexPath = [NSIndexPath indexPathForRow:row inSection:section];
+        [_mainTableView scrollToRowAtIndexPath:indexPath
+                             atScrollPosition:UITableViewScrollPositionTop
+                                     animated:YES];
+    }
 }
 
 -(void) setDescriptionForProgramId:(NSString *)programID {
@@ -955,31 +1018,21 @@
     _boxDescription.text = @"";
 }
 
-- (void) messageUpdatedNowPlaying:(NSNotification *)notification {
-    NSString *chNum = [notification.object stringValue];
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
-        NSString *channelId = [Channels getChannelIdForChannelNumber:chNum channels:_channels];
-        dispatch_after(0, dispatch_get_main_queue(), ^{
-            if ([channelId isEqualToString:@""]) {
-                [self clearNowPlaying];
-            } else {
-                [self setNowPlaying:channelId];
-            }
-        });
-    });
-}
-
-
 - (void) refreshGuide {
-    [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
-    CGRect frm = _overlayProgress.frame;
-    frm.size.width = 0;
-    _overlayProgress.frame = frm;
-    _overlayProgress.hidden = NO;
-    _overlayLabel.text = @"Refreshing guide data...";
-    
-    [Guide refreshGuide:_channels sorted:_sortedChannels forTime:[NSDate date]];
-    
+
+    if (!guideIsRefreshing) {
+        guideIsRefreshing = YES;
+        [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
+        CGRect frm = _overlayProgress.frame;
+        frm.size.width = 0;
+        _overlayProgress.frame = frm;
+        _overlayProgress.hidden = NO;
+        _overlayLabel.text = @"Refreshing guide data...";
+        
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
+            [Guide refreshGuide:_channels sorted:_sortedChannels forTime:[NSDate date]];
+        });
+    }
 }
 
 - (void) messageNextGuideRefreshTime:(NSNotification *)notification {
@@ -988,12 +1041,12 @@
 
 - (void) messageUpdatedGuide:(NSNotification *)notification {
     _guide = notification.object;
+    guideIsRefreshing = NO;
     [[NSOperationQueue mainQueue] addOperationWithBlock:^{
         _overlayProgress.hidden = YES;
         _overlayLabel.text = @"Guide updated.";
         [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
         [_mainTableView reloadData];
-        [self refreshNowPlaying:nil];
     }];
 }
 
@@ -1019,15 +1072,9 @@
 }
 
 - (void) messageChannelChanged:(NSNotification *)notification {
-    [self refreshNowPlaying:nil];
+    [self refreshNowPlaying:nil scrollToPlayingChanel:NO];
 }
 
-
-
-
-- (IBAction)stub:(id)sender {
-    
-}
 - (IBAction)sortChannels:(id)sender {
     
     UIAlertController *view = [UIAlertController
@@ -1061,6 +1108,10 @@
     
 }
 - (IBAction)playPause:(id)sender {
+    
+}
+
+- (IBAction)stub:(id)sender {
     
 }
 @end

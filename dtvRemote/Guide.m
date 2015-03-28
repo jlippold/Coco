@@ -12,17 +12,12 @@
 @implementation Guide
 
 + (void) refreshGuide:(NSMutableDictionary *)channels sorted:(NSMutableDictionary *)sortedChannels forTime:(NSDate *)time {
-    
-    NSOperationQueue *whatsPlayingQueue = [[NSOperationQueue alloc] init];
-    whatsPlayingQueue.name = @"Whats Playing";
-    whatsPlayingQueue.maxConcurrentOperationCount = 3;
+    NSLog(@"Rfreshing guide");
+    //this needs to use gcd when called, now sync
     
     if ([[channels allKeys] count] == 0) {
         return;
     }
-    
-    [whatsPlayingQueue cancelAllOperations];
-    
     
     NSDate *dt = [NSDate date];
     if (time != nil) {
@@ -31,23 +26,8 @@
     
     dt = [self getHalfHourIncrement:dt];
     
-    [[NSNotificationCenter defaultCenter]
-     postNotificationName:@"messageNextGuideRefreshTime"
-     object:[dt dateByAddingTimeInterval:(30*60)]];
-    
-    
-    NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
-    [dateFormatter setDateFormat:@"EEE, dd MMM yyyy HH:mm:ss Z"];
-    NSString *localDateString = [dateFormatter stringFromDate:dt];
-    
-    NSLog(@"DT: %@", localDateString);
-    
-    //build a base URL for all now playing requests
-    NSString *builder = @"https://www.directv.com/json/channelschedule";
-    builder = [builder stringByAppendingString:@"?channels=%@"];
-    builder = [builder stringByAppendingString:@"&startTime=%@"];
-    builder = [builder stringByAppendingString:@"&hours=4"];
-    builder = [builder stringByAppendingString:@"&chIds=%@"];
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"messageNextGuideRefreshTime"
+                                                        object:[dt dateByAddingTimeInterval:(30*60)]];
     
     
     //Download data in 50 channel chunks
@@ -56,132 +36,172 @@
     __block int total = ceil((double)[[channels allKeys] count]/chunkSize);
     __block NSMutableDictionary *guide = [[NSMutableDictionary alloc] init];
     
-    NSLog(@"Total Channels: %lu", (unsigned long)[[channels allKeys] count]);
-    NSLog(@"Requests to make: %d", total);
     
     //add all requests to the queue
     for (NSUInteger i = 0; i < total; i++) {
         
         NSInteger offset = i*chunkSize;
-        NSString *strUrl = [NSString stringWithFormat:builder,
-                            [self getJoinedArrayByProp:@"chNum" arrayOffset:offset chunkSize:chunkSize channels:channels sortedChannels:sortedChannels],
-                            [localDateString stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding],
-                            [self getJoinedArrayByProp:@"chId" arrayOffset:offset chunkSize:chunkSize channels:channels sortedChannels:sortedChannels]
-                            ];
         
-        //NSLog(@"Request #%lu Fired", (unsigned long)i);
+        NSString *chNums = [self getJoinedArrayByProp:@"chNum"
+                                          arrayOffset:offset
+                                            chunkSize:chunkSize
+                                             channels:channels
+                                       sortedChannels:sortedChannels];
         
-        NSURL *url = [NSURL URLWithString:strUrl];
+        NSString *chIds = [self getJoinedArrayByProp:@"chId"
+                                         arrayOffset:offset
+                                           chunkSize:chunkSize
+                                            channels:channels
+                                      sortedChannels:sortedChannels];
         
+        NSMutableDictionary *results = [self getGuideDataForChannels:chIds channelNums:chNums forTime:dt];
+        [guide addEntriesFromDictionary:results];
         
-        [NSURLConnection sendAsynchronousRequest:[NSURLRequest requestWithURL:url]
-                                           queue:whatsPlayingQueue
-                               completionHandler:^(NSURLResponse *response,
-                                                   NSData *data,
-                                                   NSError *connectionError)
-         {
-             
-             if (data.length > 0 && connectionError == nil) {
-                 
-                 NSDictionary *json = [NSJSONSerialization JSONObjectWithData:data options:0 error:NULL];
-                 
-                 for (id channel in [json objectForKey: @"schedule"]) {
-                     
-                     
-                     if ( ![[channel objectForKey:@"chId"] isKindOfClass:[NSNumber class]] ) {
-                         continue;
-                     }
-                     
-                     NSArray *channelSchedule = [channel objectForKey:@"schedules"];
-                     NSString *chId = [[channel objectForKey:@"chId"] stringValue];
-                     
-                     int i;
-                     for (i = 0; i < [channelSchedule count]; i++) {
-                         
-                         id show = [channelSchedule objectAtIndex:i];
-                         
-                         NSDateFormatter* dateFormatter = [[NSDateFormatter alloc] init];
-                         [dateFormatter setDateFormat:@"yyyy-MM-dd'T'HH:mm:ss.SSSZ"];
-                         NSDate *startDate = [dateFormatter dateFromString:show[@"airTime"]];
-                         NSInteger duration = [show[@"duration"] intValue];
-                         
-                         bool isPlaying = [self isNowPlaying:startDate duration:duration];
-                         NSArray *keys = [guide allKeys];
-                         bool isAdded = [keys containsObject:chId];
-                         
-                         if (isPlaying && !isAdded) {
-                             
-                             NSMutableDictionary *guideItem = [[NSMutableDictionary alloc] init];
-                             
-                             if (show[@"programID"]) {
-                                 guideItem[@"programID"] = show[@"programID"];
-                             }
-                             if (show[@"title"]) {
-                                 guideItem[@"title"] = show[@"title"];
-                             }
-                             if (show[@"title"] && show[@"episodeTitle"]) {
-                                 guideItem[@"title"] = [NSString stringWithFormat:@"%@ - %@",
-                                                        show[@"title"], show[@"episodeTitle"]];
-                             }
-                             if (show[@"title"] && show[@"releaseYear"]) {
-                                 guideItem[@"title"] = [NSString stringWithFormat:@"%@ (%@)",
-                                                        show[@"title"], show[@"releaseYear"]];
-                             }
-                             if (show[@"starRatingNum"]) {
-                                 guideItem[@"starRating"] = show[@"starRatingNum"];
-                             }
-                             if (show[@"primaryImageUrl"]) {
-                                 guideItem[@"boxcover"] = show[@"primaryImageUrl"];
-                             }
-                             if (show[@"mainCategory"]) {
-                                 guideItem[@"category"] = show[@"mainCategory"];
-                             }
-                             if (show[@"hd"]) {
-                                 guideItem[@"hd"] = show[@"hd"];
-                             }
-                             if (show[@"rating"]) {
-                                 guideItem[@"mpaaRating"] = show[@"rating"];
-                             }
-                             
-                             guideItem[@"starts"] = startDate;
-                             guideItem[@"ends"] = [startDate dateByAddingTimeInterval:duration*60];
-                             
-                             guideItem[@"upNext"] = @"Not Available";
-                             if (i < [channelSchedule count]-1) {
-                                 id nextShow = [channelSchedule objectAtIndex:i+1];
-                                 guideItem[@"upNext"] = nextShow[@"title"];
-                             }
-                             
-                             [guide setObject:guideItem forKey:chId];
-                             
-                         }
-                         
-                     }
-                     
-                     
-                 }
-                 
-             }
-             
-             completed++;
-             
-             if (completed >= total) {
-                 NSLog(@"guide updated");
-                 [[NSNotificationCenter defaultCenter] postNotificationName:@"messageUpdatedGuide" object:guide];
-             } else {
-                 long double progress =(completed*1.0/total*1.0);
-                 //NSLog(@"progress %Lf", progress);
-                 NSNumber *nsprogress = [NSNumber numberWithDouble:progress];
-                 [[NSNotificationCenter defaultCenter] postNotificationName:@"messageUpdatedGuideProgress"
-                                                                     object:nsprogress];
-                 [[NSNotificationCenter defaultCenter] postNotificationName:@"messageUpdatedGuidePartial"
-                                                                     object:guide];
-             }
-             
-             
-         }];
+        completed++;
+        
+        if (completed >= total) {
+            NSLog(@"guide updated");
+            [[NSNotificationCenter defaultCenter] postNotificationName:@"messageUpdatedGuide" object:guide];
+        } else {
+            long double progress =(completed*1.0/total*1.0);
+            //NSLog(@"progress %Lf", progress);
+            NSNumber *nsprogress = [NSNumber numberWithDouble:progress];
+            [[NSNotificationCenter defaultCenter] postNotificationName:@"messageUpdatedGuideProgress"
+                                                                object:nsprogress];
+            [[NSNotificationCenter defaultCenter] postNotificationName:@"messageUpdatedGuidePartial"
+                                                                object:guide];
+        }
+        
         
     }
+}
+
++ (NSMutableDictionary *) getGuideDataForChannels:(NSString *)channelIds
+                     channelNums:(NSString *)channelNums forTime:(NSDate *)time {
+
+    
+    NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
+    [dateFormatter setDateFormat:@"EEE, dd MMM yyyy HH:mm:ss Z"];
+    NSString *localDateString = [dateFormatter stringFromDate:time];
+    
+    NSString *builder = @"https://www.directv.com/json/channelschedule";
+    builder = [builder stringByAppendingString:@"?channels=%@"];
+    builder = [builder stringByAppendingString:@"&startTime=%@"];
+    builder = [builder stringByAppendingString:@"&hours=1"];
+    builder = [builder stringByAppendingString:@"&chIds=%@"];
+    
+    
+    NSString *strUrl = [NSString stringWithFormat:builder, channelNums,
+                        [localDateString stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding], channelIds];
+
+    NSURLResponse* response;
+    NSError *connectionError;
+    NSData* data = [NSURLConnection sendSynchronousRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:strUrl]]
+                                         returningResponse:&response error:&connectionError];
+    
+    NSMutableDictionary *results = [[NSMutableDictionary alloc] init];
+    
+    if (data.length > 0 && connectionError == nil) {
+        
+        NSDictionary *json = [NSJSONSerialization JSONObjectWithData:data options:0 error:NULL];
+        
+        NSMutableDictionary *deDuplicate = [[NSMutableDictionary alloc] init];
+        
+        for (id channel in [json objectForKey: @"schedule"]) {
+            
+            if ( ![[channel objectForKey:@"chId"] isKindOfClass:[NSNumber class]] ) {
+                continue;
+            }
+            
+            NSArray *channelSchedule = [channel objectForKey:@"schedules"];
+            NSString *chId = [[channel objectForKey:@"chId"] stringValue];
+            NSString *chNum = [[channel objectForKey:@"chNum"] stringValue];
+            
+            int i;
+            for (i = 0; i < [channelSchedule count]; i++) {
+                
+                id show = [channelSchedule objectAtIndex:i];
+                
+                NSDateFormatter* dateFormatter = [[NSDateFormatter alloc] init];
+                [dateFormatter setDateFormat:@"yyyy-MM-dd'T'HH:mm:ss.SSSZ"];
+                //[dateFormatter setTimeZone:[NSTimeZone localTimeZone]];
+                NSDate *startDate = [dateFormatter dateFromString:show[@"airTime"]];
+                NSInteger duration = [show[@"duration"] intValue];
+                
+                bool isPlaying = [self isNowPlaying:startDate duration:duration];
+                if (isPlaying) {
+                    
+                    if (deDuplicate[chNum]) {
+                        //the channel has already been added
+                        if ([[[channel objectForKey:@"chHd"] stringValue] isEqualToString:@"true"]) {
+                            //and new channel is in HD, overwrite the old with the new
+                            [deDuplicate setObject:chId forKey:chNum];
+                        }
+                    } else {
+                        //new channel
+                        [deDuplicate setObject:chId forKey:chNum];
+                    }
+                    
+                    NSMutableDictionary *guideItem = [[NSMutableDictionary alloc] init];
+                    
+                    if (show[@"programID"]) {
+                        guideItem[@"programID"] = show[@"programID"];
+                    }
+                    if (show[@"title"]) {
+                        guideItem[@"title"] = show[@"title"];
+                    }
+                    if (show[@"title"] && show[@"episodeTitle"]) {
+                        guideItem[@"title"] = [NSString stringWithFormat:@"%@ - %@",
+                                               show[@"title"], show[@"episodeTitle"]];
+                    }
+                    if (show[@"title"] && show[@"releaseYear"]) {
+                        guideItem[@"title"] = [NSString stringWithFormat:@"%@ (%@)",
+                                               show[@"title"], show[@"releaseYear"]];
+                    }
+                    if (show[@"starRatingNum"]) {
+                        guideItem[@"starRating"] = show[@"starRatingNum"];
+                    }
+                    if (show[@"primaryImageUrl"]) {
+                        guideItem[@"boxcover"] = show[@"primaryImageUrl"];
+                    }
+                    if (show[@"mainCategory"]) {
+                        guideItem[@"category"] = show[@"mainCategory"];
+                    }
+                    if (show[@"hd"]) {
+                        guideItem[@"hd"] = show[@"hd"];
+                    }
+                    if (show[@"rating"]) {
+                        guideItem[@"mpaaRating"] = show[@"rating"];
+                    }
+                    
+                    guideItem[@"starts"] = startDate;
+                    guideItem[@"ends"] = [startDate dateByAddingTimeInterval:duration*60];
+                    
+                    guideItem[@"upNext"] = @"Not Available";
+                    if (i < [channelSchedule count]-1) {
+                        id nextShow = [channelSchedule objectAtIndex:i+1];
+                        guideItem[@"upNext"] = nextShow[@"title"];
+                    }
+                    
+                    
+                    [results setObject:guideItem forKey:deDuplicate[chNum]];
+                    
+                }
+                
+            }
+            
+            
+        }
+    }
+    
+    return results;
+}
+
++ (NSMutableDictionary *) getNowPlayingForChannel:(id)channel {
+    NSDate *dt = [self getHalfHourIncrement:[NSDate date]];
+    return [self getGuideDataForChannels:[channel[@"chId"] stringValue]
+                             channelNums:[channel[@"chNum"] stringValue]
+                                 forTime:dt];
 }
 
 + (NSString *)getJoinedArrayByProp:(NSString *)prop
@@ -189,6 +209,7 @@
                          chunkSize:(NSInteger)size
                           channels:(NSMutableDictionary *)channels
                     sortedChannels:(NSMutableDictionary *)sortedChannels {
+    
     //returns a csv list of some property in _channels for url building
     NSMutableArray *outArray = [[NSMutableArray alloc] init];
     

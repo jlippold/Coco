@@ -11,6 +11,6 @@
 @interface Commands : NSObject
 
 + (void)changeChannel:(NSString *)chNum device:(NSDictionary *) client;
-+ (void)whatsOnDevice:(NSDictionary *) client;
++ (NSString *)getChannelOnClient:(NSDictionary *) client;
 
 @end

@@ -23,4 +23,6 @@ NSDate *guideTime;
                           channels:(NSMutableDictionary *)channels
                     sortedChannels:(NSMutableDictionary *)sortedChannels;
 
++ (NSMutableDictionary *) getNowPlayingForChannel:(id)channel;
+
 @end

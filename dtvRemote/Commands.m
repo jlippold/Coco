@@ -36,28 +36,27 @@
      }];
 }
 
-+ (void)whatsOnDevice:(NSDictionary *) client {
++ (NSString *)getChannelOnClient:(NSDictionary *) client {
     
+    NSString *chNum = @"";
+                                 
     NSURL *url = [NSURL URLWithString:
                   [NSString stringWithFormat:@"http://%@:8080/tv/getTuned?%@",
                    client[@"address"], client[@"appendage"] ]];
-    [NSURLConnection sendAsynchronousRequest:[NSURLRequest requestWithURL:url]
-                                       queue:[NSOperationQueue mainQueue]
-                           completionHandler:^(NSURLResponse *response,
-                                               NSData *data,
-                                               NSError *connectionError)
-     {
-         
-         if (data.length > 0 && connectionError == nil) {
-             NSDictionary *json = [NSJSONSerialization JSONObjectWithData:data options:0 error:NULL];
-             NSNumber *statusCode = json[@"status"][@"code"];
-             if ([statusCode isEqualToNumber:[NSNumber numberWithInt:200]]){
-                 [[NSNotificationCenter defaultCenter] postNotificationName:@"messageUpdatedNowPlaying" object:json[@"major"]];
-             }
-         }
-         
-     }];
     
+    NSURLResponse* response;
+    NSError *connectionError;
+    NSData* data = [NSURLConnection sendSynchronousRequest:[NSURLRequest requestWithURL:url]
+                                           returningResponse:&response error:&connectionError];
     
+    if (data.length > 0 && connectionError == nil) {
+        NSDictionary *json = [NSJSONSerialization JSONObjectWithData:data options:0 error:NULL];
+        NSNumber *statusCode = json[@"status"][@"code"];
+        if ([statusCode isEqualToNumber:[NSNumber numberWithInt:200]]){
+            chNum = [json[@"major"] stringValue];
+        }
+    }
+    
+    return chNum;
 }
 @end

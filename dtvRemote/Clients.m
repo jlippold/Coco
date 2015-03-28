@@ -59,7 +59,7 @@
                              NSString *clientId = [NSString stringWithFormat:@"%@-%@", [item objectForKey:@"locationName"], [item objectForKey:@"clientAddr"]];
                              
                              
-                             NSMutableDictionary *clientInfo = @{@"id" : clientId,
+                             NSDictionary *clientInfo = @{@"id" : clientId,
                                                           @"address" : client,
                                                           @"url": [NSString stringWithFormat:@"http://%@:8080/", client],
                                                           @"name" : [item objectForKey:@"locationName"],
