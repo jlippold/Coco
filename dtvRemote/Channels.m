@@ -154,6 +154,7 @@
 
 + (void) downloadChannelImages:(NSMutableDictionary *)channelList {
     [self clearCaches];
+                     //NSLog(@"checking channels");
     
     NSOperationQueue *channelImagesQueue = [[NSOperationQueue alloc] init];
     channelImagesQueue.name = @"Channel Images Cache";
@@ -182,7 +183,7 @@
                  [data writeToFile:imagePath atomically:NO];
              }
              completed++;
-             if (completed >= (total-1)) {
+             if (completed >= total) {
                  NSLog(@"channels refreshed");
                  [[NSNotificationCenter defaultCenter] postNotificationName:@"messageUpdatedChannels" object:channelList];
              } else {

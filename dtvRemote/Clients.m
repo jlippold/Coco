@@ -71,7 +71,7 @@
                              }
                              
                              if (!clients[ssid][clientId]) {
-                                 [clients[ssid] setObject:clientInfo forKey:clientId];
+                                 [clients[ssid] setObject:[clientInfo mutableCopy] forKey:clientId];
                              }
                          }
                          
