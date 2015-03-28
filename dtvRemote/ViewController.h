@@ -47,6 +47,10 @@
 @property (nonatomic, strong) IBOutlet UIBarButtonItem *rewindButton;
 @property (nonatomic, strong) IBOutlet UIBarButtonItem *playButton;
 @property (nonatomic, strong) IBOutlet UIBarButtonItem *forwardButton;
+@property (nonatomic, strong) UILabel *hdLabel;
+@property (nonatomic, strong) UILabel *stars;
+@property (nonatomic, strong) UILabel *ratingLabel;
+
 @property (nonatomic, strong) IBOutlet UISlider *seekBar;
 @property (nonatomic, strong) UIToolbar *toolBar;
 

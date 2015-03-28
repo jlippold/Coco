@@ -143,6 +143,8 @@
                         if ([[[channel objectForKey:@"chHd"] stringValue] isEqualToString:@"1"]) {
                             //and new channel is in HD, overwrite the old with the new
                             [deDuplicate setObject:chId forKey:chNum];
+                        } else {
+                            continue;
                         }
                     } else {
                         //new channel
@@ -206,9 +208,10 @@
 
 + (NSMutableDictionary *) getNowPlayingForChannel:(id)channel {
     NSDate *dt = [self getHalfHourIncrement:[NSDate date]];
-    return [self getGuideDataForChannels:[channel[@"chId"] stringValue]
-                             channelNums:[channel[@"chNum"] stringValue]
-                                 forTime:dt];
+    NSMutableDictionary *guideData = [self getGuideDataForChannels:[channel[@"chId"] stringValue]
+                                                       channelNums:[channel[@"chNum"] stringValue]
+                                                           forTime:dt];
+    return guideData;
 }
 
 + (NSString *)getJoinedArrayByProp:(NSString *)prop

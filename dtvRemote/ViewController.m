@@ -304,66 +304,57 @@
     
     [self.view addSubview:_searchBar];
     
-    UILabel *hdLabel = [[UILabel alloc] init];
-    hdLabel.text = @"HD";
-    hdLabel.font = [UIFont fontWithName:@"Helvetica-Bold" size:14];
-    [hdLabel setBackgroundColor:[UIColor blackColor]];
-    hdLabel.layer.cornerRadius = 5;
-    hdLabel.layer.masksToBounds = YES;
+     _hdLabel= [[UILabel alloc] init];
+    _hdLabel.text = @"HD";
+    _hdLabel.font = [UIFont fontWithName:@"Helvetica-Bold" size:14];
+    [_hdLabel setBackgroundColor:[UIColor blackColor]];
+    _hdLabel.layer.cornerRadius = 5;
+    _hdLabel.layer.masksToBounds = YES;
     
-    [hdLabel setTextColor:textColor];
-    hdLabel.textAlignment = NSTextAlignmentCenter;
-    hdLabel.frame = CGRectMake(7,
+    [_hdLabel setTextColor:textColor];
+    _hdLabel.textAlignment = NSTextAlignmentCenter;
+    _hdLabel.frame = CGRectMake(7,
                                223,
                                31,
                                24);
+    [_hdLabel setHidden:YES];
     
-    [self.view addSubview:hdLabel];
+    [self.view addSubview:_hdLabel];
     
     
-    UILabel *ratingLabel = [[UILabel alloc] init];
-    ratingLabel.text = @"TV-MA";
-    ratingLabel.font = [UIFont fontWithName:@"Helvetica-Bold" size:14];
-    [ratingLabel setBackgroundColor:[UIColor clearColor]];
-    [ratingLabel setTextColor:textColor];
-    ratingLabel.textAlignment = NSTextAlignmentCenter;
-    ratingLabel.frame = CGRectMake(
+    _ratingLabel = [[UILabel alloc] init];
+    _ratingLabel.text = @"";
+    _ratingLabel.font = [UIFont fontWithName:@"Helvetica-Bold" size:14];
+    [_ratingLabel setBackgroundColor:[UIColor clearColor]];
+    [_ratingLabel setTextColor:textColor];
+    _ratingLabel.textAlignment = NSTextAlignmentCenter;
+    _ratingLabel.frame = CGRectMake(
                                    _searchBar.frame.origin.x + searchBarMinWidth + 10,
                                    223,
                                    64,
                                    29);
     
+    [_hdLabel setHidden:YES];
     
+    [self.view addSubview:_ratingLabel];
     
-    [self.view addSubview:ratingLabel];
-    
-    float rating = 0.5;
-    UIColor *gold = [UIColor colorWithRed:0.941 green:0.812 blue:0.376 alpha:1]; /*#f0cf60*/
-    
-    
-    UILabel *stars = [[UILabel alloc] init];
-    UIFont *font = [UIFont fontWithName:@"Helvetica-Bold" size:16];
-    NSDictionary *userAttributes = @{NSFontAttributeName: font,
-                                     NSForegroundColorAttributeName: gold};
-    NSString *text = @"★★★★★";
-    stars.text = text;
-    stars.font = [UIFont fontWithName:@"Helvetica-Bold" size:16];
-    const CGSize textSize = [text sizeWithAttributes: userAttributes];
-    stars.clipsToBounds = YES;
-    stars.adjustsFontSizeToFitWidth = NO;
-    stars.lineBreakMode = NSLineBreakByClipping;
-    stars.layer.masksToBounds = YES;
-    [stars setTextColor:gold];
-    stars.textAlignment = NSTextAlignmentLeft;
-    stars.frame = CGRectMake(
-                             [[UIScreen mainScreen] bounds].size.width - textSize.width - 10 ,
+    _stars = [[UILabel alloc] init];
+    _stars.text = @"★★★★★";
+    _stars.font = [UIFont fontWithName:@"Helvetica-Bold" size:16];
+    _stars.clipsToBounds = YES;
+    _stars.adjustsFontSizeToFitWidth = NO;
+    _stars.lineBreakMode = NSLineBreakByClipping;
+    _stars.layer.masksToBounds = YES;
+    [_stars setTextColor:[UIColor colorWithRed:0.941 green:0.812 blue:0.376 alpha:1]];  /*#f0cf60*/
+    _stars.textAlignment = NSTextAlignmentLeft;
+    _stars.frame = CGRectMake(
+                             0,
                              223,
-                             textSize.width * rating,
+                             0,
                              29);
-    
-    [self.view addSubview:stars];
-    
-    
+    [_stars setHidden:YES];
+    [self.view addSubview:_stars];
+
     
 }
 
@@ -893,6 +884,9 @@
     NSLog(@"setting NP");
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
         NSDictionary *guide = [Guide getNowPlayingForChannel:channel];
+        if ([[guide allKeys] count] == 0) {
+            return;
+        }
         NSDictionary *guideData = [guide objectForKey:[guide allKeys][0]];
         NSDictionary *duration = [Guide getDurationForChannel:guideData];
         
@@ -912,13 +906,34 @@
     }
     
     _currentProgramId = guideData[@"programID"];
-    _boxTitle.text = [NSString stringWithFormat:@"%@: %@",
-                      [channel[@"chNum"] stringValue],
+    _boxTitle.text = [NSString stringWithFormat:@"%@",
                       guideData[@"title"]];
     
-    _navItem.title = _currentClient[@"name"];
+    if (guideData[@"hd"] && [[guideData[@"hd"] stringValue] isEqualToString:@"1"] ) {
+        [_hdLabel setHidden:NO];
+    } else {
+        [_hdLabel setHidden:YES];
+    }
+    
+    _navItem.title = [NSString stringWithFormat:@"%@ %@",
+                      _currentClient[@"name"],
+                      channel[@"chCall"]];
+
     [self setBoxCoverForChannel:guideData[@"boxcover"]];
     [self setDescriptionForProgramId:guideData[@"programID"]];
+}
+
+-(void) setStarRating:(double) rating {
+    rating = (rating*2.0) / 100.0;
+    
+    UIFont *font = [UIFont fontWithName:@"Helvetica-Bold" size:16];
+    NSDictionary *userAttributes = @{NSFontAttributeName: font};
+    const CGSize textSize = [@"★★★★★" sizeWithAttributes: userAttributes];
+    _stars.frame = CGRectMake(
+                              [[UIScreen mainScreen] bounds].size.width - textSize.width - 10 ,
+                              223,
+                              textSize.width * rating,
+                              29);
 }
 
 -(void) scrollToChannel:(NSString *)scrollToChNum {
@@ -963,25 +978,37 @@
                                                NSError *connectionError)
      {
          if (data.length > 0 && connectionError == nil) {
-             NSDictionary *show = [NSJSONSerialization JSONObjectWithData:data options:0 error:NULL];
-             if (show[@"programDetail"]) {
-                 
-                 if (show[@"programDetail"][@"description"]) {
-                     _boxDescription.text = show[@"programDetail"][@"description"];
+             NSDictionary *json = [NSJSONSerialization JSONObjectWithData:data options:0 error:NULL];
+
+             if (json[@"programDetail"]) {
+
+                 id show = json[@"programDetail"];
+                 if (show[@"description"]) {
+                     _boxDescription.text = show[@"description"];
                  }
                  NSString *title = _boxTitle.text;
                  
-                 if (show[@"programDetail"][@"title"]) {
-                     title = [NSString stringWithFormat:@"%@: %@ - %@",
-                              _boxTitle.text, show[@"programDetail"][@"title"], show[@"programDetail"][@"episodeTitle"]];
+                 if (show[@"title"] && show[@"episodeTitle"]) {
+                     title = [NSString stringWithFormat:@"%@ - %@",
+                              _boxTitle.text, show[@"episodeTitle"]];
                  }
-                 if (show[@"programDetail"][@"title"] && show[@"programDetail"][@"episodeTitle"]) {
-                     title = [NSString stringWithFormat:@"%@: %@ - %@",
-                              _boxTitle.text, show[@"programDetail"][@"title"], show[@"programDetail"][@"episodeTitle"]];
+                 if (show[@"title"] && show[@"releaseYear"]) {
+                     title = [NSString stringWithFormat:@"%@ (%@)",
+                              _boxTitle.text, show[@"releaseYear"]];
                  }
-                 if (show[@"programDetail"][@"title"] && show[@"programDetail"][@"releaseYear"]) {
-                     title = [NSString stringWithFormat:@"%@: %@ (%@)",
-                              _boxTitle.text, show[@"programDetail"][@"title"], show[@"programDetail"][@"releaseYear"]];
+                 
+                 if (show[@"rating"]) {
+                     _ratingLabel.text = show[@"rating"];
+                     [_ratingLabel setHidden:NO];
+                 } else {
+                     [_ratingLabel setHidden:YES];
+                 }
+                 
+                 if (show[@"starRatingNum"]) {
+                     [self setStarRating:[show[@"starRatingNum"] doubleValue]];
+                     [_stars setHidden:NO];
+                 } else {
+                     [_stars setHidden:YES];
                  }
                  
                  _boxTitle.text = title;
