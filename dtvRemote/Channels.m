@@ -328,14 +328,14 @@
     if ([sort isEqualToString:@"category"]) {
         for (id channel in keys) {
             NSString *chId = [channels[channel] objectForKey:@"chId"];
-            NSString *chName = [channels[channel] objectForKey:@"chName"];
+            NSString *chNum = [channels[channel] objectForKey:@"chNum"];
             NSString *header = [channels[channel] objectForKey:@"chCat"];
             
             if (![sortedChannels objectForKey:header]) {
                 [sortedChannels setObject:[[NSMutableDictionary alloc] init] forKey:header];
             }
             
-            [sortedChannels[header] setObject:chId forKey:chName];
+            [sortedChannels[header] setObject:chId forKey:chNum];
         }
     }
     
@@ -347,7 +347,7 @@
 
         for (id channel in keys) {
             NSString *chId = [channels[channel] objectForKey:@"chId"];
-            NSString *chName = [channels[channel] objectForKey:@"chName"];
+            NSString *chNum = [channels[channel] objectForKey:@"chNum"];
             NSString *chCall = [[channels[channel] objectForKey:@"chCall"] uppercaseString];
             NSString *header = @"Uncatagorized";
             if (categories[chCall]) {
@@ -363,7 +363,7 @@
                 [sortedChannels setObject:[[NSMutableDictionary alloc] init] forKey:header];
             }
             
-            [sortedChannels[header] setObject:chId forKey:chName];
+            [sortedChannels[header] setObject:chId forKey:chNum];
         }
     }
     

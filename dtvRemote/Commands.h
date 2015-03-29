@@ -12,5 +12,6 @@
 
 + (void)changeChannel:(NSString *)chNum device:(NSDictionary *) client;
 + (NSString *)getChannelOnClient:(NSDictionary *) client;
++ (BOOL) sendCommand:(NSString *)command client:(NSDictionary *) client;
 
 @end

@@ -53,6 +53,7 @@
     _clients = [Clients loadClientList];
     _currentClient = [Clients getClient];
     isEditing = NO;
+    isPlaying = YES;
     
     _ssidTimer = [[NSTimer alloc] init];
     
@@ -265,11 +266,11 @@
     
     UIBarButtonItem *rewindButton = [[UIBarButtonItem alloc]
                                      initWithImage:[UIImage imageNamed:@"images.bundle/rewind.png"]
-                                     style:UIBarButtonItemStylePlain target:self action:@selector(stub:)];
+                                     style:UIBarButtonItemStylePlain target:self action:@selector(rewind:)];
     
     _playButton = [[UIBarButtonItem alloc]
                    initWithImage:[UIImage imageNamed:@"images.bundle/pause"]
-                   style:UIBarButtonItemStylePlain target:self action:@selector(stub:) ];
+                   style:UIBarButtonItemStylePlain target:self action:@selector(playpause:) ];
     
     _playButton.tintColor = textColor;
     
@@ -295,10 +296,16 @@
     
     _seekBar.tintColor = textColor;
     _seekBar.thumbTintColor = textColor;
+    _seekBar.userInteractionEnabled = NO;
     
+    /*
     [_seekBar setThumbImage:[UIImage imageNamed:@"images.bundle/scrubber"] forState:UIControlStateNormal];
     [_seekBar setThumbImage:[UIImage imageNamed:@"images.bundle/scrubber"] forState:UIControlStateSelected];
     [_seekBar setThumbImage:[UIImage imageNamed:@"images.bundle/scrubber"] forState:UIControlStateHighlighted];
+    */
+    [_seekBar setThumbImage:[UIImage new] forState:UIControlStateNormal];
+    [_seekBar setThumbImage:[UIImage new] forState:UIControlStateSelected];
+    [_seekBar setThumbImage:[UIImage new] forState:UIControlStateHighlighted];
     
     [self.view addSubview:_seekBar];
     
@@ -1164,6 +1171,7 @@
 }
 
 - (void) messageChannelChanged:(NSNotification *)notification {
+    isPlaying = YES;
     [self refreshNowPlaying:nil scrollToPlayingChanel:NO];
 }
 
@@ -1305,8 +1313,22 @@
     [self presentViewController:alert animated:YES completion:nil];
 }
 
+- (IBAction)playpause:(id)sender {
+    if (isPlaying) {
+        isPlaying = NO;
+        [Commands sendCommand:@"pause" client:_currentClient];
+    } else {
+        isPlaying = YES;
+        [Commands sendCommand:@"play" client:_currentClient];
+    }
+}
+
+- (IBAction)rewind:(id)sender {
+    [Commands sendCommand:@"rew" client:_currentClient];
+}
+
 - (IBAction)forward:(id)sender {
-    
+    [Commands sendCommand:@"ffwd" client:_currentClient];
 }
 
 

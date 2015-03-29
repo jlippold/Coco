@@ -19,6 +19,7 @@
     
     BOOL guideIsRefreshing;
     BOOL isEditing;
+    BOOL isPlaying;
     
 }
 
