@@ -1315,20 +1315,30 @@
 
 - (IBAction)playpause:(id)sender {
     if (isPlaying) {
-        isPlaying = NO;
-        [Commands sendCommand:@"pause" client:_currentClient];
+        if ([Commands sendCommand:@"pause" client:_currentClient]) {
+            _playButton.image = [UIImage imageNamed:@"images.bundle/play"];
+            isPlaying = NO;
+        }
     } else {
-        isPlaying = YES;
-        [Commands sendCommand:@"play" client:_currentClient];
+        if ([Commands sendCommand:@"play" client:_currentClient]) {
+            _playButton.image = [UIImage imageNamed:@"images.bundle/pause"];
+            isPlaying = YES;
+        }
     }
 }
 
 - (IBAction)rewind:(id)sender {
-    [Commands sendCommand:@"rew" client:_currentClient];
+    if ([Commands sendCommand:@"rew" client:_currentClient]) {
+        _playButton.image = [UIImage imageNamed:@"images.bundle/play"];
+        isPlaying = NO;
+    }
 }
 
 - (IBAction)forward:(id)sender {
-    [Commands sendCommand:@"ffwd" client:_currentClient];
+    if ([Commands sendCommand:@"ffwd" client:_currentClient]) {
+        _playButton.image = [UIImage imageNamed:@"images.bundle/play"];
+        isPlaying = NO;
+    }
 }
 
 
