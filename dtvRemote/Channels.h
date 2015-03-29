@@ -18,6 +18,8 @@
 + (void) downloadChannelImages:(NSMutableDictionary *)channelList;
 + (NSMutableArray *) loadBlockedChannels:(NSMutableDictionary *)channelList;
 + (void)saveBlockedChannels:(NSMutableArray *) blockedChannels;
++ (NSMutableDictionary *) addChannelCategoriesFromGuide:(NSMutableDictionary *)guide
+                                               channels:(NSMutableDictionary *)channels;
 
 + (NSString *)getChannelIdForChannelNumber:(NSString *)chNum channels:(NSMutableDictionary *)channels;
 + (NSMutableDictionary *) sortChannels:(NSMutableDictionary *)channels sortBy:(NSString *)sort;

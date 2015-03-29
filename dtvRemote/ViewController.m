@@ -73,7 +73,7 @@
         });
     } else {
         _sortedChannels = [Channels sortChannels:_channels sortBy:@"default"];
-        [self refreshGuide];
+        [self refreshGuide:nil];
     }
     
     
@@ -101,7 +101,7 @@
     [self refreshNowPlaying:nil scrollToPlayingChanel:NO];
     
     if( [[NSDate date] timeIntervalSinceDate:_nextRefresh] >= 0 ) {
-        [self refreshGuide];
+        [self refreshGuide:nil];
     }
 }
 
@@ -440,6 +440,7 @@
                                   initWithImage:[UIImage imageNamed:@"images.bundle/left.png"]
                                   style:UIBarButtonItemStylePlain target:self action:@selector(stub:) ];
     
+    
     UIBarButtonItem *guideForward = [[UIBarButtonItem alloc]
                                      initWithImage:[UIImage imageNamed:@"images.bundle/right"]
                                      style:UIBarButtonItemStylePlain target:self action:@selector(stub:) ];
@@ -448,9 +449,9 @@
                                   initWithImage:[UIImage imageNamed:@"images.bundle/numberpad.png"]
                                   style:UIBarButtonItemStylePlain target:self action:@selector(stub:) ];
     
-    UIBarButtonItem *filter = [[UIBarButtonItem alloc]
-                               initWithImage:[UIImage imageNamed:@"images.bundle/filter.png"]
-                               style:UIBarButtonItemStylePlain target:self action:@selector(stub:) ];
+    UIBarButtonItem *refresh = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRefresh
+                                                                             target:self
+                                                                             action:@selector(refreshGuide:)];
     
     UIBarButtonItem *commands = [[UIBarButtonItem alloc]
                                  initWithImage:[UIImage imageNamed:@"images.bundle/commands.png"]
@@ -461,7 +462,7 @@
                              style:UIBarButtonItemStylePlain target:self action:@selector(sortChannels:) ];
     
     
-    NSArray *buttons = [NSArray arrayWithObjects:  commands, flex , sort, flex, filter, flex, numberPad, flex, guideBack, flex, guideForward, nil];
+    NSArray *buttons = [NSArray arrayWithObjects:  commands, flex , sort, flex, numberPad, flex, refresh, flex, guideBack, flex, guideForward, nil];
     [_toolBar setItems:buttons animated:NO];
     
     [self.view addSubview:_toolBar];
@@ -800,7 +801,7 @@
         [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
         [MBProgressHUD hideHUDForView:self.view animated:YES];
         _sortedChannels = [Channels sortChannels:_channels sortBy:@"default"];
-        [self refreshGuide];
+        [self refreshGuide:nil];
     });
     
 }
@@ -1083,7 +1084,7 @@
     _boxDescription.text = @"";
 }
 
-- (void) refreshGuide {
+- (IBAction) refreshGuide:(id)sender {
 
     if (!guideIsRefreshing) {
         guideIsRefreshing = YES;
@@ -1107,6 +1108,10 @@
 - (void) messageUpdatedGuide:(NSNotification *)notification {
     _guide = notification.object;
     guideIsRefreshing = NO;
+    
+    _channels = [Channels addChannelCategoriesFromGuide:_guide channels:_channels];
+    _sortedChannels = [Channels sortChannels:_channels sortBy:@"default"];
+    
     [[NSOperationQueue mainQueue] addOperationWithBlock:^{
         _overlayProgress.hidden = YES;
         _overlayLabel.text = @"Guide updated.";
@@ -1144,10 +1149,10 @@
     
     UIAlertController *view = [UIAlertController
                                alertControllerWithTitle:nil
-                               message:@"Sort Channels By"
+                               message:@"Sort By"
                                preferredStyle:UIAlertControllerStyleActionSheet];
     
-    UIAlertAction* name = [UIAlertAction actionWithTitle:@"Name" style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
+    UIAlertAction* name = [UIAlertAction actionWithTitle:@"Channel Name" style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
         
         //save sort
         [[NSUserDefaults standardUserDefaults] setObject:@"name" forKey:@"sort"];
@@ -1160,7 +1165,7 @@
     }];
     [view addAction:name];
     
-    UIAlertAction* number = [UIAlertAction actionWithTitle:@"Number" style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
+    UIAlertAction* number = [UIAlertAction actionWithTitle:@"Channel Number" style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
         
         //save sort
         [[NSUserDefaults standardUserDefaults] setObject:@"number" forKey:@"sort"];
@@ -1172,6 +1177,19 @@
         [view dismissViewControllerAnimated:YES completion:nil];
     }];
     [view addAction:number];
+    
+    UIAlertAction* category = [UIAlertAction actionWithTitle:@"Show Type" style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
+        
+        //save sort
+        [[NSUserDefaults standardUserDefaults] setObject:@"category" forKey:@"sort"];
+        [[NSUserDefaults standardUserDefaults] synchronize];
+        
+        _sortedChannels = [Channels sortChannels:_channels sortBy:@"category"];
+        [_mainTableView scrollRectToVisible:CGRectMake(0, 0, 1, 1) animated:NO];
+        [_mainTableView reloadData];
+        [view dismissViewControllerAnimated:YES completion:nil];
+    }];
+    [view addAction:category];
     
     UIAlertAction* cancel = [UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:^(UIAlertAction * action) {
         [view dismissViewControllerAnimated:YES completion:nil];
@@ -1190,6 +1208,7 @@
         _rightButton.title = @"Edit";
         _channels = [Channels load:NO];
         _blockedChannels = [[NSMutableArray alloc] init];
+        _sortedChannels = [Channels sortChannels:_channels sortBy:@"default"];
         //NSIndexPath *indexpath = (NSIndexPath*)[[_mainTableView indexPathsForVisibleRows] objectAtIndex:0];
         
     } else {
@@ -1198,11 +1217,13 @@
         _rightButton.title = @"Done";
         _channels = [Channels load:YES];
         _blockedChannels = [Channels loadBlockedChannels:_channels];
+        _sortedChannels = [Channels sortChannels:_channels sortBy:@"number"];
     }
-    _sortedChannels = [Channels sortChannels:_channels sortBy:@"default"];
+    
     [_mainTableView scrollRectToVisible:CGRectMake(0, 0, 1, 1) animated:NO];
     [_mainTableView reloadData];
 }
+
 
 - (IBAction)forward:(id)sender {
     

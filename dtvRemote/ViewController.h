@@ -26,6 +26,7 @@
 @property (nonatomic, strong) NSMutableDictionary *allChannels;
 @property (nonatomic, strong) NSMutableDictionary *sortedChannels;
 @property (nonatomic, strong) NSMutableArray *blockedChannels;
+
 @property (nonatomic, strong) NSMutableDictionary *guide;
 @property (nonatomic, strong) NSMutableDictionary *clients;
 @property (nonatomic, strong) NSDictionary *currentClient;

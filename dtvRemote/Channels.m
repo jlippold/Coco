@@ -192,6 +192,7 @@
                                                        @"chLogoId" : [item objectForKey:@"chLogoId"],
                                                        @"chNum": [item objectForKey:@"chNum"],
                                                        @"chHd": [item objectForKey:@"chHd"],
+                                                       @"chCat": @"Uncategorized",
                                                        @"chAdult": [item objectForKey:@"chAdult"]};
                              
                              [channelList setObject:[channel mutableCopy] forKey:[deDuplicate[chNum] stringValue]];
@@ -324,6 +325,20 @@
         }
     }
     
+    if ([sort isEqualToString:@"category"]) {
+        for (id channel in keys) {
+            NSString *chId = [channels[channel] objectForKey:@"chId"];
+            NSString *chName = [channels[channel] objectForKey:@"chName"];
+            NSString *header = [channels[channel] objectForKey:@"chCat"];
+            
+            if (![sortedChannels objectForKey:header]) {
+                [sortedChannels setObject:[[NSMutableDictionary alloc] init] forKey:header];
+            }
+            
+            [sortedChannels[header] setObject:chId forKey:chName];
+        }
+    }
+    
     return sortedChannels;
 }
 
@@ -357,6 +372,17 @@
     NSString *documentsDirectoryPath = [paths objectAtIndex:0];
     NSString *filePath = [documentsDirectoryPath stringByAppendingPathComponent:key];
     [NSKeyedArchiver archiveRootObject:dataDict toFile:filePath];
+}
+
++ (NSMutableDictionary *) addChannelCategoriesFromGuide:(NSMutableDictionary *)guide
+                                               channels:(NSMutableDictionary *)channels  {
+    for (NSString *chId in channels) {
+        if ([guide objectForKey:chId]) {
+            NSDictionary *guideItem = [guide objectForKey:chId];
+            channels[chId][@"chCat"] = guideItem[@"category"];
+        }
+    }
+    return channels;
 }
 
 

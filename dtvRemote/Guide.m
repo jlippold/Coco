@@ -30,7 +30,7 @@
                                                         object:[dt dateByAddingTimeInterval:(30*60)]];
     
     
-    //Download data in 50 channel chunks
+    //Download data in channel chunks
     NSUInteger chunkSize = 200;
     __block int completed = 0;
     __block int total = ceil((double)[[channels allKeys] count]/chunkSize);
@@ -167,6 +167,12 @@
                         guideItem[@"title"] = [NSString stringWithFormat:@"%@ (%@)",
                                                show[@"title"], show[@"releaseYear"]];
                     }
+                    
+                    guideItem[@"category"] = @"Uncatagorized";
+                    if (show[@"mainCategory"]) {
+                        guideItem[@"category"] = show[@"mainCategory"];
+                    }
+                    
                     if (show[@"starRatingNum"]) {
                         guideItem[@"starRating"] = show[@"starRatingNum"];
                     }
@@ -191,7 +197,6 @@
                         id nextShow = [channelSchedule objectAtIndex:i+1];
                         guideItem[@"upNext"] = nextShow[@"title"];
                     }
-                    
                     
                     [results setObject:guideItem forKey:deDuplicate[chNum]];
                     
