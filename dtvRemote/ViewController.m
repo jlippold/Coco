@@ -1231,10 +1231,9 @@
         _rightButton.title = @"Done";
         _channels = [Channels load:YES];
         _blockedChannels = [Channels loadBlockedChannels:_channels];
-        _sortedChannels = [Channels sortChannels:_channels sortBy:@"number"];
+        _sortedChannels = [Channels sortChannels:_channels sortBy:@"default"];
     }
-    
-    [_mainTableView scrollRectToVisible:CGRectMake(0, 0, 1, 1) animated:NO];
+
     [_mainTableView reloadData];
 }
 
