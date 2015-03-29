@@ -35,6 +35,8 @@
 
 @property (nonatomic, strong) UITableView *mainTableView;
 @property (nonatomic, strong) IBOutlet UINavigationBar *navbar;
+@property (nonatomic, strong) IBOutlet UILabel *navTitle;
+@property (nonatomic, strong) IBOutlet UILabel *navSubTitle;
 @property (nonatomic, strong) IBOutlet UINavigationItem *navItem;
 @property (nonatomic, strong) IBOutlet UIBarButtonItem *rightButton;
 @property (nonatomic, strong) UISearchController *searchController;

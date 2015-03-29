@@ -177,6 +177,29 @@
     _navbar.tintColor = navTint;
     _navbar.titleTextAttributes = @{NSForegroundColorAttributeName : textColor};
     
+    
+    _navTitle = [[UILabel alloc] init];
+    _navTitle.translatesAutoresizingMaskIntoConstraints = YES;
+    _navTitle.text = @"";
+    _navTitle.font = [UIFont fontWithName:@"Helvetica-Bold" size:17];
+    [_navTitle setTextColor:textColor];
+    _navTitle.tintColor = navTint;
+    _navTitle.textAlignment = NSTextAlignmentCenter;
+    _navTitle.frame = CGRectMake(0, 28, [[UIScreen mainScreen] bounds].size.width, 20);
+    
+    _navSubTitle = [[UILabel alloc] init];
+    _navSubTitle.translatesAutoresizingMaskIntoConstraints = YES;
+    _navSubTitle.text = @"";
+    _navSubTitle.font = [UIFont fontWithName:@"Helvetica" size:15];
+    [_navSubTitle setTextColor: textColor];
+    _navSubTitle.textAlignment = NSTextAlignmentCenter;
+    _navSubTitle.frame = CGRectMake(0, 44, [[UIScreen mainScreen] bounds].size.width, 20);
+    [_navSubTitle setFont:[UIFont systemFontOfSize:14]];
+    
+    [_navbar addSubview:_navTitle];
+    [_navbar addSubview:_navSubTitle];
+    
+    
     NSDictionary* barButtonItemAttributes =  @{NSFontAttributeName: [UIFont fontWithName:@"Helvetica" size:14.0f],
                                                NSForegroundColorAttributeName: navTint};
     
@@ -889,10 +912,10 @@
 
 - (void) displayClient {
     if (_currentClient) {
-        _navItem.title = _currentClient[@"name"];
+        _navTitle.text = [_currentClient[@"name"] capitalizedString];
         [self refreshNowPlaying:nil scrollToPlayingChanel:YES];
     } else {
-        _navItem.title = @"";
+        _navTitle.text = @"";
         [self clearNowPlaying];
     }
 }
@@ -920,7 +943,7 @@
 -(void) setNowPlaying:(NSString *)chId chNum:(NSString *)chNum {
 
     NSDictionary *channel = [_allChannels objectForKey:chId];
-    NSLog(@"setting NP");
+    NSLog(@"Querying Now Playing");
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
         NSDictionary *guide = [Guide getNowPlayingForChannel:channel];
         if ([[guide allKeys] count] == 0) {
@@ -954,9 +977,8 @@
         [_hdLabel setHidden:YES];
     }
     
-    _navItem.title = [NSString stringWithFormat:@"%@ %@",
-                      _currentClient[@"name"],
-                      channel[@"chCall"]];
+    _navTitle.text = [_currentClient[@"name"] capitalizedString];
+    _navSubTitle.text = [NSString stringWithFormat:@"%@ %@", channel[@"chNum"], channel[@"chName"]];
 
     [self setBoxCoverForChannel:guideData[@"boxcover"]];
     [self setDescriptionForProgramId:guideData[@"programID"]];
