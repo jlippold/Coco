@@ -320,7 +320,7 @@
             if (![sortedChannels objectForKey:header]) {
                 [sortedChannels setObject:[[NSMutableDictionary alloc] init] forKey:header];
             }
-            
+
             [sortedChannels[header] setObject:chId forKey:chNum];
         }
     }
@@ -338,6 +338,35 @@
             [sortedChannels[header] setObject:chId forKey:chName];
         }
     }
+    
+    if ([sort isEqualToString:@"channelGroup"]) {
+        
+        
+        NSURL *url = [[NSBundle mainBundle] URLForResource:@"categories" withExtension:@"plist"];
+        NSDictionary *categories = [[NSDictionary dictionaryWithContentsOfURL:url] objectForKey: @"Categories"];
+
+        for (id channel in keys) {
+            NSString *chId = [channels[channel] objectForKey:@"chId"];
+            NSString *chName = [channels[channel] objectForKey:@"chName"];
+            NSString *chCall = [[channels[channel] objectForKey:@"chCall"] uppercaseString];
+            NSString *header = @"Uncatagorized";
+            if (categories[chCall]) {
+                header = categories[chCall];
+            }
+            
+            if ([header isEqualToString:@"Uncatagorized"] &&
+                [[chCall substringFromIndex:1] isEqualToString:@"W"]) {
+                header = @"Local";
+            }
+
+            if (![sortedChannels objectForKey:header]) {
+                [sortedChannels setObject:[[NSMutableDictionary alloc] init] forKey:header];
+            }
+            
+            [sortedChannels[header] setObject:chId forKey:chName];
+        }
+    }
+    
     
     return sortedChannels;
 }

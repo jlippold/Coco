@@ -1191,6 +1191,20 @@
     }];
     [view addAction:category];
     
+    UIAlertAction* channelGroup = [UIAlertAction actionWithTitle:@"Channel Type" style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
+        
+        //save sort
+        [[NSUserDefaults standardUserDefaults] setObject:@"channelGroup" forKey:@"sort"];
+        [[NSUserDefaults standardUserDefaults] synchronize];
+        
+        _sortedChannels = [Channels sortChannels:_channels sortBy:@"channelGroup"];
+        [_mainTableView scrollRectToVisible:CGRectMake(0, 0, 1, 1) animated:NO];
+        [_mainTableView reloadData];
+        [view dismissViewControllerAnimated:YES completion:nil];
+    }];
+    [view addAction:channelGroup];
+    
+    
     UIAlertAction* cancel = [UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:^(UIAlertAction * action) {
         [view dismissViewControllerAnimated:YES completion:nil];
     }];
