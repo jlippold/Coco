@@ -269,7 +269,7 @@
     
     _playButton = [[UIBarButtonItem alloc]
                    initWithImage:[UIImage imageNamed:@"images.bundle/pause"]
-                   style:UIBarButtonItemStylePlain target:self action:@selector(playPause:) ];
+                   style:UIBarButtonItemStylePlain target:self action:@selector(stub:) ];
     
     _playButton.tintColor = textColor;
     
@@ -470,7 +470,7 @@
     
     UIBarButtonItem *numberPad = [[UIBarButtonItem alloc]
                                   initWithImage:[UIImage imageNamed:@"images.bundle/numberpad.png"]
-                                  style:UIBarButtonItemStylePlain target:self action:@selector(stub:) ];
+                                  style:UIBarButtonItemStylePlain target:self action:@selector(showNumberPad:) ];
     
     UIBarButtonItem *refresh = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRefresh
                                                                              target:self
@@ -1259,13 +1259,56 @@
     [_mainTableView reloadData];
 }
 
+- (IBAction)showNumberPad:(id)sender {
+    
+    if ([[_currentClient allKeys] count] == 0) {
+        return;
+    }
+   
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Number Pad"
+                                                                   message:@"Please enter a channel"
+                                                            preferredStyle:UIAlertControllerStyleAlert];
+    
+    UIAlertAction* accept =
+    [UIAlertAction actionWithTitle:@"Change Channel"
+                             style:UIAlertActionStyleDefault
+                           handler:^(UIAlertAction * action){
+                               
+                               UITextField *txtField = alert.textFields.firstObject;
+                               NSString *channel = txtField.text;
+                               NSLog(@"Change to: %@", channel);
+                               
+                               if ([channel length] > 4) {
+                                   [self showNumberPad:nil];
+                                   return;
+                               }
+                               [Commands changeChannel:channel device:_currentClient];
+                               [self dismissViewControllerAnimated:YES completion:nil];
+                               
+                           }];
+    
+    
+    [alert addTextFieldWithConfigurationHandler:^(UITextField *textField) {
+        textField.text = @"";
+        textField.keyboardType = UIKeyboardTypeNumberPad;
+    }];
+    
+    UIAlertAction* cancel =
+    [UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:
+     ^(UIAlertAction * action) {
+         [self dismissViewControllerAnimated:YES completion:nil];
+     }];
+    
+    [alert addAction:accept];
+    [alert addAction:cancel];
+    
+    [self presentViewController:alert animated:YES completion:nil];
+}
 
 - (IBAction)forward:(id)sender {
     
 }
-- (IBAction)playPause:(id)sender {
-    
-}
+
 
 - (IBAction)stub:(id)sender {
     
