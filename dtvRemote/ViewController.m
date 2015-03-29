@@ -72,7 +72,7 @@
             [self promptForZipCode];
         });
     } else {
-        _sortedChannels = [Channels sortChannels:_channels sortBy:@"number"];
+        _sortedChannels = [Channels sortChannels:_channels sortBy:@"default"];
         [self refreshGuide];
     }
     
@@ -799,7 +799,7 @@
         [_mainTableView reloadData];
         [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
         [MBProgressHUD hideHUDForView:self.view animated:YES];
-        _sortedChannels = [Channels sortChannels:_channels sortBy:@"number"];
+        _sortedChannels = [Channels sortChannels:_channels sortBy:@"default"];
         [self refreshGuide];
     });
     
@@ -986,7 +986,9 @@
         NSMutableDictionary *sectionData = [_sortedChannels objectForKey:sectionKey];
         NSArray *sectionChannels = [[sectionData allKeys] sortedArrayUsingSelector: @selector(compare:)];
         for (id sectionChannelKey in sectionChannels) {
-            if ([[sectionChannelKey stringValue] isEqualToString:scrollToChNum]) {
+            NSString *chId = [sectionData[sectionChannelKey] stringValue];
+            NSString *chNum = [_channels[chId][@"chNum"] stringValue];
+            if ([chNum isEqualToString:scrollToChNum]) {
                 row = rowCounter;
                 section = sectionCounter;
             }
@@ -1146,14 +1148,26 @@
                                preferredStyle:UIAlertControllerStyleActionSheet];
     
     UIAlertAction* name = [UIAlertAction actionWithTitle:@"Name" style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
+        
+        //save sort
+        [[NSUserDefaults standardUserDefaults] setObject:@"name" forKey:@"sort"];
+        [[NSUserDefaults standardUserDefaults] synchronize];
+        
         _sortedChannels = [Channels sortChannels:_channels sortBy:@"name"];
+        [_mainTableView scrollRectToVisible:CGRectMake(0, 0, 1, 1) animated:NO];
         [_mainTableView reloadData];
         [view dismissViewControllerAnimated:YES completion:nil];
     }];
     [view addAction:name];
     
     UIAlertAction* number = [UIAlertAction actionWithTitle:@"Number" style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
+        
+        //save sort
+        [[NSUserDefaults standardUserDefaults] setObject:@"number" forKey:@"sort"];
+        [[NSUserDefaults standardUserDefaults] synchronize];
+        
         _sortedChannels = [Channels sortChannels:_channels sortBy:@"number"];
+        [_mainTableView scrollRectToVisible:CGRectMake(0, 0, 1, 1) animated:NO];
         [_mainTableView reloadData];
         [view dismissViewControllerAnimated:YES completion:nil];
     }];
@@ -1185,7 +1199,7 @@
         _channels = [Channels load:YES];
         _blockedChannels = [Channels loadBlockedChannels:_channels];
     }
-    _sortedChannels = [Channels sortChannels:_channels sortBy:@"number"];
+    _sortedChannels = [Channels sortChannels:_channels sortBy:@"default"];
     [_mainTableView scrollRectToVisible:CGRectMake(0, 0, 1, 1) animated:NO];
     [_mainTableView reloadData];
 }

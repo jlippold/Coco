@@ -287,11 +287,19 @@
     NSMutableDictionary *sortedChannels = [[NSMutableDictionary alloc] init];
     NSArray *keys = [channels allKeys];
     
+    if ([sort isEqualToString:@"default"]) {
+        if ([[NSUserDefaults standardUserDefaults] stringForKey:@"sort"] == nil) {
+            [[NSUserDefaults standardUserDefaults] setObject:@"number" forKey:@"sort"];
+            [[NSUserDefaults standardUserDefaults] synchronize];
+        }
+        sort = [[NSUserDefaults standardUserDefaults] stringForKey:@"sort"];
+    }
+    
     if ([sort isEqualToString:@"name"]) {
         for (id channel in keys) {
             NSString *chId = [channels[channel] objectForKey:@"chId"];
             NSString *chName = [channels[channel] objectForKey:@"chName"];
-            NSString *header = [chName substringToIndex:1];
+            NSString *header = [[chName substringToIndex:1] uppercaseString];
             
             if (![sortedChannels objectForKey:header]) {
                 [sortedChannels setObject:[[NSMutableDictionary alloc] init] forKey:header];
@@ -315,7 +323,6 @@
             [sortedChannels[header] setObject:chId forKey:chNum];
         }
     }
-    
     
     return sortedChannels;
 }
