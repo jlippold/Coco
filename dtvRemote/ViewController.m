@@ -291,7 +291,7 @@
     _seekBar.minimumValue = 0.0;
     _seekBar.maximumValue = 100.0;
     _seekBar.value = 0;
-    [_seekBar setMaximumTrackTintColor:textColor];
+    [_seekBar setMaximumTrackTintColor:boxBackgroundColor];
     [_seekBar setMinimumTrackTintColor:tint];
     
     _seekBar.tintColor = textColor;
@@ -500,8 +500,40 @@
 }
 
 - (void)searchBarTextDidBeginEditing:(UISearchBar *)searchBar {
-    // [self doFilter];
-    
+    [self openSearchBar];
+}
+
+- (void)searchBarSearchButtonClicked:(UISearchBar *)searchBar {
+    [self closeSearchBar];
+}
+
+- (void)searchBarTextDoneEditing:(UISearchBar *)searchBar {
+    [self closeSearchBar];
+}
+- (void)searchBar:(UISearchBar *)searchBar textDidChange:(NSString *)searchText {
+    [self closeSearchBar];
+}
+
+- (void) closeSearchBar {
+    [_searchBar resignFirstResponder];
+    if ([_searchBar.text isEqualToString:@""]) {
+        if (_searchBar.tag == 2) {
+            return;
+        }
+        _searchBar.tag = 2;
+        
+        CGRect newFrame = _searchBar.frame;
+        newFrame.size.width = searchBarMinWidth;
+        [UIView animateWithDuration:0.50
+                         animations:^{
+                             _searchBar.frame = newFrame;
+                             _ratingLabel.alpha = 1.0;
+                             _stars.alpha = 1.0;
+                         }];
+    }
+}
+
+- (void) openSearchBar {
     if (_searchBar.tag == 1) {
         return;
     }
@@ -513,45 +545,16 @@
     [UIView animateWithDuration:0.25
                      animations:^{
                          _searchBar.frame = newFrame;
+                         _ratingLabel.alpha = 0.0;
+                         _stars.alpha = 0.0;
                      }];
-    
-}
-
-- (void)searchBarSearchButtonClicked:(UISearchBar *)searchBar {
-    
-    [searchBar resignFirstResponder];
-    
-    if ([searchBar.text isEqualToString:@""]) {
-        NSLog(@"Clear");
-        if (_searchBar.tag == 2) {
-            return;
-        }
-        _searchBar.tag = 2;
-        
-        CGRect newFrame = _searchBar.frame;
-        newFrame.size.width = searchBarMinWidth;
-        [UIView animateWithDuration:0.50
-                         animations:^{
-                             _searchBar.frame = newFrame;
-                         }];
-    }
-    
-}
-- (void)searchBarTextDoneEditing:(UISearchBar *)searchBar {
-    [searchBar resignFirstResponder];
-}
-- (void)searchBar:(UISearchBar *)searchBar textDidChange:(NSString *)searchText {
-    if ([searchText isEqualToString:@""]) {
-    } else {
-        //[self doFilter];
-    }
 }
 
 - (BOOL)searchBarShouldEndEditing:(UISearchBar *)searchBar {
     return YES;
 }
 - (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView {
-    [_searchBar resignFirstResponder];
+    [self closeSearchBar];
 }
 
 -(CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section {
