@@ -16,6 +16,8 @@
 + (void) getLocationsForZipCode:(NSString *)zipCode;
 + (void) populateChannels:(NSMutableDictionary *)location;
 + (void) downloadChannelImages:(NSMutableDictionary *)channelList;
++ (NSMutableArray *) loadBlockedChannels:(NSMutableDictionary *)channelList;
++ (void)saveBlockedChannels:(NSMutableArray *) blockedChannels;
 
 + (NSString *)getChannelIdForChannelNumber:(NSString *)chNum channels:(NSMutableDictionary *)channels;
 + (NSMutableDictionary *) sortChannels:(NSMutableDictionary *)channels sortBy:(NSString *)sort;

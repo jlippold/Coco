@@ -41,17 +41,17 @@
     
     //remove blocks
     if (!showBlocks) {
-        NSMutableArray *blocks = [self getUserBlockedChannels:channelList];
+        NSMutableArray *blocks = [self loadBlockedChannels:channelList];
         for (id block in blocks) {
             [channelList removeObjectForKey:block];
         }
-        NSLog(@"Removed: %lu", (unsigned long)[blocks count]);
+        //NSLog(@"Removed: %lu", (unsigned long)[blocks count]);
     }
     
     return channelList;
 }
 
-+ (NSMutableArray *) getUserBlockedChannels:(NSMutableDictionary *)channelList {
++ (NSMutableArray *) loadBlockedChannels:(NSMutableDictionary *)channelList {
     NSString *key = @"blockedChannels";
     NSMutableArray *blocks = [[NSMutableArray alloc] init];
     NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
@@ -86,6 +86,17 @@
     }
     return blocks;
     
+}
++ (void)saveBlockedChannels:(NSMutableArray *) blockedChannels {
+    NSString *key = @"blockedChannels";
+    NSMutableDictionary *dataDict = [[NSMutableDictionary alloc] init];
+    if (blockedChannels != nil) {
+        [dataDict setObject:blockedChannels forKey:key];
+    }
+    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    NSString *documentsDirectoryPath = [paths objectAtIndex:0];
+    NSString *filePath = [documentsDirectoryPath stringByAppendingPathComponent:key];
+    [NSKeyedArchiver archiveRootObject:dataDict toFile:filePath];
 }
 
 + (void) getLocationsForZipCode:(NSString *)zipCode {

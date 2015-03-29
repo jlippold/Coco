@@ -18,11 +18,14 @@
     double xOffset;
     
     BOOL guideIsRefreshing;
+    BOOL isEditing;
     
 }
 
 @property (nonatomic, strong) NSMutableDictionary *channels;
+@property (nonatomic, strong) NSMutableDictionary *allChannels;
 @property (nonatomic, strong) NSMutableDictionary *sortedChannels;
+@property (nonatomic, strong) NSMutableArray *blockedChannels;
 @property (nonatomic, strong) NSMutableDictionary *guide;
 @property (nonatomic, strong) NSMutableDictionary *clients;
 @property (nonatomic, strong) NSDictionary *currentClient;
@@ -32,6 +35,7 @@
 @property (nonatomic, strong) UITableView *mainTableView;
 @property (nonatomic, strong) IBOutlet UINavigationBar *navbar;
 @property (nonatomic, strong) IBOutlet UINavigationItem *navItem;
+@property (nonatomic, strong) IBOutlet UIBarButtonItem *rightButton;
 @property (nonatomic, strong) UISearchController *searchController;
 @property (nonatomic, strong) UISearchBar *searchBar;
 

@@ -43,13 +43,16 @@
     _currentProgramId = @"";
     
     _channels = [Channels load:NO];
-
+    _allChannels = [Channels load:YES];
+    
     _guide = [[NSMutableDictionary alloc] init];
     _sortedChannels = [[NSMutableDictionary alloc] init];
-
+    _blockedChannels = [[NSMutableArray alloc] init];
+    
     _ssid = [iNet getWifiAddress];
     _clients = [Clients loadClientList];
     _currentClient = [Clients getClient];
+    isEditing = NO;
     
     _ssidTimer = [[NSTimer alloc] init];
     
@@ -190,8 +193,8 @@
     UIBarButtonItem *leftButton = [[UIBarButtonItem alloc] initWithTitle:@"Room" style:UIBarButtonItemStylePlain target:self action:@selector(chooseClient:)];
     _navItem.leftBarButtonItem = leftButton;
     
-    UIBarButtonItem *rightButton = [[UIBarButtonItem alloc] initWithTitle:@"Edit" style:UIBarButtonItemStylePlain target:self action:@selector(chooseClient:)];
-    _navItem.rightBarButtonItem = rightButton;
+    _rightButton = [[UIBarButtonItem alloc] initWithTitle:@"Edit" style:UIBarButtonItemStylePlain target:self action:@selector(toggleEditMode:)];
+    _navItem.rightBarButtonItem = _rightButton;
     
     [_navbar pushNavigationItem:_navItem animated:false];
     [self.view addSubview:_navbar];
@@ -589,9 +592,7 @@
     
     NSDictionary *channel = _channels[chId];
     NSDictionary *guideItem = [_guide objectForKey:chId];
-    
-    cell.accessoryView = [[UIImageView alloc] initWithImage:[UIImage new]];
-    
+
     NSString *timeLeft= @"";
     bool showIsEndingSoon = NO;
     
@@ -613,19 +614,38 @@
         
     } else {
         cell.textLabel.text = @"Not Available";
-        cell.detailTextLabel.text = @"";
+        cell.detailTextLabel.text = @" ";
         showIsEndingSoon = NO;
     }
     
-    
     UILabel *l2 = (UILabel *)[cell viewWithTag:1];
-    l2.text =  [NSString stringWithFormat:@"%04d\n%@", [[channel objectForKey:@"chNum"] intValue], timeLeft];
-    //l2.text =  [NSString stringWithFormat:@"%@\n%@", [channel objectForKey:@"chCall"] , timeLeft];
-    if (showIsEndingSoon){
-        l2.textColor = red;
+    
+    if (isEditing) {
+        [l2 setHidden:YES];
+        
+        cell.textLabel.text = channel[@"chName"];
+        cell.detailTextLabel.text = [NSString stringWithFormat:@"%@ - %@", channel[@"chNum"], channel[@"chCall"]];
+        
+        if ([_blockedChannels containsObject:chId]) {
+            cell.accessoryView = [[UIImageView alloc] initWithImage:[UIImage new]];
+            cell.accessoryType = UITableViewCellAccessoryNone;
+        } else {
+            cell.accessoryView = nil;
+            cell.accessoryType = UITableViewCellAccessoryCheckmark;
+        }
     } else {
-        l2.textColor = textColor;
+        cell.accessoryView = [[UIImageView alloc] initWithImage:[UIImage new]];
+        
+        [l2 setHidden:NO];
+        l2.text =  [NSString stringWithFormat:@"%04d\n%@", [[channel objectForKey:@"chNum"] intValue], timeLeft];
+        //l2.text =  [NSString stringWithFormat:@"%@\n%@", [channel objectForKey:@"chCall"] , timeLeft];
+        if (showIsEndingSoon){
+            l2.textColor = red;
+        } else {
+            l2.textColor = textColor;
+        }
     }
+
     
     //channel image
     UIImage *image = [UIImage new];
@@ -645,11 +665,6 @@
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
-    if ([[_currentClient allKeys] count] == 0) {
-        [self chooseClient:nil];
-    }
-    [tableView deselectRowAtIndexPath:indexPath animated:YES];
-    
     NSArray *sections = [[_sortedChannels allKeys] sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
     NSString *sectionKey = [sections objectAtIndex:indexPath.section];
     NSMutableDictionary *sectionData = [_sortedChannels objectForKey:sectionKey];
@@ -657,8 +672,29 @@
     id sectionChannelKey = [sectionChannels objectAtIndex:indexPath.row];
     id chId = [[sectionData objectForKey:sectionChannelKey] stringValue];
     
-    [Commands changeChannel:_channels[chId][@"chNum"] device:_currentClient];
+    [tableView deselectRowAtIndexPath:indexPath animated:YES];
     
+    if (isEditing) {
+        
+        UITableViewCell *cell =[tableView cellForRowAtIndexPath:indexPath];
+        if ([_blockedChannels containsObject:chId]) {
+            [_blockedChannels removeObject:chId];
+            cell.accessoryView = [[UIImageView alloc] initWithImage:[UIImage new]];
+            cell.accessoryType = UITableViewCellAccessoryNone;
+        } else {
+            [_blockedChannels addObject:chId];
+            cell.accessoryView = nil;
+            cell.accessoryType = UITableViewCellAccessoryCheckmark;
+        }
+        [_mainTableView reloadRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationNone];
+    } else {
+        
+        if ([[_currentClient allKeys] count] == 0) {
+            [self chooseClient:nil];
+        }
+        
+        [Commands changeChannel:_channels[chId][@"chNum"] device:_currentClient];
+    }
     
 }
 
@@ -864,7 +900,7 @@
     if (_currentClient) {
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
             NSString *channelNum = [Commands getChannelOnClient:_currentClient];
-            NSString *channelId = [Channels getChannelIdForChannelNumber:channelNum channels:_channels];
+            NSString *channelId = [Channels getChannelIdForChannelNumber:channelNum channels:_allChannels];
             
             if ([channelId isEqualToString:@""]) {
                 [self clearNowPlaying];
@@ -882,7 +918,7 @@
 
 -(void) setNowPlaying:(NSString *)chId chNum:(NSString *)chNum {
 
-    NSDictionary *channel = [_channels objectForKey:chId];
+    NSDictionary *channel = [_allChannels objectForKey:chId];
     NSLog(@"setting NP");
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
         NSDictionary *guide = [Guide getNowPlayingForChannel:channel];
@@ -1131,6 +1167,29 @@
     [self presentViewController:view animated:YES completion:nil];
     
 }
+
+- (IBAction)toggleEditMode:(id)sender {
+    if (isEditing) {
+        //Going back to regular mode
+        [Channels saveBlockedChannels:_blockedChannels];
+        isEditing = NO;
+        _rightButton.title = @"Edit";
+        _channels = [Channels load:NO];
+        _blockedChannels = [[NSMutableArray alloc] init];
+        //NSIndexPath *indexpath = (NSIndexPath*)[[_mainTableView indexPathsForVisibleRows] objectAtIndex:0];
+        
+    } else {
+        //Going into edit mode
+        isEditing = YES;
+        _rightButton.title = @"Done";
+        _channels = [Channels load:YES];
+        _blockedChannels = [Channels loadBlockedChannels:_channels];
+    }
+    _sortedChannels = [Channels sortChannels:_channels sortBy:@"number"];
+    [_mainTableView scrollRectToVisible:CGRectMake(0, 0, 1, 1) animated:NO];
+    [_mainTableView reloadData];
+}
+
 - (IBAction)forward:(id)sender {
     
 }
