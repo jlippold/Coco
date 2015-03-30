@@ -25,11 +25,7 @@
     }
     
     dt = [self getHalfHourIncrement:dt];
-    
-    [[NSNotificationCenter defaultCenter] postNotificationName:@"messageNextGuideRefreshTime"
-                                                        object:[dt dateByAddingTimeInterval:(30*60)]];
-    
-    
+
     //Download data in channel chunks
     NSUInteger chunkSize = 200;
     __block int completed = 0;
@@ -60,8 +56,11 @@
         completed++;
         
         if (completed >= total) {
-            NSLog(@"guide updated");
             [[NSNotificationCenter defaultCenter] postNotificationName:@"messageUpdatedGuide" object:guide];
+            
+            [[NSNotificationCenter defaultCenter] postNotificationName:@"messageNextGuideRefreshTime"
+                                                                object:[dt dateByAddingTimeInterval:(30*60)]];
+            
         } else {
             long double progress =(completed*1.0/total*1.0);
             //NSLog(@"progress %Lf", progress);

@@ -24,5 +24,6 @@ NSDate *guideTime;
                     sortedChannels:(NSMutableDictionary *)sortedChannels;
 
 + (NSMutableDictionary *) getNowPlayingForChannel:(id)channel;
++ (NSDate *)getHalfHourIncrement:(NSDate *)date;
 
 @end

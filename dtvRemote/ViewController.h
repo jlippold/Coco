@@ -50,6 +50,7 @@
 
 
 @property (nonatomic, strong) UIToolbar *playBar;
+@property (nonatomic, strong) UIView *overlay;
 @property (nonatomic, strong) UILabel *overlayLabel;
 @property (nonatomic, strong) UIView *overlayProgress;
 @property (nonatomic, strong) IBOutlet UIBarButtonItem *rewindButton;

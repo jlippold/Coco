@@ -425,37 +425,33 @@
     
     UIColor *textColor = [UIColor colorWithRed:193/255.0f green:193/255.0f blue:193/255.0f alpha:1.0f];
     
-    UIView *overlay = [[UIView alloc] init];
-    _overlayProgress = [[UIView alloc] init];
-    
-    
-    
-    overlay.frame = CGRectMake(0, [[UIScreen mainScreen] bounds].size.height - (toolbarHeight + overlayHeight),
+    _overlay = [[UIView alloc] init];
+    _overlay.opaque = YES;
+    _overlay.alpha = 0;
+    _overlay.backgroundColor = [UIColor blackColor];
+    _overlay.frame = CGRectMake(0, [[UIScreen mainScreen] bounds].size.height - (toolbarHeight + overlayHeight),
                                [[UIScreen mainScreen] bounds].size.width, overlayHeight);
     
-    _overlayProgress.frame = CGRectMake(0,
-                                        [[UIScreen mainScreen] bounds].size.height -
-                                        (toolbarHeight + progressHeight) ,
+    _overlayProgress = [[UIView alloc] init];
+    _overlayProgress.frame = CGRectMake(0, overlayHeight - progressHeight,
                                         0, progressHeight);
     
     _overlayProgress.opaque = YES;
-    _overlayProgress.alpha = .6;
+    _overlayProgress.alpha = 0.8;
     _overlayProgress.backgroundColor = [UIColor redColor];
     
-    overlay.opaque = YES;
-    overlay.alpha = .6;
-    overlay.backgroundColor = [UIColor blackColor];
+
     
     _overlayLabel = [[UILabel alloc] init];
     _overlayLabel.textColor = textColor;
-    _overlayLabel.frame = overlay.frame;
+    _overlayLabel.frame = CGRectMake(0, 0,[[UIScreen mainScreen] bounds].size.width, overlayHeight);
     _overlayLabel.text = @"";
     _overlayLabel.font = [UIFont fontWithName:@"Helvetica" size:12];
     _overlayLabel.textAlignment = NSTextAlignmentCenter;
-    
-    [self.view addSubview:overlay];
-    [self.view addSubview:_overlayProgress];
-    [self.view addSubview:_overlayLabel];
+
+    [_overlay addSubview:_overlayProgress];
+    [_overlay addSubview:_overlayLabel];
+    [self.view addSubview:_overlay];
     
     _toolBar = [[UIToolbar alloc] init];
     _toolBar.clipsToBounds = YES;
@@ -465,7 +461,7 @@
     
     UIBarButtonItem *flex = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:self action:nil ];
     
-    
+    /*
     UIBarButtonItem *guideBack = [[UIBarButtonItem alloc]
                                   initWithImage:[UIImage imageNamed:@"images.bundle/left.png"]
                                   style:UIBarButtonItemStylePlain target:self action:@selector(stub:) ];
@@ -474,6 +470,7 @@
     UIBarButtonItem *guideForward = [[UIBarButtonItem alloc]
                                      initWithImage:[UIImage imageNamed:@"images.bundle/right"]
                                      style:UIBarButtonItemStylePlain target:self action:@selector(stub:) ];
+    */
     
     UIBarButtonItem *numberPad = [[UIBarButtonItem alloc]
                                   initWithImage:[UIImage imageNamed:@"images.bundle/numberpad.png"]
@@ -492,7 +489,7 @@
                              style:UIBarButtonItemStylePlain target:self action:@selector(sortChannels:) ];
     
     
-    NSArray *buttons = [NSArray arrayWithObjects:  commands, flex , sort, flex, numberPad, flex, refresh, flex, guideBack, flex, guideForward, nil];
+    NSArray *buttons = [NSArray arrayWithObjects:  commands, flex , sort, flex, numberPad, flex, refresh, nil];
     [_toolBar setItems:buttons animated:NO];
     
     [self.view addSubview:_toolBar];
@@ -1125,7 +1122,13 @@
         frm.size.width = 0;
         _overlayProgress.frame = frm;
         _overlayProgress.hidden = NO;
-        _overlayLabel.text = @"Refreshing guide data...";
+        [self toggleOverlay:@"show"];
+        
+        NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
+        [formatter setDateFormat:@"h:mm a"];
+        NSDate *dt = [Guide getHalfHourIncrement:[NSDate date]];
+        _overlayLabel.text = [NSString stringWithFormat:@"Now Refreshing guide for %@",
+                              [formatter stringFromDate:dt]];
         
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
             [Guide refreshGuide:_channels sorted:_sortedChannels forTime:[NSDate date]];
@@ -1135,6 +1138,14 @@
 
 - (void) messageNextGuideRefreshTime:(NSNotification *)notification {
     _nextRefresh = [notification object];
+    
+    [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+        NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
+        [formatter setDateFormat:@"h:mm a"];
+        _overlayLabel.text = [NSString stringWithFormat:@"Next Refresh at %@",
+                              [formatter stringFromDate:_nextRefresh]];
+        [self toggleOverlay:@"hide"];
+    }];
 }
 
 - (void) messageUpdatedGuide:(NSNotification *)notification {
@@ -1146,10 +1157,26 @@
     
     [[NSOperationQueue mainQueue] addOperationWithBlock:^{
         _overlayProgress.hidden = YES;
-        _overlayLabel.text = @"Guide updated.";
         [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
         [_mainTableView reloadData];
     }];
+}
+
+- (void) toggleOverlay:(NSString *)action {
+    if ([action isEqualToString:@"show"]) {
+        [UIView animateWithDuration:0.5
+                         animations:^{
+                             _overlay.alpha = 0.8;
+                         }];
+    } else {
+        dispatch_time_t delay = dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC * 3);
+        dispatch_after(delay, dispatch_get_main_queue(), ^(void){
+            [UIView animateWithDuration:0.5
+                             animations:^{
+                                 _overlay.alpha = 0.0;
+                             }];
+        });
+    }
 }
 
 - (void) messageUpdatedGuideProgress:(NSNotification *)notification {
