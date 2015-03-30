@@ -134,10 +134,8 @@
     [self saveClientList:clients];
     
     NSString *ssid = [iNet fetchSSID];
-    
-    NSMutableDictionary *netClients = [[NSMutableDictionary alloc] init];
-    [netClients setObject:clients forKey:ssid];
-    NSLog(@"%@", netClients);
+
+    NSLog(@"%@", clients);
     [[NSNotificationCenter defaultCenter] postNotificationName:@"messageUpdatedClients" object:clients];
     
 }

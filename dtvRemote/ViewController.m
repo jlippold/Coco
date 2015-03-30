@@ -49,7 +49,7 @@
     _sortedChannels = [[NSMutableDictionary alloc] init];
     _blockedChannels = [[NSMutableArray alloc] init];
     
-    _ssid = [iNet getWifiAddress];
+    _ssid = [iNet fetchSSID];
     _clients = [Clients loadClientList];
     _currentClient = [Clients getClient];
     isEditing = NO;
@@ -89,7 +89,7 @@
                                             userInfo:nil
                                              repeats:YES];
     
-   _ssidTimer = [NSTimer scheduledTimerWithTimeInterval:3.0
+   _ssidTimer = [NSTimer scheduledTimerWithTimeInterval:30.0
                                                  target:self
                                                selector:@selector(fetchSSID:)
                                                userInfo:nil
