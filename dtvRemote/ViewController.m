@@ -593,9 +593,7 @@
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     
-    
     UIColor *textColor = [UIColor colorWithRed:193/255.0f green:193/255.0f blue:193/255.0f alpha:1.0f];
-    UIColor *red = [UIColor colorWithRed:217/255.0f green:50/255.0f blue:5/255.0f alpha:1.0f];
     UIColor *backgroundColor = [UIColor colorWithRed:28/255.0f green:28/255.0f blue:28/255.0f alpha:1.0f];
     
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"SomeId"];
@@ -624,29 +622,21 @@
     NSDictionary *channel = _channels[chId];
     NSDictionary *guideItem = [_guide objectForKey:chId];
 
-    NSString *timeLeft= @"";
-    bool showIsEndingSoon = NO;
     
     if (guideItem) {
+        NSDictionary *duration = [Guide getDurationForChannel:guideItem];
         cell.textLabel.text = [guideItem objectForKey:@"title"];
         if ([guideItem objectForKey:@"upNext"]) {
-            cell.detailTextLabel.text = [NSString stringWithFormat:@"next: %@",
+            cell.detailTextLabel.text = [NSString stringWithFormat:@"-%@ %@",
+                                         duration[@"timeLeft"],
                                          [guideItem objectForKey:@"upNext"]];
         } else {
             cell.detailTextLabel.text = @"";
         }
         
-        NSDictionary *duration = [Guide getDurationForChannel:guideItem];
-        if ((int)duration[@"showIsEndingSoon"] == 1) {
-            showIsEndingSoon = YES;
-        }
-        
-        timeLeft = duration[@"timeLeft"];
-        
     } else {
         cell.textLabel.text = @"Not Available";
         cell.detailTextLabel.text = @" ";
-        showIsEndingSoon = NO;
     }
     
     UILabel *l2 = (UILabel *)[cell viewWithTag:1];
@@ -668,13 +658,8 @@
         cell.accessoryView = [[UIImageView alloc] initWithImage:[UIImage new]];
         
         [l2 setHidden:NO];
-        l2.text =  [NSString stringWithFormat:@"%04d\n%@", [[channel objectForKey:@"chNum"] intValue], timeLeft];
-        //l2.text =  [NSString stringWithFormat:@"%@\n%@", [channel objectForKey:@"chCall"] , timeLeft];
-        if (showIsEndingSoon){
-            l2.textColor = red;
-        } else {
-            l2.textColor = textColor;
-        }
+        l2.text =  [NSString stringWithFormat:@"%@", [channel objectForKey:@"chNum"]];
+
     }
 
     
