@@ -290,7 +290,7 @@
     
     if ([sort isEqualToString:@"default"]) {
         if ([[NSUserDefaults standardUserDefaults] stringForKey:@"sort"] == nil) {
-            [[NSUserDefaults standardUserDefaults] setObject:@"number" forKey:@"sort"];
+            [[NSUserDefaults standardUserDefaults] setObject:@"channelGroup" forKey:@"sort"];
             [[NSUserDefaults standardUserDefaults] synchronize];
         }
         sort = [[NSUserDefaults standardUserDefaults] stringForKey:@"sort"];

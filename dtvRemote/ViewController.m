@@ -279,7 +279,13 @@
                                       style:UIBarButtonItemStylePlain target:self action:@selector(forward:) ];
     
     
-    NSArray *buttons = [NSArray arrayWithObjects: flex, rewindButton, flex, _playButton, flex, forwardButton, flex, nil];
+    UIBarButtonItem *recButton = [[UIBarButtonItem alloc]
+                                     initWithImage:[UIImage imageNamed:@"images.bundle/rec"]
+                                     style:UIBarButtonItemStylePlain target:self action:@selector(rewind:)];
+    
+    recButton.tintColor = [UIColor colorWithRed:0.722 green:0.094 blue:0.094 alpha:0.5];
+    
+    NSArray *buttons = [NSArray arrayWithObjects: flex, recButton, flex, rewindButton, flex, _playButton, flex, forwardButton, nil];
     [_playBar setItems: buttons animated:NO];
     
     [self.view addSubview:_playBar];
@@ -508,7 +514,13 @@
     [self closeSearchBar];
 }
 - (void)searchBar:(UISearchBar *)searchBar textDidChange:(NSString *)searchText {
-    [self closeSearchBar];
+    if ([searchText isEqualToString:@""]) {
+        _sortedChannels = [Channels sortChannels:_channels sortBy:@"default"];
+        [_mainTableView reloadData];
+        [self closeSearchBar];
+    } else {
+        [self filterResults:searchText];
+    }
 }
 
 - (void) closeSearchBar {
@@ -518,6 +530,7 @@
             return;
         }
         _searchBar.tag = 2;
+        _sortedChannels = [Channels sortChannels:_channels sortBy:@"default"];
         
         CGRect newFrame = _searchBar.frame;
         newFrame.size.width = searchBarMinWidth;
@@ -545,6 +558,29 @@
                          _ratingLabel.alpha = 0.0;
                          _stars.alpha = 0.0;
                      }];
+}
+
+- (void) filterResults:(NSString *) term {
+    NSMutableDictionary *results = [[NSMutableDictionary alloc] init];
+    NSArray *keys = [_channels allKeys];
+    
+    NSString *header = @"Filtered Results";
+    [results setObject:[[NSMutableDictionary alloc] init] forKey:header];
+
+    for (id channel in keys) {
+        NSString *chId = [_channels[channel] objectForKey:@"chId"];
+        NSString *chName = [_channels[channel] objectForKey:@"chName"];
+        NSString *title = _guide[channel][@"title"];
+        if (title && [title rangeOfString:term options:NSCaseInsensitiveSearch].location != NSNotFound ) {
+            [results[header] setObject:chId forKey:chName];
+        } else {
+            if ([chName rangeOfString:term options:NSCaseInsensitiveSearch].location != NSNotFound ) {
+                [results[header] setObject:chId forKey:chName];
+            }
+        }
+    }
+    _sortedChannels = results;
+    [_mainTableView reloadData];
 }
 
 - (BOOL)searchBarShouldEndEditing:(UISearchBar *)searchBar {
