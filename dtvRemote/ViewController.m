@@ -285,7 +285,8 @@
     
     recButton.tintColor = [UIColor colorWithRed:0.722 green:0.094 blue:0.094 alpha:0.5];
     
-    NSArray *buttons = [NSArray arrayWithObjects: flex, recButton, flex, rewindButton, flex, _playButton, flex, forwardButton, nil];
+    NSArray *buttons = [NSArray arrayWithObjects:
+                        flex, rewindButton, flex, flex, recButton, flex, _playButton, flex, flex, forwardButton, flex, nil];
     [_playBar setItems: buttons animated:NO];
     
     [self.view addSubview:_playBar];
@@ -478,6 +479,10 @@
                                      style:UIBarButtonItemStylePlain target:self action:@selector(stub:) ];
     */
     
+    UIBarButtonItem *clock = [[UIBarButtonItem alloc]
+                                     initWithImage:[UIImage imageNamed:@"images.bundle/clock"]
+                                     style:UIBarButtonItemStylePlain target:self action:@selector(stub:) ];
+    
     UIBarButtonItem *numberPad = [[UIBarButtonItem alloc]
                                   initWithImage:[UIImage imageNamed:@"images.bundle/numberpad.png"]
                                   style:UIBarButtonItemStylePlain target:self action:@selector(showNumberPad:) ];
@@ -495,7 +500,7 @@
                              style:UIBarButtonItemStylePlain target:self action:@selector(sortChannels:) ];
     
     
-    NSArray *buttons = [NSArray arrayWithObjects:  commands, flex , sort, flex, numberPad, flex, refresh, nil];
+    NSArray *buttons = [NSArray arrayWithObjects:  commands, flex , clock, flex, numberPad, flex, sort, flex, refresh, nil];
     [_toolBar setItems:buttons animated:NO];
     
     [self.view addSubview:_toolBar];
