@@ -481,7 +481,7 @@
     
     UIBarButtonItem *clock = [[UIBarButtonItem alloc]
                                      initWithImage:[UIImage imageNamed:@"images.bundle/clock"]
-                                     style:UIBarButtonItemStylePlain target:self action:@selector(stub:) ];
+                                     style:UIBarButtonItemStylePlain target:self action:@selector(selectGuideTime:) ];
     
     UIBarButtonItem *numberPad = [[UIBarButtonItem alloc]
                                   initWithImage:[UIImage imageNamed:@"images.bundle/numberpad.png"]
@@ -493,7 +493,7 @@
     
     UIBarButtonItem *commands = [[UIBarButtonItem alloc]
                                  initWithImage:[UIImage imageNamed:@"images.bundle/commands.png"]
-                                 style:UIBarButtonItemStylePlain target:self action:@selector(stub:) ];
+                                 style:UIBarButtonItemStylePlain target:self action:@selector(showCommands:) ];
     
     UIBarButtonItem *sort = [[UIBarButtonItem alloc]
                              initWithImage:[UIImage imageNamed:@"images.bundle/sort.png"]
@@ -504,6 +504,28 @@
     [_toolBar setItems:buttons animated:NO];
     
     [self.view addSubview:_toolBar];
+    
+    
+    _guideDatePicker = [[UIDatePicker alloc] init];
+    _guideTime = [[UITextField alloc] initWithFrame:CGRectMake(0,0,1,1)];
+    [_guideTime setHidden:YES];
+    [_guideTime setInputView:_guideDatePicker];
+    [_guideDatePicker addTarget:self action:@selector(changedGuideTime:)
+         forControlEvents:UIControlEventValueChanged];
+    
+    UIToolbar *guideTimeDone = [[UIToolbar alloc] initWithFrame:CGRectMake(0, 0, 320, 44)];
+    [guideTimeDone setBarStyle:UIBarStyleBlackTranslucent];
+    
+    UIBarButtonItem *spacer2 = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace
+                                target:nil action:nil];
+    
+    UIBarButtonItem *done = [[UIBarButtonItem alloc] initWithTitle:@"Done" style:UIBarButtonItemStyleDone
+                                                            target:nil action:@selector(selectedGuideTime:)];
+    
+    [guideTimeDone setItems: [NSArray arrayWithObjects:spacer2, done, nil]];
+    [_guideTime setInputAccessoryView:guideTimeDone];
+    
+    [self.view addSubview:_guideTime];
     
 }
 
@@ -1139,26 +1161,30 @@
     _boxDescription.text = @"";
 }
 
-- (IBAction) refreshGuide:(id)sender {
+- (void) refreshGuideForTime:(NSDate *)time {
 
+    [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
+    CGRect frm = _overlayProgress.frame;
+    frm.size.width = 0;
+    _overlayProgress.frame = frm;
+    _overlayProgress.hidden = NO;
+    [self toggleOverlay:@"show"];
+    
+    NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
+    [formatter setDateFormat:@"h:mm a"];
+    NSDate *dt = [Guide getHalfHourIncrement:time];
+    _overlayLabel.text = [NSString stringWithFormat:@"Now Refreshing guide for %@",
+                          [formatter stringFromDate:dt]];
+    
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
+        [Guide refreshGuide:_channels sorted:_sortedChannels forTime:dt];
+    });
+}
+
+- (IBAction) refreshGuide:(id)sender {
     if (!guideIsRefreshing) {
         guideIsRefreshing = YES;
-        [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
-        CGRect frm = _overlayProgress.frame;
-        frm.size.width = 0;
-        _overlayProgress.frame = frm;
-        _overlayProgress.hidden = NO;
-        [self toggleOverlay:@"show"];
-        
-        NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
-        [formatter setDateFormat:@"h:mm a"];
-        NSDate *dt = [Guide getHalfHourIncrement:[NSDate date]];
-        _overlayLabel.text = [NSString stringWithFormat:@"Now Refreshing guide for %@",
-                              [formatter stringFromDate:dt]];
-        
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
-            [Guide refreshGuide:_channels sorted:_sortedChannels forTime:[NSDate date]];
-        });
+        [self refreshGuideForTime:[NSDate date]];
     }
 }
 
@@ -1397,8 +1423,43 @@
     }
 }
 
+- (IBAction)selectGuideTime:(id)sender {
+   if (!guideIsRefreshing) {
+       guideIsRefreshing = YES;
+       [_guideDatePicker setDate:[NSDate date]];
+       _guideDatePicker.maximumDate=[[NSDate date] dateByAddingTimeInterval:(48*60*60)];
+       _guideDatePicker.minimumDate=[[NSDate date] dateByAddingTimeInterval:(90*60*-1)];
+       [_guideTime becomeFirstResponder];
+   }
+}
 
-- (IBAction)stub:(id)sender {
+
+-(void)changedGuideTime:(UIDatePicker *)sender
+{
+    NSDateFormatter *dateFormat = [[NSDateFormatter alloc] init];
+    [dateFormat setDateStyle:NSDateFormatterFullStyle];
+    [dateFormat setTimeStyle:NSDateFormatterFullStyle];
+    _guideTime.text = [dateFormat stringFromDate:sender.date];
+    NSLog(@"Changed: %@", sender.date);
+ 
+}
+
+
+- (IBAction)selectedGuideTime:(id)sender {
+
+    NSDateFormatter *dateFormat = [[NSDateFormatter alloc] init];
+    [dateFormat setDateStyle:NSDateFormatterFullStyle];
+    [dateFormat setTimeStyle:NSDateFormatterFullStyle];
+    NSLog(@"DATE%@", _guideTime.text);
+    NSDate *date = [dateFormat dateFromString:_guideTime.text];
+    [_guideTime resignFirstResponder];
+    [self refreshGuideForTime:date];
+    
+    NSLog(@"Selected: %@", _guideTime.text);
+
+}
+
+- (IBAction)showCommands:(id)sender {
     
 }
 @end

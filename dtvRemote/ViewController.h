@@ -64,6 +64,9 @@
 @property (nonatomic, strong) UIToolbar *toolBar;
 
 
+@property (nonatomic, strong) UITextField *guideTime;
+@property (nonatomic, strong) UIDatePicker *guideDatePicker;
+
 @property (nonatomic, strong) NSTimer *timer;
 @property (nonatomic, strong) NSTimer *ssidTimer;
 
