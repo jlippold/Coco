@@ -101,7 +101,7 @@
 -(void) onTimerFire:(id)sender {
     [self refreshNowPlaying:nil scrollToPlayingChanel:NO];
     
-    if( [[NSDate date] timeIntervalSinceDate:_nextRefresh] >= 0 ) {
+    if ([[NSDate date] timeIntervalSinceDate:_nextRefresh] >= 0) {
         [self refreshGuide:nil];
     }
 }
@@ -125,6 +125,8 @@
                                                  name:@"messageNextGuideRefreshTime" object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageUpdatedGuide:)
                                                  name:@"messageUpdatedGuide" object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageUpdatedFutureGuide:)
+                                                 name:@"messageUpdatedFutureGuide" object:nil];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageUpdatedGuidePartial:)
                                                  name:@"messageUpdatedGuidePartial" object:nil];
@@ -685,21 +687,21 @@
     NSDictionary *channel = _channels[chId];
     NSDictionary *guideItem = [_guide objectForKey:chId];
 
-    
+    cell.textLabel.text = @"Not Available";
+    cell.detailTextLabel.text = @" ";
     if (guideItem) {
-        NSDictionary *duration = [Guide getDurationForChannel:guideItem];
         cell.textLabel.text = [guideItem objectForKey:@"title"];
-        if ([guideItem objectForKey:@"upNext"]) {
-            cell.detailTextLabel.text = [NSString stringWithFormat:@"-%@ %@",
-                                         duration[@"timeLeft"],
-                                         [guideItem objectForKey:@"upNext"]];
+        if ([guideItem objectForKey:@"FutureAiring"]) {
+            cell.detailTextLabel.text = [NSString stringWithFormat:@"%@",
+                                         [guideItem objectForKey:@"FutureAiring"]];
         } else {
-            cell.detailTextLabel.text = @"";
+            if ([guideItem objectForKey:@"upNext"]) {
+                NSDictionary *duration = [Guide getDurationForChannel:guideItem];
+                cell.detailTextLabel.text = [NSString stringWithFormat:@"-%@ %@",
+                                             duration[@"timeLeft"],
+                                             [guideItem objectForKey:@"upNext"]];
+            }
         }
-        
-    } else {
-        cell.textLabel.text = @"Not Available";
-        cell.detailTextLabel.text = @" ";
     }
     
     UILabel *l2 = (UILabel *)[cell viewWithTag:1];
@@ -768,10 +770,20 @@
         [_mainTableView reloadRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationNone];
     } else {
         
+        //some error here about no clients found
         if ([[_currentClient allKeys] count] == 0) {
             [self chooseClient:nil];
         }
         
+        id guideItem = _guide[chId];
+        if ([guideItem objectForKey:@"FutureAiring"]) {
+            UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Cannot Change Channel"
+                                                                           message:@"This program is not on the air" preferredStyle:UIAlertControllerStyleAlert];
+            UIAlertAction* accept = [UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil];
+             [alert addAction:accept];
+             [self presentViewController:alert animated:YES completion:nil];
+            return;
+        }
         [Commands changeChannel:_channels[chId][@"chNum"] device:_currentClient];
     }
     
@@ -1170,12 +1182,13 @@
     _overlayProgress.hidden = NO;
     [self toggleOverlay:@"show"];
     
-    NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
-    [formatter setDateFormat:@"h:mm a"];
+
     NSDate *dt = [Guide getHalfHourIncrement:time];
-    _overlayLabel.text = [NSString stringWithFormat:@"Now Refreshing guide for %@",
+    NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
+    [formatter setDateFormat:@"MMM, d h:mm a"];
+    _overlayLabel.text = [NSString stringWithFormat:@"Loading guide for %@",
                           [formatter stringFromDate:dt]];
-    
+
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
         [Guide refreshGuide:_channels sorted:_sortedChannels forTime:dt];
     });
@@ -1201,15 +1214,33 @@
 }
 
 - (void) messageUpdatedGuide:(NSNotification *)notification {
-    _guide = notification.object;
+    [self sendGuideDataToUI:notification.object isFuture:NO];
+}
+
+- (void) messageUpdatedFutureGuide:(NSNotification *)notification {
+    [self sendGuideDataToUI:notification.object isFuture:YES];
+}
+
+- (void)sendGuideDataToUI:(NSMutableDictionary *) guide isFuture:(BOOL)future {
+    _guide = guide;
     guideIsRefreshing = NO;
     
     _channels = [Channels addChannelCategoriesFromGuide:_guide channels:_channels];
     _sortedChannels = [Channels sortChannels:_channels sortBy:@"default"];
     
     [[NSOperationQueue mainQueue] addOperationWithBlock:^{
-        _overlayProgress.hidden = YES;
+        
         [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
+        if (future) {
+            CGRect frm = _overlayProgress.frame;
+            frm.size.width = [[UIScreen mainScreen] bounds].size.width;
+            _overlayProgress.frame = frm;
+            _overlayProgress.hidden = NO;
+            _overlayLabel.text = [_overlayLabel.text stringByReplacingOccurrencesOfString:@"Loading"
+                                                                               withString:@"Showing future"];
+        } else {
+            _overlayProgress.hidden = YES;
+        }
         [_mainTableView reloadData];
     }];
 }
@@ -1440,8 +1471,6 @@
     [dateFormat setDateStyle:NSDateFormatterFullStyle];
     [dateFormat setTimeStyle:NSDateFormatterFullStyle];
     _guideTime.text = [dateFormat stringFromDate:sender.date];
-    NSLog(@"Changed: %@", sender.date);
- 
 }
 
 
@@ -1450,12 +1479,9 @@
     NSDateFormatter *dateFormat = [[NSDateFormatter alloc] init];
     [dateFormat setDateStyle:NSDateFormatterFullStyle];
     [dateFormat setTimeStyle:NSDateFormatterFullStyle];
-    NSLog(@"DATE%@", _guideTime.text);
     NSDate *date = [dateFormat dateFromString:_guideTime.text];
     [_guideTime resignFirstResponder];
     [self refreshGuideForTime:date];
-    
-    NSLog(@"Selected: %@", _guideTime.text);
 
 }
 

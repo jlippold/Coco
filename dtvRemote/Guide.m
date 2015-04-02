@@ -19,13 +19,14 @@
         return;
     }
     
-    NSDate *dt = [NSDate date];
-    if (time != nil) {
-        dt = time;
+    BOOL refreshingFutureDate = YES;
+    NSDate *dt = [self getHalfHourIncrement:time];
+    NSDate *now = [self getHalfHourIncrement:[NSDate date]];
+    
+    if ([dt isEqualToDate:now]) {
+        refreshingFutureDate = NO;
     }
     
-    dt = [self getHalfHourIncrement:dt];
-
     //Download data in channel chunks
     NSUInteger chunkSize = 200;
     __block int completed = 0;
@@ -57,10 +58,13 @@
         
         if (completed >= total) {
             [[NSNotificationCenter defaultCenter] postNotificationName:@"messageUpdatedGuide" object:guide];
-            
-            [[NSNotificationCenter defaultCenter] postNotificationName:@"messageNextGuideRefreshTime"
+            if (!refreshingFutureDate) {
+                 [[NSNotificationCenter defaultCenter] postNotificationName:@"messageUpdatedGuide" object:guide];
+                [[NSNotificationCenter defaultCenter] postNotificationName:@"messageNextGuideRefreshTime"
                                                                 object:[dt dateByAddingTimeInterval:(30*60)]];
-            
+            } else {
+                [[NSNotificationCenter defaultCenter] postNotificationName:@"messageUpdatedFutureGuide" object:guide];
+            }
         } else {
             long double progress =(completed*1.0/total*1.0);
             //NSLog(@"progress %Lf", progress);
@@ -78,10 +82,18 @@
 + (NSMutableDictionary *) getGuideDataForChannels:(NSString *)channelIds
                      channelNums:(NSString *)channelNums forTime:(NSDate *)time {
 
+    BOOL refreshingFutureDate = YES;
+    if ([time isEqualToDate:[self getHalfHourIncrement:[NSDate date]]]) {
+        refreshingFutureDate = NO;
+    }
     
     NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
     [dateFormatter setDateFormat:@"EEE, dd MMM yyyy HH:mm:ss Z"];
     NSString *localDateString = [dateFormatter stringFromDate:time];
+
+    [dateFormatter setDateFormat:@"MMM, d h:mm a"];
+    NSString *dt = [dateFormatter stringFromDate:time];
+
     
     NSString *builder = @"https://www.directv.com/json/channelschedule";
     builder = [builder stringByAppendingString:@"?channels=%@"];
@@ -130,12 +142,12 @@
                 
                 NSDateFormatter* dateFormatter = [[NSDateFormatter alloc] init];
                 [dateFormatter setDateFormat:@"yyyy-MM-dd'T'HH:mm:ss.SSSZ"];
-                //[dateFormatter setTimeZone:[NSTimeZone localTimeZone]];
+
                 NSDate *startDate = [dateFormatter dateFromString:show[@"airTime"]];
                 NSInteger duration = [show[@"duration"] intValue];
                 
                 bool isPlaying = [self isNowPlaying:startDate duration:duration];
-                if (isPlaying) {
+                if ((isPlaying || refreshingFutureDate) && startDate) {
                     
                     if (deDuplicate[chNum]) {
                         //the channel has already been added
@@ -189,21 +201,20 @@
                     }
                     
                     guideItem[@"starts"] = startDate;
-                    guideItem[@"ends"] = [startDate dateByAddingTimeInterval:duration*60];
-                    
-                    guideItem[@"upNext"] = @"Not Available";
-                    if (i < [channelSchedule count]-1) {
-                        id nextShow = [channelSchedule objectAtIndex:i+1];
-                        guideItem[@"upNext"] = nextShow[@"title"];
+                    if (refreshingFutureDate) {
+                        guideItem[@"FutureAiring"] = dt;
+                    } else {
+                        guideItem[@"ends"] = [startDate dateByAddingTimeInterval:duration*60];
+                        guideItem[@"upNext"] = @"Not Available";
+                        if (i < [channelSchedule count]-1) {
+                            id nextShow = [channelSchedule objectAtIndex:i+1];
+                            guideItem[@"upNext"] = nextShow[@"title"];
+                        }
                     }
-                    
+
                     [results setObject:guideItem forKey:deDuplicate[chNum]];
-                    
                 }
-                
             }
-            
-            
         }
     }
     
@@ -265,7 +276,8 @@
     } else { //round down to half hour
         [components setValue:30 forComponent:NSCalendarUnitMinute];
     }
-    
+    [components setValue:0 forComponent:NSCalendarUnitSecond];
+    [components setValue:0 forComponent:NSCalendarUnitNanosecond];
     return  [calendar dateFromComponents:components];
     
 }
