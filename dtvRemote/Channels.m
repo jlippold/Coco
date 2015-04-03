@@ -69,6 +69,9 @@
     
     if ([blocks count] == 0) {
         //load some defaults
+        NSURL *url = [[NSBundle mainBundle] URLForResource:@"categories" withExtension:@"plist"];
+        NSDictionary *categories = [[NSDictionary dictionaryWithContentsOfURL:url] objectForKey: @"Categories"];
+        
         NSArray *blockCallSigns = [NSArray arrayWithObjects:
                                    @"CINE", @"CINEHD", @"SONIC", @"PPV", @"DTV",
                                    @"BSN", @"NHL", @"MLS", @"PPVHD", @"IACHD",
@@ -76,12 +79,20 @@
                                    @"MALL", @"SALE", @"NEW", @"AAN", @"EPL",
                                    @"UEFA", @"RGBY", @"EPL", @"MAS", @"NBA", @"PTNW", @"ACT", nil];
         
+        NSArray *blockCategories = [NSArray arrayWithObjects:
+                                   @"Foreign", @"Religious", @"Shopping", @"Sports", @"Uncatagorized", @"(null)", nil];
+        
         for (id key in channelList) {
             id channel = [channelList objectForKey:key];
-            if ([channel[@"chAdult"] intValue] == 1 || [blockCallSigns containsObject:channel[@"chCall"]]) {
+            NSString *callSign = [[NSString stringWithFormat:@"%@", channel[@"chCall"]] uppercaseString];
+            NSString *category = [NSString stringWithFormat:@"%@", categories[callSign]];
+            
+            if ([channel[@"chAdult"] intValue] == 1 ||
+                [blockCallSigns containsObject:callSign] ||
+                [blockCategories containsObject:category]) {
                 [blocks addObject:[channel[@"chId"] stringValue]];
             }
-
+            
         }
     }
     return blocks;

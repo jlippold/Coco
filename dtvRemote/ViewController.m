@@ -44,10 +44,10 @@
     
     _channels = [Channels load:NO];
     _allChannels = [Channels load:YES];
+    _sortedChannels = [Channels sortChannels:_channels sortBy:@"default"];
+    _blockedChannels = [Channels loadBlockedChannels:_channels];
     
     _guide = [[NSMutableDictionary alloc] init];
-    _sortedChannels = [[NSMutableDictionary alloc] init];
-    _blockedChannels = [[NSMutableArray alloc] init];
     
     _ssid = [iNet fetchSSID];
     _clients = [Clients loadClientList];
@@ -63,6 +63,7 @@
     searchBarMinWidth = 74;
     searchBarMaxWidth = [[UIScreen mainScreen] bounds].size.width - xOffset;
     
+
     
     [self registerForNotifications];
     [self createMainView];
@@ -73,7 +74,6 @@
             [self promptForZipCode];
         });
     } else {
-        _sortedChannels = [Channels sortChannels:_channels sortBy:@"default"];
         [self refreshGuide:nil];
     }
     
@@ -897,10 +897,10 @@
 - (void) messageUpdatedChannels:(NSNotification *)notification {
     _channels = [notification object];
     dispatch_async(dispatch_get_main_queue(), ^{
-        [_mainTableView reloadData];
         [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
         [MBProgressHUD hideHUDForView:self.view animated:YES];
         _sortedChannels = [Channels sortChannels:_channels sortBy:@"default"];
+        [_mainTableView reloadData];
         [self refreshGuide:nil];
     });
     
