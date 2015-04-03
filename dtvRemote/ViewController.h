@@ -64,6 +64,7 @@
 @property (nonatomic, strong) UIToolbar *toolBar;
 
 
+@property (nonatomic, strong) UITextField *commandText;
 @property (nonatomic, strong) UITextField *guideTime;
 @property (nonatomic, strong) UIDatePicker *guideDatePicker;
 

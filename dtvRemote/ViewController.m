@@ -94,8 +94,7 @@
                                                selector:@selector(fetchSSID:)
                                                userInfo:nil
                                                 repeats:YES];
-    //[_timer fire];
-    //[_ssidTimer fire];
+
 }
 
 -(void) onTimerFire:(id)sender {
@@ -470,17 +469,6 @@
     
     UIBarButtonItem *flex = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:self action:nil ];
     
-    /*
-    UIBarButtonItem *guideBack = [[UIBarButtonItem alloc]
-                                  initWithImage:[UIImage imageNamed:@"images.bundle/left.png"]
-                                  style:UIBarButtonItemStylePlain target:self action:@selector(stub:) ];
-    
-    
-    UIBarButtonItem *guideForward = [[UIBarButtonItem alloc]
-                                     initWithImage:[UIImage imageNamed:@"images.bundle/right"]
-                                     style:UIBarButtonItemStylePlain target:self action:@selector(stub:) ];
-    */
-    
     UIBarButtonItem *clock = [[UIBarButtonItem alloc]
                                      initWithImage:[UIImage imageNamed:@"images.bundle/clock"]
                                      style:UIBarButtonItemStylePlain target:self action:@selector(selectGuideTime:) ];
@@ -515,7 +503,7 @@
     [_guideDatePicker addTarget:self action:@selector(changedGuideTime:)
          forControlEvents:UIControlEventValueChanged];
     
-    UIToolbar *guideTimeDone = [[UIToolbar alloc] initWithFrame:CGRectMake(0, 0, 320, 44)];
+    UIToolbar *guideTimeDone = [[UIToolbar alloc] initWithFrame:CGRectMake(0, 0, [[UIScreen mainScreen] bounds].size.width, 44)];
     [guideTimeDone setBarStyle:UIBarStyleBlackTranslucent];
     
     UIBarButtonItem *spacer2 = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace
@@ -526,8 +514,30 @@
     
     [guideTimeDone setItems: [NSArray arrayWithObjects:spacer2, done, nil]];
     [_guideTime setInputAccessoryView:guideTimeDone];
+    _guideTime.text = @"";
     
     [self.view addSubview:_guideTime];
+    
+
+    _commandText = [[UITextField alloc] initWithFrame:CGRectMake(0,0,1,1)];
+    
+    UIToolbar *commandTextDone = [[UIToolbar alloc] initWithFrame:CGRectMake(0, 0, [[UIScreen mainScreen] bounds].size.width, 44)];
+    [commandTextDone setBarStyle:UIBarStyleBlackTranslucent];
+    UIBarButtonItem *done3 = [[UIBarButtonItem alloc] initWithTitle:@"Done" style:UIBarButtonItemStyleDone
+                                                            target:nil action:@selector(closeCommands:)];
+    
+    [commandTextDone setItems: [NSArray arrayWithObjects:spacer2, done3, nil]];
+    [_commandText setInputAccessoryView:commandTextDone];
+    _commandText.keyboardType = UIKeyboardTypeNumberPad;
+    [_commandText setHidden:YES];
+    _commandText.text = @"";
+    [_commandText addTarget:self
+                  action:@selector(commandSend:)
+        forControlEvents:UIControlEventEditingChanged];
+    
+
+    [self.view addSubview:_commandText];
+
     
 }
 
@@ -1386,44 +1396,7 @@
         return;
     }
    
-    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Number Pad"
-                                                                   message:@"Please enter a channel"
-                                                            preferredStyle:UIAlertControllerStyleAlert];
-    
-    UIAlertAction* accept =
-    [UIAlertAction actionWithTitle:@"Change Channel"
-                             style:UIAlertActionStyleDefault
-                           handler:^(UIAlertAction * action){
-                               
-                               UITextField *txtField = alert.textFields.firstObject;
-                               NSString *channel = txtField.text;
-                               NSLog(@"Change to: %@", channel);
-                               
-                               if ([channel length] > 4) {
-                                   [self showNumberPad:nil];
-                                   return;
-                               }
-                               [Commands changeChannel:channel device:_currentClient];
-                               [self dismissViewControllerAnimated:YES completion:nil];
-                               
-                           }];
-    
-    
-    [alert addTextFieldWithConfigurationHandler:^(UITextField *textField) {
-        textField.text = @"";
-        textField.keyboardType = UIKeyboardTypeNumberPad;
-    }];
-    
-    UIAlertAction* cancel =
-    [UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:
-     ^(UIAlertAction * action) {
-         [self dismissViewControllerAnimated:YES completion:nil];
-     }];
-    
-    [alert addAction:accept];
-    [alert addAction:cancel];
-    
-    [self presentViewController:alert animated:YES completion:nil];
+    [_commandText becomeFirstResponder];
 }
 
 - (IBAction)playpause:(id)sender {
@@ -1475,17 +1448,34 @@
 
 
 - (IBAction)selectedGuideTime:(id)sender {
-
-    NSDateFormatter *dateFormat = [[NSDateFormatter alloc] init];
-    [dateFormat setDateStyle:NSDateFormatterFullStyle];
-    [dateFormat setTimeStyle:NSDateFormatterFullStyle];
-    NSDate *date = [dateFormat dateFromString:_guideTime.text];
+    if (![_guideTime.text isEqualToString:@""]) {
+        NSDateFormatter *dateFormat = [[NSDateFormatter alloc] init];
+        [dateFormat setDateStyle:NSDateFormatterFullStyle];
+        [dateFormat setTimeStyle:NSDateFormatterFullStyle];
+        NSDate *date = [dateFormat dateFromString:_guideTime.text];
+        [self refreshGuideForTime:date];
+        _guideTime.text = @"";
+    }
     [_guideTime resignFirstResponder];
-    [self refreshGuideForTime:date];
+}
 
+- (IBAction)closeCommands:(id)sender {
+    _commandText.text = @"";
+    [_commandText resignFirstResponder];
+}
+
+
+
+-(void) commandSend:(id)sender {
+    // there was a text change in some control
+    NSString *command = _commandText.text;
+    if (![command isEqualToString:@""]) {
+        [Commands sendCommand:command client:_currentClient];
+    }
+    _commandText.text = @"";
 }
 
 - (IBAction)showCommands:(id)sender {
-    
+
 }
 @end
