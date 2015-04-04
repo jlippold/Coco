@@ -7,10 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		00221477D28EF9A83C83EC4A /* libPods-dtvRemote.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FF67676F84F6094A358A7EBE /* libPods-dtvRemote.a */; };
 		85428D5E1AA5368600134A23 /* Guide.m in Sources */ = {isa = PBXBuildFile; fileRef = 85428D5D1AA5368600134A23 /* Guide.m */; };
 		85428D611AA5379700134A23 /* Commands.m in Sources */ = {isa = PBXBuildFile; fileRef = 85428D601AA5379700134A23 /* Commands.m */; };
 		85428D641AA559CA00134A23 /* Clients.m in Sources */ = {isa = PBXBuildFile; fileRef = 85428D631AA559CA00134A23 /* Clients.m */; };
+		8564F7DC1AD06F520090F308 /* MBProgressHUD.m in Sources */ = {isa = PBXBuildFile; fileRef = 8564F7DB1AD06F520090F308 /* MBProgressHUD.m */; };
 		8580653E1AC89A36005672E8 /* categories.plist in Resources */ = {isa = PBXBuildFile; fileRef = 8580653D1AC89A36005672E8 /* categories.plist */; };
 		858A4F651AA5FC5600B6226E /* images.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 858A4F641AA5FC5600B6226E /* images.bundle */; };
 		859D6D871A9926CA0024FBA4 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 859D6D861A9926CA0024FBA4 /* main.m */; };
@@ -26,13 +26,14 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		46FA3F8F608AC56CC2CF5BEE /* Pods-dtvRemote.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-dtvRemote.debug.xcconfig"; path = "Pods/Target Support Files/Pods-dtvRemote/Pods-dtvRemote.debug.xcconfig"; sourceTree = "<group>"; };
 		85428D5C1AA5368600134A23 /* Guide.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Guide.h; sourceTree = "<group>"; };
 		85428D5D1AA5368600134A23 /* Guide.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Guide.m; sourceTree = "<group>"; };
 		85428D5F1AA5379700134A23 /* Commands.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Commands.h; sourceTree = "<group>"; };
 		85428D601AA5379700134A23 /* Commands.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Commands.m; sourceTree = "<group>"; };
 		85428D621AA559CA00134A23 /* Clients.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Clients.h; sourceTree = "<group>"; };
 		85428D631AA559CA00134A23 /* Clients.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Clients.m; sourceTree = "<group>"; };
+		8564F7DA1AD06F520090F308 /* MBProgressHUD.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MBProgressHUD.h; sourceTree = "<group>"; };
+		8564F7DB1AD06F520090F308 /* MBProgressHUD.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MBProgressHUD.m; sourceTree = "<group>"; };
 		8580653D1AC89A36005672E8 /* categories.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = categories.plist; sourceTree = "<group>"; };
 		858A4F641AA5FC5600B6226E /* images.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = images.bundle; sourceTree = "<group>"; };
 		859D6D811A9926CA0024FBA4 /* dtvRemote.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = dtvRemote.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -51,8 +52,6 @@
 		859D6DB41A9AA4040024FBA4 /* iNet.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = iNet.h; sourceTree = "<group>"; };
 		85AFB3D41AA35B38000AEEB4 /* Channels.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Channels.h; sourceTree = "<group>"; };
 		85AFB3D51AA35B4A000AEEB4 /* Channels.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Channels.m; sourceTree = "<group>"; };
-		E664BFBE9F87230CE83F20F6 /* Pods-dtvRemote.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-dtvRemote.release.xcconfig"; path = "Pods/Target Support Files/Pods-dtvRemote/Pods-dtvRemote.release.xcconfig"; sourceTree = "<group>"; };
-		FF67676F84F6094A358A7EBE /* libPods-dtvRemote.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-dtvRemote.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -61,29 +60,18 @@
 			buildActionMask = 2147483647;
 			files = (
 				859D6DB11A9A8F5E0024FBA4 /* CFNetwork.framework in Frameworks */,
-				00221477D28EF9A83C83EC4A /* libPods-dtvRemote.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		22AE240EBA104A53605D668B /* Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-				FF67676F84F6094A358A7EBE /* libPods-dtvRemote.a */,
-			);
-			name = Frameworks;
-			sourceTree = "<group>";
-		};
 		859D6D781A9926CA0024FBA4 = {
 			isa = PBXGroup;
 			children = (
 				859D6DB01A9A8F5E0024FBA4 /* CFNetwork.framework */,
 				859D6D831A9926CA0024FBA4 /* dtvRemote */,
 				859D6D821A9926CA0024FBA4 /* Products */,
-				BD126121518CA9401547206C /* Pods */,
-				22AE240EBA104A53605D668B /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -98,6 +86,8 @@
 		859D6D831A9926CA0024FBA4 /* dtvRemote */ = {
 			isa = PBXGroup;
 			children = (
+				8564F7DA1AD06F520090F308 /* MBProgressHUD.h */,
+				8564F7DB1AD06F520090F308 /* MBProgressHUD.m */,
 				858A4F641AA5FC5600B6226E /* images.bundle */,
 				859D6D881A9926CA0024FBA4 /* AppDelegate.h */,
 				859D6D891A9926CA0024FBA4 /* AppDelegate.m */,
@@ -132,15 +122,6 @@
 			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
-		BD126121518CA9401547206C /* Pods */ = {
-			isa = PBXGroup;
-			children = (
-				46FA3F8F608AC56CC2CF5BEE /* Pods-dtvRemote.debug.xcconfig */,
-				E664BFBE9F87230CE83F20F6 /* Pods-dtvRemote.release.xcconfig */,
-			);
-			name = Pods;
-			sourceTree = "<group>";
-		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -148,11 +129,9 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 859D6DA71A9926CA0024FBA4 /* Build configuration list for PBXNativeTarget "dtvRemote" */;
 			buildPhases = (
-				095938F92E73DDB4D64E2EF3 /* Check Pods Manifest.lock */,
 				859D6D7D1A9926CA0024FBA4 /* Sources */,
 				859D6D7E1A9926CA0024FBA4 /* Frameworks */,
 				859D6D7F1A9926CA0024FBA4 /* Resources */,
-				CE761C875CD95FC5B133BA25 /* Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -211,39 +190,6 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
-/* Begin PBXShellScriptBuildPhase section */
-		095938F92E73DDB4D64E2EF3 /* Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "Check Pods Manifest.lock";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [[ $? != 0 ]] ; then\n    cat << EOM\nerror: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\nEOM\n    exit 1\nfi\n";
-			showEnvVarsInLog = 0;
-		};
-		CE761C875CD95FC5B133BA25 /* Copy Pods Resources */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "Copy Pods Resources";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-dtvRemote/Pods-dtvRemote-resources.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-/* End PBXShellScriptBuildPhase section */
-
 /* Begin PBXSourcesBuildPhase section */
 		859D6D7D1A9926CA0024FBA4 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -256,6 +202,7 @@
 				859D6D8A1A9926CA0024FBA4 /* AppDelegate.m in Sources */,
 				859D6D901A9926CA0024FBA4 /* ViewController.m in Sources */,
 				85AFB3D61AA35B4A000AEEB4 /* Channels.m in Sources */,
+				8564F7DC1AD06F520090F308 /* MBProgressHUD.m in Sources */,
 				859D6D871A9926CA0024FBA4 /* main.m in Sources */,
 				85428D611AA5379700134A23 /* Commands.m in Sources */,
 			);
@@ -363,7 +310,6 @@
 		};
 		859D6DA81A9926CA0024FBA4 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 46FA3F8F608AC56CC2CF5BEE /* Pods-dtvRemote.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
@@ -377,7 +323,6 @@
 		};
 		859D6DA91A9926CA0024FBA4 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = E664BFBE9F87230CE83F20F6 /* Pods-dtvRemote.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";

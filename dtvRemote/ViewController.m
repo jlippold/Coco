@@ -8,7 +8,6 @@
 
 #import "ViewController.h"
 #import "MBProgressHUD.h"
-#import <SDWebImage/UIImageView+WebCache.h>
 #import <QuartzCore/QuartzCore.h>
 
 #import "iNet.h"
