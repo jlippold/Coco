@@ -293,6 +293,17 @@
     return chan;
 }
 
++ (NSString *)getChannelIdForChannelCallSign:(NSString *)callSign channels:(NSMutableDictionary *)channels {
+    NSString *chan = @"";
+    for (NSString *chId in channels) {
+        id channel = [channels objectForKey:chId];
+        if ( [channel[@"chCall"] isEqualToString:callSign] ) {
+            chan = chId;
+            break;
+        }
+    }
+    return chan;
+}
 
 + (NSMutableDictionary *) sortChannels:(NSMutableDictionary *)channels sortBy:(NSString *)sort {
     

@@ -22,6 +22,7 @@
                                                channels:(NSMutableDictionary *)channels;
 
 + (NSString *)getChannelIdForChannelNumber:(NSString *)chNum channels:(NSMutableDictionary *)channels;
++ (NSString *)getChannelIdForChannelCallSign:(NSString *)callSign channels:(NSMutableDictionary *)channels;
 + (NSMutableDictionary *) sortChannels:(NSMutableDictionary *)channels sortBy:(NSString *)sort;
 + (NSString *) DTVCookie;
 

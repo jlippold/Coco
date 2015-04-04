@@ -22,17 +22,19 @@
 
 @implementation ViewController
 
-- (void)viewDidLoad {
+#pragma mark - Initialization
+
+- (void) viewDidLoad {
     [super viewDidLoad];
     [self setNeedsStatusBarAppearanceUpdate];
     [self initiate];
 }
 
-- (void)didReceiveMemoryWarning {
+- (void) didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
 }
 
-- (void)dealloc {
+- (void) dealloc {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
@@ -62,10 +64,9 @@
     searchBarMinWidth = 74;
     searchBarMaxWidth = [[UIScreen mainScreen] bounds].size.width - xOffset;
     
-
-    
     [self registerForNotifications];
     [self createMainView];
+    [self displayClient];
     
     
     if ([[_channels allKeys] count] == 0) { //run initial setup
@@ -79,6 +80,11 @@
     
     if ([[_currentClient allKeys] count] != 0) {
         [self refreshNowPlaying:nil scrollToPlayingChanel:YES];
+    } else {
+        //no device set, so just display hbo
+        NSString *chId = [Channels getChannelIdForChannelCallSign:@"HBOe" channels:_channels];
+        id channel = _channels[chId];
+        [self setNowPlaying:chId chNum:channel[@"chNum"]];
     }
 
 
@@ -96,7 +102,7 @@
 
 }
 
--(void) onTimerFire:(id)sender {
+- (void) onTimerFire:(id)sender {
     [self refreshNowPlaying:nil scrollToPlayingChanel:NO];
     
     if ([[NSDate date] timeIntervalSinceDate:_nextRefresh] >= 0) {
@@ -139,17 +145,11 @@
     
 }
 
--(void) fetchSSID:(id)sender {
+- (void) fetchSSID:(id)sender {
     self.ssid = [iNet fetchSSID];
 }
 
-- (void) selectInitialClient {
-    
-}
-
--(UIStatusBarStyle)preferredStatusBarStyle{
-    return UIStatusBarStyleLightContent;
-}
+#pragma mark - View Creations
 
 - (void) createMainView {
     
@@ -181,7 +181,6 @@
     
     _navTitle = [[UILabel alloc] init];
     _navTitle.translatesAutoresizingMaskIntoConstraints = YES;
-    _navTitle.text = @"";
     _navTitle.font = [UIFont fontWithName:@"Helvetica-Bold" size:17];
     [_navTitle setTextColor:textColor];
     _navTitle.tintColor = navTint;
@@ -190,7 +189,6 @@
     
     _navSubTitle = [[UILabel alloc] init];
     _navSubTitle.translatesAutoresizingMaskIntoConstraints = YES;
-    _navSubTitle.text = @"";
     _navSubTitle.font = [UIFont fontWithName:@"Helvetica" size:15];
     [_navSubTitle setTextColor: textColor];
     _navSubTitle.textAlignment = NSTextAlignmentCenter;
@@ -214,7 +212,7 @@
     _navItem = [UINavigationItem alloc];
     _navItem.title = @"";
     
-    UIBarButtonItem *leftButton = [[UIBarButtonItem alloc] initWithTitle:@"Room" style:UIBarButtonItemStylePlain target:self action:@selector(chooseClient:)];
+    UIBarButtonItem *leftButton = [[UIBarButtonItem alloc] initWithTitle:@"Devices" style:UIBarButtonItemStylePlain target:self action:@selector(chooseClient:)];
     _navItem.leftBarButtonItem = leftButton;
     
     _rightButton = [[UIBarButtonItem alloc] initWithTitle:@"Edit" style:UIBarButtonItemStylePlain target:self action:@selector(toggleEditMode:)];
@@ -423,7 +421,6 @@
     
 }
 
-
 - (void) createToolbar {
     
     double toolbarHeight = 40;
@@ -542,18 +539,25 @@
     
 }
 
-- (void)searchBarTextDidBeginEditing:(UISearchBar *)searchBar {
+-(UIStatusBarStyle) preferredStatusBarStyle{
+    return UIStatusBarStyleLightContent;
+}
+
+#pragma mark - Table View Filtering
+
+- (void) searchBarTextDidBeginEditing:(UISearchBar *)searchBar {
     [self openSearchBar];
 }
 
-- (void)searchBarSearchButtonClicked:(UISearchBar *)searchBar {
+- (void) searchBarSearchButtonClicked:(UISearchBar *)searchBar {
     [self closeSearchBar];
 }
 
-- (void)searchBarTextDoneEditing:(UISearchBar *)searchBar {
+- (void) searchBarTextDoneEditing:(UISearchBar *)searchBar {
     [self closeSearchBar];
 }
-- (void)searchBar:(UISearchBar *)searchBar textDidChange:(NSString *)searchText {
+
+- (void) searchBar:(UISearchBar *)searchBar textDidChange:(NSString *)searchText {
     if ([searchText isEqualToString:@""]) {
         _sortedChannels = [Channels sortChannels:_channels sortBy:@"default"];
         [_mainTableView reloadData];
@@ -623,49 +627,49 @@
     [_mainTableView reloadData];
 }
 
-- (BOOL)searchBarShouldEndEditing:(UISearchBar *)searchBar {
+- (BOOL) searchBarShouldEndEditing:(UISearchBar *)searchBar {
     return YES;
 }
-- (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView {
+
+- (void) scrollViewWillBeginDragging:(UIScrollView *)scrollView {
     [self closeSearchBar];
 }
 
--(CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section {
+#pragma mark - TableView Management
+
+-(CGFloat) tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section {
     return  18.0;
 }
 
-- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
+- (NSInteger) numberOfSectionsInTableView:(UITableView *)tableView {
     return [[_sortedChannels allKeys] count];
 }
 
-- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+- (NSInteger) tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
     NSArray *sections = [[_sortedChannels allKeys] sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
     NSString *sectionKey = [sections objectAtIndex:section];
     return [[[_sortedChannels objectForKey:sectionKey] allKeys] count];
 }
 
--(NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section{
+- (NSString*) tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section {
     NSArray *sections = [[_sortedChannels allKeys] sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
     return [sections objectAtIndex:section];
 }
 
-- (void)tableView:(UITableView *)tableView willDisplayCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath {
+- (void) tableView:(UITableView *)tableView willDisplayCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath
+{
     UIColor *backgroundColor = [UIColor colorWithRed:28/255.0f green:28/255.0f blue:28/255.0f alpha:1.0f];
     UIColor *textColor = [UIColor colorWithRed:193/255.0f green:193/255.0f blue:193/255.0f alpha:1.0f];
     UIColor *tintColor = [UIColor colorWithRed:30/255.0f green:147/255.0f blue:212/255.0f alpha:1.0f];
     
     cell.indentationLevel = 1;
     cell.indentationWidth = 2;
-    
     cell.accessoryType = UITableViewCellAccessoryCheckmark;
-    
     cell.backgroundColor = backgroundColor;
     [cell.textLabel setTextColor: textColor];
     [cell.detailTextLabel setTextColor:textColor];
     [cell setTintColor:tintColor];
-    
 }
-
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     
@@ -800,7 +804,7 @@
     
 }
 
-
+#pragma mark - IB Actions
 
 - (void) promptForZipCode {
     UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Guide Listing"
@@ -837,10 +841,6 @@
     [self presentViewController:alert animated:YES completion:nil];
 }
 
-- (void) messageUpdatedLocations:(NSNotification *)notification {
-    NSMutableDictionary *locations = [notification object];
-    [self promptForLocation:locations];
-}
 - (void) promptForLocation:(NSMutableDictionary *) locations {
     
     NSArray *keys = [locations allKeys];
@@ -881,41 +881,7 @@
     }
 }
 
-- (void) messageDownloadChannelLogos:(NSNotification *)notification {
-    _channels = [notification object];
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
-        MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
-        hud.mode = MBProgressHUDModeAnnularDeterminate;
-        hud.labelText = @"Downloading channel logos";
-        hud.detailsLabelText = @"for first use";
-        [Channels downloadChannelImages:_channels];
-    });
-    
-}
-
-
-- (void) messageUpdatedChannels:(NSNotification *)notification {
-    _channels = [notification object];
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
-        [MBProgressHUD hideHUDForView:self.view animated:YES];
-        _sortedChannels = [Channels sortChannels:_channels sortBy:@"default"];
-        [_mainTableView reloadData];
-        [self refreshGuide:nil];
-    });
-    
-}
-
-- (void) messageUpdatedChannelsProgress:(NSNotification *)notification {
-    MBProgressHUD *hud = [MBProgressHUD HUDForView:self.view];
-    hud.mode = MBProgressHUDModeAnnularDeterminate;
-    hud.progress = [[notification object] floatValue];
-    
-}
-
 - (IBAction) chooseClient:(id)sender {
-    
     if ([[_clients[self.ssid] allKeys] count] == 0) {
         MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
         hud.mode = MBProgressHUDModeAnnularDeterminate;
@@ -924,24 +890,9 @@
     } else {
         [self showClientPicker:nil];
     }
-    
 }
 
-- (void) messageUpdatedClients:(NSNotification *)notification {
-    _clients = notification.object;
-    [MBProgressHUD hideHUDForView:self.view animated:YES];
-    [self chooseClient:nil];
-}
-
-- (void) messageUpdatedClientsProgress:(NSNotification *)notification {
-    [[NSOperationQueue mainQueue] addOperationWithBlock:^{
-        MBProgressHUD *hud = [MBProgressHUD HUDForView:self.view];
-        hud.mode = MBProgressHUDModeAnnularDeterminate;
-        hud.progress = [[notification object] floatValue];
-    }];
-}
-
-- (IBAction)showClientPicker:(id)sender {
+- (IBAction) showClientPicker:(id)sender {
     
     [MBProgressHUD hideHUDForView:self.view animated:YES];
     
@@ -988,223 +939,6 @@
     [vc presentViewController:view animated:YES completion:nil];
 }
 
-- (void) displayClient {
-    if (_currentClient) {
-        _navTitle.text = [_currentClient[@"name"] capitalizedString];
-        [self refreshNowPlaying:nil scrollToPlayingChanel:YES];
-    } else {
-        _navTitle.text = @"";
-        [self clearNowPlaying];
-    }
-}
-
-- (void) refreshNowPlaying:(id)sender scrollToPlayingChanel:(BOOL)scroll {
-    if (_currentClient) {
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
-            NSString *channelNum = [Commands getChannelOnClient:_currentClient];
-            NSString *channelId = [Channels getChannelIdForChannelNumber:channelNum channels:_allChannels];
-            
-            if ([channelId isEqualToString:@""]) {
-                [self clearNowPlaying];
-            } else {
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    [self setNowPlaying:channelId chNum:channelNum];
-                    if (scroll) {
-                        [self scrollToChannel:channelNum];
-                    }
-                });
-            }
-        });
-    }
-}
-
--(void) setNowPlaying:(NSString *)chId chNum:(NSString *)chNum {
-
-    NSDictionary *channel = [_allChannels objectForKey:chId];
-    NSLog(@"Querying Now Playing");
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
-        NSDictionary *guide = [Guide getNowPlayingForChannel:channel];
-        if ([[guide allKeys] count] == 0) {
-            return;
-        }
-        NSDictionary *guideData = [guide objectForKey:[guide allKeys][0]];
-        NSDictionary *duration = [Guide getDurationForChannel:guideData];
-        
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [self setNowPlayingForChannel:channel guideData:guideData duration:duration];
-        });
-    });
-
-}
-
--(void) setNowPlayingForChannel:(id)channel guideData:(id)guideData duration:(NSDictionary *)duration {
-    
-    _seekBar.value = [duration[@"percentage"] doubleValue];
-
-    if ([_currentProgramId isEqualToString:guideData[@"programID"]]) {
-        return;
-    }
-    
-    _currentProgramId = guideData[@"programID"];
-    _boxTitle.text = [NSString stringWithFormat:@"%@",
-                      guideData[@"title"]];
-    
-    if (guideData[@"hd"] && [[guideData[@"hd"] stringValue] isEqualToString:@"1"] ) {
-        [_hdLabel setHidden:NO];
-    } else {
-        [_hdLabel setHidden:YES];
-    }
-    
-    _navTitle.text = [_currentClient[@"name"] capitalizedString];
-    _navSubTitle.text = [NSString stringWithFormat:@"%@ %@", channel[@"chNum"], channel[@"chName"]];
-
-    [self setBoxCoverForChannel:guideData[@"boxcover"]];
-    [self setDescriptionForProgramId:guideData[@"programID"]];
-}
-
--(void) setStarRating:(double) rating {
-    rating = (rating*2.0) / 100.0;
-    
-    UIFont *font = [UIFont fontWithName:@"Helvetica-Bold" size:16];
-    NSDictionary *userAttributes = @{NSFontAttributeName: font};
-    const CGSize textSize = [@"★★★★★" sizeWithAttributes: userAttributes];
-    _stars.frame = CGRectMake(
-                              [[UIScreen mainScreen] bounds].size.width - textSize.width - 10 ,
-                              223,
-                              textSize.width * rating,
-                              29);
-}
-
--(void) scrollToChannel:(NSString *)scrollToChNum {
-    int row = -1;
-    int section = -1;
-
-    int sectionCounter = 0;
-    int rowCounter = 0;
-    
-    NSArray *sections = [[_sortedChannels allKeys] sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
-    for (NSString *sectionKey in sections) {
-        NSMutableDictionary *sectionData = [_sortedChannels objectForKey:sectionKey];
-        NSArray *sectionChannels = [[sectionData allKeys] sortedArrayUsingSelector: @selector(compare:)];
-        for (id sectionChannelKey in sectionChannels) {
-            NSString *chId = [sectionData[sectionChannelKey] stringValue];
-            NSString *chNum = [_channels[chId][@"chNum"] stringValue];
-            if ([chNum isEqualToString:scrollToChNum]) {
-                row = rowCounter;
-                section = sectionCounter;
-            }
-            rowCounter++;
-        }
-        sectionCounter++;
-        rowCounter = 0;
-    }
-    
-    if (row > -1 && section > -1) {
-        NSIndexPath *indexPath = [NSIndexPath indexPathForRow:row inSection:section];
-        [_mainTableView scrollToRowAtIndexPath:indexPath
-                             atScrollPosition:UITableViewScrollPositionTop
-                                     animated:YES];
-    }
-}
-
--(void) setDescriptionForProgramId:(NSString *)programID {
-    
-    NSURL* programURL = [NSURL URLWithString:
-                         [NSString stringWithFormat:@"https://www.directv.com/json/program/flip/%@", programID]];
-    
-    [NSURLConnection sendAsynchronousRequest:[NSURLRequest requestWithURL:programURL]
-                                       queue:[NSOperationQueue mainQueue]
-                           completionHandler:^(NSURLResponse *response,
-                                               NSData *data,
-                                               NSError *connectionError)
-     {
-         if (data.length > 0 && connectionError == nil) {
-             NSDictionary *json = [NSJSONSerialization JSONObjectWithData:data options:0 error:NULL];
-
-             if (json[@"programDetail"]) {
-
-                 id show = json[@"programDetail"];
-                 if (show[@"description"]) {
-                     _boxDescription.text = show[@"description"];
-                 }
-                 NSString *title = _boxTitle.text;
-                 
-                 if (show[@"title"] && show[@"episodeTitle"]) {
-                     title = [NSString stringWithFormat:@"%@ - %@",
-                              _boxTitle.text, show[@"episodeTitle"]];
-                 }
-                 if (show[@"title"] && show[@"releaseYear"]) {
-                     title = [NSString stringWithFormat:@"%@ (%@)",
-                              _boxTitle.text, show[@"releaseYear"]];
-                 }
-                 
-                 if (show[@"rating"]) {
-                     _ratingLabel.text = show[@"rating"];
-                     [_ratingLabel setHidden:NO];
-                 } else {
-                     [_ratingLabel setHidden:YES];
-                 }
-                 
-                 if (show[@"starRatingNum"]) {
-                     [self setStarRating:[show[@"starRatingNum"] doubleValue]];
-                     [_stars setHidden:NO];
-                 } else {
-                     [_stars setHidden:YES];
-                 }
-                 
-                 _boxTitle.text = title;
-                 
-             }
-         }
-     }];
-}
-
--(void) setBoxCoverForChannel:(NSString *)path {
-    NSURL* imageUrl = [NSURL URLWithString:
-                       [NSString stringWithFormat:@"https://dtvimages.hs.llnwd.net/e1%@", path]];
-    
-    [NSURLConnection sendAsynchronousRequest:[NSURLRequest requestWithURL:imageUrl]
-                                       queue:[NSOperationQueue mainQueue]
-                           completionHandler:^(NSURLResponse *response,
-                                               NSData *data,
-                                               NSError *connectionError)
-     {
-         if (data.length > 0 && connectionError == nil) {
-             UIImage *image = [UIImage imageWithData:data];
-             [_boxCover setImage:image];
-         }
-     }];
-}
-
-
-
--(void) clearNowPlaying {
-    _boxCover.image = [UIImage new];
-    _boxTitle.text = @"";
-    _boxDescription.text = @"";
-}
-
-- (void) refreshGuideForTime:(NSDate *)time {
-
-    [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
-    CGRect frm = _overlayProgress.frame;
-    frm.size.width = 0;
-    _overlayProgress.frame = frm;
-    _overlayProgress.hidden = NO;
-    [self toggleOverlay:@"show"];
-    
-
-    NSDate *dt = [Guide getHalfHourIncrement:time];
-    NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
-    [formatter setDateFormat:@"MMM, d h:mm a"];
-    _overlayLabel.text = [NSString stringWithFormat:@"Loading guide for %@",
-                          [formatter stringFromDate:dt]];
-
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
-        [Guide refreshGuide:_channels sorted:_sortedChannels forTime:dt];
-    });
-}
-
 - (IBAction) refreshGuide:(id)sender {
     if (!guideIsRefreshing) {
         guideIsRefreshing = YES;
@@ -1212,94 +946,7 @@
     }
 }
 
-- (void) messageNextGuideRefreshTime:(NSNotification *)notification {
-    _nextRefresh = [notification object];
-    
-    [[NSOperationQueue mainQueue] addOperationWithBlock:^{
-        NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
-        [formatter setDateFormat:@"h:mm a"];
-        _overlayLabel.text = [NSString stringWithFormat:@"Next Refresh at %@",
-                              [formatter stringFromDate:_nextRefresh]];
-        [self toggleOverlay:@"hide"];
-    }];
-}
-
-- (void) messageUpdatedGuide:(NSNotification *)notification {
-    [self sendGuideDataToUI:notification.object isFuture:NO];
-}
-
-- (void) messageUpdatedFutureGuide:(NSNotification *)notification {
-    [self sendGuideDataToUI:notification.object isFuture:YES];
-}
-
-- (void)sendGuideDataToUI:(NSMutableDictionary *) guide isFuture:(BOOL)future {
-    _guide = guide;
-    guideIsRefreshing = NO;
-    
-    _channels = [Channels addChannelCategoriesFromGuide:_guide channels:_channels];
-    _sortedChannels = [Channels sortChannels:_channels sortBy:@"default"];
-    
-    [[NSOperationQueue mainQueue] addOperationWithBlock:^{
-        
-        [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
-        if (future) {
-            CGRect frm = _overlayProgress.frame;
-            frm.size.width = [[UIScreen mainScreen] bounds].size.width;
-            _overlayProgress.frame = frm;
-            _overlayProgress.hidden = NO;
-            _overlayLabel.text = [_overlayLabel.text stringByReplacingOccurrencesOfString:@"Loading"
-                                                                               withString:@"Showing future"];
-        } else {
-            _overlayProgress.hidden = YES;
-        }
-        [_mainTableView reloadData];
-    }];
-}
-
-- (void) toggleOverlay:(NSString *)action {
-    if ([action isEqualToString:@"show"]) {
-        [UIView animateWithDuration:0.5
-                         animations:^{
-                             _overlay.alpha = 0.8;
-                         }];
-    } else {
-        dispatch_time_t delay = dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC * 3);
-        dispatch_after(delay, dispatch_get_main_queue(), ^(void){
-            [UIView animateWithDuration:0.5
-                             animations:^{
-                                 _overlay.alpha = 0.0;
-                             }];
-        });
-    }
-}
-
-- (void) messageUpdatedGuideProgress:(NSNotification *)notification {
-    [[NSOperationQueue mainQueue] addOperationWithBlock:^{
-        float percent = [[notification object] floatValue];
-        CGRect frm = _overlayProgress.frame;
-        frm.size.width = [[UIScreen mainScreen] bounds].size.width * percent;
-        
-        [UIView animateWithDuration:0.25
-                         animations:^{
-                             _overlayProgress.frame = frm;
-                         }];
-        
-    }];
-}
-
-- (void) messageUpdatedGuidePartial:(NSNotification *)notification {
-    _guide = notification.object;
-    [[NSOperationQueue mainQueue] addOperationWithBlock:^{
-        [_mainTableView reloadData];
-    }];
-}
-
-- (void) messageChannelChanged:(NSNotification *)notification {
-    isPlaying = YES;
-    [self refreshNowPlaying:nil scrollToPlayingChanel:NO];
-}
-
-- (IBAction)sortChannels:(id)sender {
+- (IBAction) sortChannels:(id)sender {
     
     UIAlertController *view = [UIAlertController
                                alertControllerWithTitle:nil
@@ -1368,7 +1015,7 @@
     
 }
 
-- (IBAction)toggleEditMode:(id)sender {
+- (IBAction) toggleEditMode:(id)sender {
     if (isEditing) {
         //Going back to regular mode
         [Channels saveBlockedChannels:_blockedChannels];
@@ -1387,20 +1034,20 @@
         _blockedChannels = [Channels loadBlockedChannels:_channels];
         _sortedChannels = [Channels sortChannels:_channels sortBy:@"default"];
     }
-
+    
     [_mainTableView reloadData];
 }
 
-- (IBAction)showNumberPad:(id)sender {
+- (IBAction) showNumberPad:(id)sender {
     
     if ([[_currentClient allKeys] count] == 0) {
         return;
     }
-   
+    
     [_commandText becomeFirstResponder];
 }
 
-- (IBAction)playpause:(id)sender {
+- (IBAction) playpause:(id)sender {
     if (isPlaying) {
         if ([Commands sendCommand:@"pause" client:_currentClient]) {
             _playButton.image = [UIImage imageNamed:@"images.bundle/play"];
@@ -1414,41 +1061,31 @@
     }
 }
 
-- (IBAction)rewind:(id)sender {
+- (IBAction) rewind:(id)sender {
     if ([Commands sendCommand:@"rew" client:_currentClient]) {
         _playButton.image = [UIImage imageNamed:@"images.bundle/play"];
         isPlaying = NO;
     }
 }
 
-- (IBAction)forward:(id)sender {
+- (IBAction) forward:(id)sender {
     if ([Commands sendCommand:@"ffwd" client:_currentClient]) {
         _playButton.image = [UIImage imageNamed:@"images.bundle/play"];
         isPlaying = NO;
     }
 }
 
-- (IBAction)selectGuideTime:(id)sender {
-   if (!guideIsRefreshing) {
-       guideIsRefreshing = YES;
-       [_guideDatePicker setDate:[NSDate date]];
-       _guideDatePicker.maximumDate=[[NSDate date] dateByAddingTimeInterval:(48*60*60)];
-       _guideDatePicker.minimumDate=[[NSDate date] dateByAddingTimeInterval:(90*60*-1)];
-       [_guideTime becomeFirstResponder];
-   }
+- (IBAction) selectGuideTime:(id)sender {
+    if (!guideIsRefreshing) {
+        guideIsRefreshing = YES;
+        [_guideDatePicker setDate:[NSDate date]];
+        _guideDatePicker.maximumDate=[[NSDate date] dateByAddingTimeInterval:(48*60*60)];
+        _guideDatePicker.minimumDate=[[NSDate date] dateByAddingTimeInterval:(90*60*-1)];
+        [_guideTime becomeFirstResponder];
+    }
 }
 
-
--(void)changedGuideTime:(UIDatePicker *)sender
-{
-    NSDateFormatter *dateFormat = [[NSDateFormatter alloc] init];
-    [dateFormat setDateStyle:NSDateFormatterFullStyle];
-    [dateFormat setTimeStyle:NSDateFormatterFullStyle];
-    _guideTime.text = [dateFormat stringFromDate:sender.date];
-}
-
-
-- (IBAction)selectedGuideTime:(id)sender {
+- (IBAction) selectedGuideTime:(id)sender {
     if (![_guideTime.text isEqualToString:@""]) {
         NSDateFormatter *dateFormat = [[NSDateFormatter alloc] init];
         [dateFormat setDateStyle:NSDateFormatterFullStyle];
@@ -1460,14 +1097,16 @@
     [_guideTime resignFirstResponder];
 }
 
-- (IBAction)closeCommands:(id)sender {
+- (IBAction) closeCommands:(id)sender {
     _commandText.text = @"";
     [_commandText resignFirstResponder];
 }
 
+- (IBAction) showCommands:(id)sender {
+    
+}
 
-
--(void) commandSend:(id)sender {
+- (void) commandSend:(id)sender {
     // there was a text change in some control
     NSString *command = _commandText.text;
     if (![command isEqualToString:@""]) {
@@ -1476,7 +1115,372 @@
     _commandText.text = @"";
 }
 
-- (IBAction)showCommands:(id)sender {
+#pragma mark - Messages / Events
+
+- (void) messageUpdatedLocations:(NSNotification *)notification {
+    NSMutableDictionary *locations = [notification object];
+    [self promptForLocation:locations];
+}
+
+- (void) messageDownloadChannelLogos:(NSNotification *)notification {
+    _channels = [notification object];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
+        MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+        hud.mode = MBProgressHUDModeAnnularDeterminate;
+        hud.labelText = @"Downloading channel logos";
+        hud.detailsLabelText = @"for first use";
+        [Channels downloadChannelImages:_channels];
+    });
+    
+}
+
+- (void) messageUpdatedChannels:(NSNotification *)notification {
+    _channels = [notification object];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
+        [MBProgressHUD hideHUDForView:self.view animated:YES];
+        _sortedChannels = [Channels sortChannels:_channels sortBy:@"default"];
+        [_mainTableView reloadData];
+        [self refreshGuide:nil];
+    });
+    
+}
+
+- (void) messageUpdatedChannelsProgress:(NSNotification *)notification {
+    MBProgressHUD *hud = [MBProgressHUD HUDForView:self.view];
+    hud.mode = MBProgressHUDModeAnnularDeterminate;
+    hud.progress = [[notification object] floatValue];
+    
+}
+
+- (void) messageUpdatedClients:(NSNotification *)notification {
+    _clients = notification.object;
+    [MBProgressHUD hideHUDForView:self.view animated:YES];
+    [self chooseClient:nil];
+}
+
+- (void) messageUpdatedClientsProgress:(NSNotification *)notification {
+    [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+        MBProgressHUD *hud = [MBProgressHUD HUDForView:self.view];
+        hud.mode = MBProgressHUDModeAnnularDeterminate;
+        hud.progress = [[notification object] floatValue];
+    }];
+}
+
+- (void) messageNextGuideRefreshTime:(NSNotification *)notification {
+    _nextRefresh = [notification object];
+    
+    [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+        NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
+        [formatter setDateFormat:@"h:mm a"];
+        _overlayLabel.text = [NSString stringWithFormat:@"Next Refresh at %@",
+                              [formatter stringFromDate:_nextRefresh]];
+        [self toggleOverlay:@"hide"];
+    }];
+}
+
+- (void) messageUpdatedGuide:(NSNotification *)notification {
+    [self sendGuideDataToUI:notification.object isFuture:NO];
+}
+
+- (void) messageUpdatedFutureGuide:(NSNotification *)notification {
+    [self sendGuideDataToUI:notification.object isFuture:YES];
+}
+
+- (void) messageUpdatedGuideProgress:(NSNotification *)notification {
+    [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+        float percent = [[notification object] floatValue];
+        CGRect frm = _overlayProgress.frame;
+        frm.size.width = [[UIScreen mainScreen] bounds].size.width * percent;
+        
+        [UIView animateWithDuration:0.25
+                         animations:^{
+                             _overlayProgress.frame = frm;
+                         }];
+        
+    }];
+}
+
+- (void) messageUpdatedGuidePartial:(NSNotification *)notification {
+    _guide = notification.object;
+    [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+        [_mainTableView reloadData];
+    }];
+}
+
+- (void) messageChannelChanged:(NSNotification *)notification {
+    isPlaying = YES;
+    [self refreshNowPlaying:nil scrollToPlayingChanel:NO];
+}
+
+#pragma mark - UI Updates
+
+- (void) displayClient {
+    if (_currentClient) {
+        _navTitle.text = [_currentClient[@"name"] capitalizedString];
+        [self refreshNowPlaying:nil scrollToPlayingChanel:YES];
+    } else {
+        _navTitle.text = @"No Device Selected";
+        _navSubTitle.text = @"N/A";
+        [self clearNowPlaying];
+    }
+}
+
+- (void) refreshNowPlaying:(id)sender scrollToPlayingChanel:(BOOL)scroll {
+    if (_currentClient) {
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
+            NSString *channelNum = [Commands getChannelOnClient:_currentClient];
+            NSString *channelId = [Channels getChannelIdForChannelNumber:channelNum channels:_allChannels];
+            
+            if ([channelId isEqualToString:@""]) {
+                [self clearNowPlaying];
+            } else {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [self setNowPlaying:channelId chNum:channelNum];
+                    if (scroll) {
+                        [self scrollToChannel:channelNum];
+                    }
+                });
+            }
+        });
+    }
+}
+
+- (void) setNowPlaying:(NSString *)chId chNum:(NSString *)chNum {
+
+    NSDictionary *channel = [_allChannels objectForKey:chId];
+    NSLog(@"Querying Now Playing");
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
+        NSDictionary *guide = [Guide getNowPlayingForChannel:channel];
+        if ([[guide allKeys] count] == 0) {
+            return;
+        }
+        NSDictionary *guideData = [guide objectForKey:[guide allKeys][0]];
+        NSDictionary *duration = [Guide getDurationForChannel:guideData];
+        
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self setNowPlayingForChannel:channel guideData:guideData duration:duration];
+        });
+    });
 
 }
+
+- (void) setNowPlayingForChannel:(id)channel guideData:(id)guideData duration:(NSDictionary *)duration {
+    
+    _seekBar.value = [duration[@"percentage"] doubleValue];
+
+    if ([_currentProgramId isEqualToString:guideData[@"programID"]]) {
+        return;
+    }
+    
+    _currentProgramId = guideData[@"programID"];
+    _boxTitle.text = [NSString stringWithFormat:@"%@",
+                      guideData[@"title"]];
+    
+    if (guideData[@"hd"] && [[guideData[@"hd"] stringValue] isEqualToString:@"1"] ) {
+        [_hdLabel setHidden:NO];
+    } else {
+        [_hdLabel setHidden:YES];
+    }
+    
+    //_navTitle.text = [_currentClient[@"name"] capitalizedString];
+    _navSubTitle.text = [NSString stringWithFormat:@"%@ %@", channel[@"chNum"], channel[@"chName"]];
+
+    [self setBoxCoverForChannel:guideData[@"boxcover"]];
+    [self setDescriptionForProgramId:guideData[@"programID"]];
+}
+
+- (void) setStarRating:(double) rating {
+    rating = (rating*2.0) / 100.0;
+    
+    UIFont *font = [UIFont fontWithName:@"Helvetica-Bold" size:16];
+    NSDictionary *userAttributes = @{NSFontAttributeName: font};
+    const CGSize textSize = [@"★★★★★" sizeWithAttributes: userAttributes];
+    _stars.frame = CGRectMake(
+                              [[UIScreen mainScreen] bounds].size.width - textSize.width - 10 ,
+                              223,
+                              textSize.width * rating,
+                              29);
+}
+
+- (void) scrollToChannel:(NSString *)scrollToChNum {
+    int row = -1;
+    int section = -1;
+
+    int sectionCounter = 0;
+    int rowCounter = 0;
+    
+    NSArray *sections = [[_sortedChannels allKeys] sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
+    for (NSString *sectionKey in sections) {
+        NSMutableDictionary *sectionData = [_sortedChannels objectForKey:sectionKey];
+        NSArray *sectionChannels = [[sectionData allKeys] sortedArrayUsingSelector: @selector(compare:)];
+        for (id sectionChannelKey in sectionChannels) {
+            NSString *chId = [sectionData[sectionChannelKey] stringValue];
+            NSString *chNum = [_channels[chId][@"chNum"] stringValue];
+            if ([chNum isEqualToString:scrollToChNum]) {
+                row = rowCounter;
+                section = sectionCounter;
+            }
+            rowCounter++;
+        }
+        sectionCounter++;
+        rowCounter = 0;
+    }
+    
+    if (row > -1 && section > -1) {
+        NSIndexPath *indexPath = [NSIndexPath indexPathForRow:row inSection:section];
+        [_mainTableView scrollToRowAtIndexPath:indexPath
+                             atScrollPosition:UITableViewScrollPositionTop
+                                     animated:YES];
+    }
+}
+
+- (void) setDescriptionForProgramId:(NSString *)programID {
+    
+    NSURL* programURL = [NSURL URLWithString:
+                         [NSString stringWithFormat:@"https://www.directv.com/json/program/flip/%@", programID]];
+    
+    [NSURLConnection sendAsynchronousRequest:[NSURLRequest requestWithURL:programURL]
+                                       queue:[NSOperationQueue mainQueue]
+                           completionHandler:^(NSURLResponse *response,
+                                               NSData *data,
+                                               NSError *connectionError)
+     {
+         if (data.length > 0 && connectionError == nil) {
+             NSDictionary *json = [NSJSONSerialization JSONObjectWithData:data options:0 error:NULL];
+
+             if (json[@"programDetail"]) {
+
+                 id show = json[@"programDetail"];
+                 if (show[@"description"]) {
+                     _boxDescription.text = show[@"description"];
+                 }
+                 NSString *title = _boxTitle.text;
+                 
+                 if (show[@"title"] && show[@"episodeTitle"]) {
+                     title = [NSString stringWithFormat:@"%@ - %@",
+                              _boxTitle.text, show[@"episodeTitle"]];
+                 }
+                 if (show[@"title"] && show[@"releaseYear"]) {
+                     title = [NSString stringWithFormat:@"%@ (%@)",
+                              _boxTitle.text, show[@"releaseYear"]];
+                 }
+                 
+                 if (show[@"rating"]) {
+                     _ratingLabel.text = show[@"rating"];
+                     [_ratingLabel setHidden:NO];
+                 } else {
+                     [_ratingLabel setHidden:YES];
+                 }
+                 
+                 if (show[@"starRatingNum"]) {
+                     [self setStarRating:[show[@"starRatingNum"] doubleValue]];
+                     [_stars setHidden:NO];
+                 } else {
+                     [_stars setHidden:YES];
+                 }
+                 
+                 _boxTitle.text = title;
+                 
+             }
+         }
+     }];
+}
+
+- (void) setBoxCoverForChannel:(NSString *)path {
+    NSURL* imageUrl = [NSURL URLWithString:
+                       [NSString stringWithFormat:@"https://dtvimages.hs.llnwd.net/e1%@", path]];
+    
+    [NSURLConnection sendAsynchronousRequest:[NSURLRequest requestWithURL:imageUrl]
+                                       queue:[NSOperationQueue mainQueue]
+                           completionHandler:^(NSURLResponse *response,
+                                               NSData *data,
+                                               NSError *connectionError)
+     {
+         if (data.length > 0 && connectionError == nil) {
+             UIImage *image = [UIImage imageWithData:data];
+             [_boxCover setImage:image];
+         }
+     }];
+}
+
+- (void) clearNowPlaying {
+    _boxCover.image = [UIImage new];
+    _boxTitle.text = @"";
+    _boxDescription.text = @"";
+}
+
+#pragma mark - Guide Updates
+
+- (void) refreshGuideForTime:(NSDate *)time {
+
+    [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
+    CGRect frm = _overlayProgress.frame;
+    frm.size.width = 0;
+    _overlayProgress.frame = frm;
+    _overlayProgress.hidden = NO;
+    [self toggleOverlay:@"show"];
+    
+
+    NSDate *dt = [Guide getHalfHourIncrement:time];
+    NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
+    [formatter setDateFormat:@"MMM, d h:mm a"];
+    _overlayLabel.text = [NSString stringWithFormat:@"Loading guide for %@",
+                          [formatter stringFromDate:dt]];
+
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
+        [Guide refreshGuide:_channels sorted:_sortedChannels forTime:dt];
+    });
+}
+
+- (void) sendGuideDataToUI:(NSMutableDictionary *) guide isFuture:(BOOL)future {
+    _guide = guide;
+    guideIsRefreshing = NO;
+    
+    _channels = [Channels addChannelCategoriesFromGuide:_guide channels:_channels];
+    _sortedChannels = [Channels sortChannels:_channels sortBy:@"default"];
+    
+    [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+        
+        [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
+        if (future) {
+            CGRect frm = _overlayProgress.frame;
+            frm.size.width = [[UIScreen mainScreen] bounds].size.width;
+            _overlayProgress.frame = frm;
+            _overlayProgress.hidden = NO;
+            _overlayLabel.text = [_overlayLabel.text stringByReplacingOccurrencesOfString:@"Loading"
+                                                                               withString:@"Showing future"];
+        } else {
+            _overlayProgress.hidden = YES;
+        }
+        [_mainTableView reloadData];
+    }];
+}
+
+- (void) changedGuideTime:(UIDatePicker *)sender {
+    NSDateFormatter *dateFormat = [[NSDateFormatter alloc] init];
+    [dateFormat setDateStyle:NSDateFormatterFullStyle];
+    [dateFormat setTimeStyle:NSDateFormatterFullStyle];
+    _guideTime.text = [dateFormat stringFromDate:sender.date];
+}
+
+- (void) toggleOverlay:(NSString *)action {
+    if ([action isEqualToString:@"show"]) {
+        [UIView animateWithDuration:0.5
+                         animations:^{
+                             _overlay.alpha = 0.8;
+                         }];
+    } else {
+        dispatch_time_t delay = dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC * 3);
+        dispatch_after(delay, dispatch_get_main_queue(), ^(void){
+            [UIView animateWithDuration:0.5
+                             animations:^{
+                                 _overlay.alpha = 0.0;
+                             }];
+        });
+    }
+}
+
+
 @end
