@@ -506,13 +506,10 @@
     UIToolbar *guideTimeDone = [[UIToolbar alloc] initWithFrame:CGRectMake(0, 0, [[UIScreen mainScreen] bounds].size.width, 44)];
     [guideTimeDone setBarStyle:UIBarStyleBlackTranslucent];
     
-    UIBarButtonItem *spacer2 = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace
-                                target:nil action:nil];
-    
     UIBarButtonItem *done = [[UIBarButtonItem alloc] initWithTitle:@"Done" style:UIBarButtonItemStyleDone
                                                             target:nil action:@selector(selectedGuideTime:)];
     
-    [guideTimeDone setItems: [NSArray arrayWithObjects:spacer2, done, nil]];
+    [guideTimeDone setItems: [NSArray arrayWithObjects:flex, done, nil]];
     [_guideTime setInputAccessoryView:guideTimeDone];
     _guideTime.text = @"";
     
@@ -523,10 +520,15 @@
     
     UIToolbar *commandTextDone = [[UIToolbar alloc] initWithFrame:CGRectMake(0, 0, [[UIScreen mainScreen] bounds].size.width, 44)];
     [commandTextDone setBarStyle:UIBarStyleBlackTranslucent];
+    UIBarButtonItem *b1 = [[UIBarButtonItem alloc] initWithTitle:@"Last" style:UIBarButtonItemStylePlain
+                                                             target:nil action:@selector(closeCommands:)];
+    UIBarButtonItem *b2 = [[UIBarButtonItem alloc] initWithTitle:@"Last" style:UIBarButtonItemStylePlain
+                                                          target:nil action:@selector(closeCommands:)];
+    
     UIBarButtonItem *done3 = [[UIBarButtonItem alloc] initWithTitle:@"Done" style:UIBarButtonItemStyleDone
                                                             target:nil action:@selector(closeCommands:)];
     
-    [commandTextDone setItems: [NSArray arrayWithObjects:spacer2, done3, nil]];
+    [commandTextDone setItems: [NSArray arrayWithObjects:b2, flex, b1, flex, done3, nil]];
     [_commandText setInputAccessoryView:commandTextDone];
     _commandText.keyboardType = UIKeyboardTypeNumberPad;
     [_commandText setHidden:YES];
