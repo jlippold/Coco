@@ -259,7 +259,6 @@
                  [[NSNotificationCenter defaultCenter] postNotificationName:@"messageUpdatedChannels" object:channelList];
              } else {
                  long double progress =(completed*1.0/total*1.0);
-                 //NSLog(@"c: %f", completed*1.0);
                  NSNumber *nsprogress = [NSNumber numberWithDouble:progress];
                  [[NSNotificationCenter defaultCenter] postNotificationName:@"messageUpdatedChannelsProgress"
                                                                      object:nsprogress];

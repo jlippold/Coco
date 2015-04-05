@@ -12,28 +12,34 @@
 
 + (void)changeChannel:(NSString *)chNum device:(NSMutableDictionary *)client  {
     NSLog(@"%@ set to channel %@", client, chNum);
-    NSURL *url = [NSURL URLWithString:
-                  [NSString stringWithFormat:@"http://%@:8080/tv/tune?major=%@&%@",
-                   client[@"address"], chNum, client[@"appendage"] ]];
-    [NSURLConnection sendAsynchronousRequest:[NSURLRequest requestWithURL:url]
-                                       queue:[NSOperationQueue mainQueue]
-                           completionHandler:^(NSURLResponse *response,
-                                               NSData *data,
-                                               NSError *connectionError)
-     {
-         
-         if (data.length > 0 && connectionError == nil) {
-             //slight delay
-             dispatch_time_t delay = dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC * 0.5);
-             dispatch_after(delay, dispatch_get_main_queue(), ^(void){
-                 [[NSNotificationCenter defaultCenter] postNotificationName:@"messageChannelChanged" object:nil];
-             });
+    
+    if (client) {
+        NSURL *url = [NSURL URLWithString:
+                      [NSString stringWithFormat:@"http://%@:8080/tv/tune?major=%@&%@",
+                       client[@"address"], chNum, client[@"appendage"] ]];
+        [NSURLConnection sendAsynchronousRequest:[NSURLRequest requestWithURL:url]
+                                           queue:[NSOperationQueue mainQueue]
+                               completionHandler:^(NSURLResponse *response,
+                                                   NSData *data,
+                                                   NSError *connectionError)
+         {
              
-         } else {
-             NSLog(@"Channel change error");
-         }
-         
-     }];
+             if (data.length > 0 && connectionError == nil) {
+                 //slight delay
+                 dispatch_time_t delay = dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC * 0.5);
+                 dispatch_after(delay, dispatch_get_main_queue(), ^(void){
+                     [[NSNotificationCenter defaultCenter] postNotificationName:@"messageChannelChanged" object:nil];
+                 });
+                 
+             } else {
+                 NSLog(@"Channel change error");
+             }
+             
+         }];
+    } else {
+        [[NSNotificationCenter defaultCenter] postNotificationName:@"messageSetNowPlayingChannel" object:chNum];
+    }
+
 }
 
 + (NSString *)getChannelOnClient:(NSDictionary *) client {

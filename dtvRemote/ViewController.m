@@ -75,19 +75,15 @@
         });
     } else {
         [self refreshGuide:nil];
+        
+        if ([[_currentClient allKeys] count] != 0) {
+            [self refreshNowPlaying:nil scrollToPlayingChanel:YES];
+        } else {
+            [self setDefaultNowPlayingChannel];
+        }
+        
     }
     
-    
-    if ([[_currentClient allKeys] count] != 0) {
-        [self refreshNowPlaying:nil scrollToPlayingChanel:YES];
-    } else {
-        //no device set, so just display hbo
-        NSString *chId = [Channels getChannelIdForChannelCallSign:@"HBOe" channels:_channels];
-        id channel = _channels[chId];
-        [self setNowPlaying:chId chNum:channel[@"chNum"]];
-    }
-
-
     _timer = [NSTimer scheduledTimerWithTimeInterval:60.0
                                               target:self
                                             selector:@selector(onTimerFire:)
@@ -142,6 +138,9 @@
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageChannelChanged:)
                                                  name:@"messageChannelChanged" object:nil];
+ 
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageSetNowPlayingChannel:)
+                                                 name:@"messageSetNowPlayingChannel" object:nil];
     
 }
 
@@ -246,16 +245,16 @@
     _boxTitle.text = @"";
     _boxTitle.font = [UIFont fontWithName:@"Helvetica-Bold" size:17];
     [_boxTitle setTextColor:textColor];
+    [_boxTitle setHidden:YES];
     _boxTitle.textAlignment = NSTextAlignmentLeft;
     _boxTitle.frame = CGRectMake(xOffset, 82, [[UIScreen mainScreen] bounds].size.width - xOffset, 18);
     [self.view addSubview:_boxTitle];
     
     
     _playBar = [[UIToolbar alloc] init];
-    //_playBar.clipsToBounds = YES;
-    
     _playBar.tintColor = textColor;
     _playBar.frame = CGRectMake(xOffset, 106, [[UIScreen mainScreen] bounds].size.width - (xOffset+5), 40);
+    [_playBar setHidden:YES];
     [_playBar setBackgroundImage:[UIImage new] forToolbarPosition:UIToolbarPositionAny barMetrics:UIBarMetricsDefault];
     
     UIBarButtonItem *flex = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:self action:nil ];
@@ -287,6 +286,7 @@
                         flex, rewindButton, flex, flex, recButton, flex, _playButton, flex, flex, forwardButton, flex, nil];
     [_playBar setItems: buttons animated:NO];
     
+    
     [self.view addSubview:_playBar];
     
     
@@ -311,7 +311,7 @@
     [_seekBar setThumbImage:[UIImage new] forState:UIControlStateNormal];
     [_seekBar setThumbImage:[UIImage new] forState:UIControlStateSelected];
     [_seekBar setThumbImage:[UIImage new] forState:UIControlStateHighlighted];
-    
+    [_seekBar setHidden:YES];
     [self.view addSubview:_seekBar];
     
     _boxDescription = [[UILabel alloc] init];
@@ -322,6 +322,7 @@
     [_boxDescription setTextColor: textColor];
     _boxDescription.textAlignment = NSTextAlignmentLeft;
     _boxDescription.frame = CGRectMake(xOffset, 165, [[UIScreen mainScreen] bounds].size.width - xOffset, 56);
+    [_boxDescription setHidden:YES];
     [self.view addSubview:_boxDescription];
     
     _searchBar = [[UISearchBar alloc] initWithFrame:CGRectMake(xOffset - 10, 215, searchBarMinWidth, 44)];
@@ -340,7 +341,8 @@
     _searchController.hidesNavigationBarDuringPresentation = NO;
     _searchController.searchBar.frame = _searchBar.frame;
     _searchBar.enablesReturnKeyAutomatically = NO;
-    
+
+    [_searchBar setHidden:YES];
     [self.view addSubview:_searchBar];
     
      _hdLabel= [[UILabel alloc] init];
@@ -373,7 +375,7 @@
                                    64,
                                    29);
     
-    [_hdLabel setHidden:YES];
+    [_ratingLabel setHidden:YES];
     
     [self.view addSubview:_ratingLabel];
     
@@ -787,7 +789,7 @@
         
         //some error here about no clients found
         if ([[_currentClient allKeys] count] == 0) {
-            [self chooseClient:nil];
+            [self displayNoClientError];
         }
         
         id guideItem = _guide[chId];
@@ -849,36 +851,42 @@
         //somethings wrong, ask again for zip
         [self promptForZipCode];
         return;
-    } else {
-        
-        UIAlertController *view = [UIAlertController
-                                   alertControllerWithTitle:@"Confirm your location"
-                                   message:@""
-                                   preferredStyle:UIAlertControllerStyleActionSheet];
-        
-        for (NSUInteger i = 0; i < [locations count]; i++) {
-            
-            id key = [keys objectAtIndex: i];
-            id item = locations[key];
-            UIAlertAction *action =
-            [UIAlertAction actionWithTitle: item[@"countyName"] style: UIAlertActionStyleDefault handler:
-             ^(UIAlertAction * action) {
-                 [view dismissViewControllerAnimated:YES completion:nil];
-                 [Channels populateChannels:item];
-                 return;
-             }];
-            [view addAction:action];
-        }
-        
-        
-        UIAlertAction* cancel = [UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleDestructive handler:^(UIAlertAction * action) {
-            [view dismissViewControllerAnimated:YES completion:nil];
-            [self promptForZipCode];
-        }];
-        
-        [view addAction:cancel];
-        [self presentViewController:view animated:YES completion:nil];
     }
+    
+    if ([keys count] == 1 ) {
+        //only 1 location, dont ask, just confirm
+        id key = [keys objectAtIndex: 0];
+        [Channels populateChannels:locations[key]];
+        return;
+    }
+    
+    UIAlertController *view = [UIAlertController
+                               alertControllerWithTitle:@"Confirm your location"
+                               message:@""
+                               preferredStyle:UIAlertControllerStyleActionSheet];
+    
+    for (NSUInteger i = 0; i < [locations count]; i++) {
+        
+        id key = [keys objectAtIndex: i];
+        id item = locations[key];
+        UIAlertAction *action =
+        [UIAlertAction actionWithTitle: item[@"countyName"] style: UIAlertActionStyleDefault handler:
+         ^(UIAlertAction * action) {
+             [view dismissViewControllerAnimated:YES completion:nil];
+             [Channels populateChannels:item];
+             return;
+         }];
+        [view addAction:action];
+    }
+    
+    
+    UIAlertAction* cancel = [UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleDestructive handler:^(UIAlertAction * action) {
+        [view dismissViewControllerAnimated:YES completion:nil];
+        [self promptForZipCode];
+    }];
+    
+    [view addAction:cancel];
+    [self presentViewController:view animated:YES completion:nil];
 }
 
 - (IBAction) chooseClient:(id)sender {
@@ -890,6 +898,35 @@
     } else {
         [self showClientPicker:nil];
     }
+}
+
+- (void) displayNoClientError {
+    //some message about no clien
+    UIAlertController *view = [UIAlertController
+                               alertControllerWithTitle:@"No device selected"
+                               message:@"Would you like to search for available devices?"
+                               preferredStyle:UIAlertControllerStyleAlert];
+    
+    UIAlertAction *cancel = [UIAlertAction actionWithTitle:@"No" style:UIAlertActionStyleDefault handler:
+                             ^(UIAlertAction * action) {
+                                 [view dismissViewControllerAnimated:YES completion:nil];
+                                 return;
+                             }];
+    
+    
+    UIAlertAction *ok = [UIAlertAction actionWithTitle:@"Yes" style:UIAlertActionStyleDefault handler:
+                         ^(UIAlertAction * action) {
+                             [view dismissViewControllerAnimated:YES completion:nil];
+                             [self chooseClient:nil];
+                             return;
+                         }];
+    
+    [view addAction:ok];
+    [view addAction:cancel];
+    
+    UIViewController *vc = [[[[UIApplication sharedApplication] delegate] window] rootViewController];
+    [vc presentViewController:view animated:YES completion:nil];
+
 }
 
 - (IBAction) showClientPicker:(id)sender {
@@ -1124,6 +1161,7 @@
 
 - (void) messageDownloadChannelLogos:(NSNotification *)notification {
     _channels = [notification object];
+    _allChannels = [notification object];
     dispatch_async(dispatch_get_main_queue(), ^{
         [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
         MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
@@ -1143,6 +1181,7 @@
         _sortedChannels = [Channels sortChannels:_channels sortBy:@"default"];
         [_mainTableView reloadData];
         [self refreshGuide:nil];
+        [self setDefaultNowPlayingChannel];
     });
     
 }
@@ -1214,6 +1253,13 @@
     [self refreshNowPlaying:nil scrollToPlayingChanel:NO];
 }
 
+- (void) messageSetNowPlayingChannel:(NSNotification *)notification {
+    NSString *chNum = notification.object;
+    NSString *chId = [Channels getChannelIdForChannelNumber:chNum channels:_channels];
+    id channel = _channels[chId];
+    [self setNowPlaying:[channel[@"chId"] stringValue] chNum:[channel[@"chNum"] stringValue]];
+}
+
 #pragma mark - UI Updates
 
 - (void) displayClient {
@@ -1225,6 +1271,12 @@
         _navSubTitle.text = @"N/A";
         [self clearNowPlaying];
     }
+}
+
+- (void) setDefaultNowPlayingChannel {
+    NSString *chId = [Channels getChannelIdForChannelCallSign:@"HBOe" channels:_channels];
+    id channel = _channels[chId];
+    [self setNowPlaying:[channel[@"chId"] stringValue] chNum:[channel[@"chNum"] stringValue]];
 }
 
 - (void) refreshNowPlaying:(id)sender scrollToPlayingChanel:(BOOL)scroll {
@@ -1249,7 +1301,7 @@
 
 - (void) setNowPlaying:(NSString *)chId chNum:(NSString *)chNum {
 
-    NSDictionary *channel = [_allChannels objectForKey:chId];
+    __block id channel = [_allChannels objectForKey:chId];
     NSLog(@"Querying Now Playing");
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
         NSDictionary *guide = [Guide getNowPlayingForChannel:channel];
@@ -1284,9 +1336,14 @@
         [_hdLabel setHidden:YES];
     }
     
-    //_navTitle.text = [_currentClient[@"name"] capitalizedString];
     _navSubTitle.text = [NSString stringWithFormat:@"%@ %@", channel[@"chNum"], channel[@"chName"]];
-
+    [_playBar setHidden:NO];
+    [_searchBar setHidden:NO];
+    [_seekBar setHidden:NO];
+    [_boxCover setHidden:NO];
+    [_boxDescription setHidden:NO];
+    [_boxTitle setHidden:NO];
+    
     [self setBoxCoverForChannel:guideData[@"boxcover"]];
     [self setDescriptionForProgramId:guideData[@"programID"]];
 }
