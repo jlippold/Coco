@@ -787,7 +787,6 @@
         [_mainTableView reloadRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationNone];
     } else {
         
-        //some error here about no clients found
         if ([[_currentClient allKeys] count] == 0) {
             [self displayNoClientError];
         }

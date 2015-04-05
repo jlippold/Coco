@@ -121,7 +121,9 @@
         NSDictionary *savedData = [NSKeyedUnarchiver unarchiveObjectWithData:data];
         
         if ([savedData objectForKey:key] != nil) {
-            clients = [[NSMutableDictionary alloc] initWithDictionary:[savedData objectForKey:key] copyItems:YES];
+            //copy to a new mutatable object
+            NSMutableDictionary *base = [[savedData objectForKey:key] mutableCopy];
+            clients = [base mutableCopy];
         }
     }
     return clients;
