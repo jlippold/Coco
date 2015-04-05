@@ -7,7 +7,6 @@
 //
 
 #import "ViewController.h"
-#import "MBProgressHUD.h"
 #import <QuartzCore/QuartzCore.h>
 
 #import "iNet.h"
@@ -16,6 +15,8 @@
 #import "Commands.h"
 #import "Clients.h"
 
+#import "MBProgressHUD.h"
+
 @interface ViewController ()
 
 @end
@@ -23,6 +24,7 @@
 @implementation ViewController
 
 #pragma mark - Initialization
+
 
 - (void) viewDidLoad {
     [super viewDidLoad];
@@ -153,10 +155,10 @@
 #pragma mark - View Creations
 
 - (void) createMainView {
-    
+
     UIColor *backgroundColor = [UIColor colorWithRed:30/255.0f green:30/255.0f blue:30/255.0f alpha:1.0f];
     [self.view setBackgroundColor:backgroundColor];
-    
+
     [self createTitleBar];
     [self createTopSection];
     [self createTableView];
@@ -205,7 +207,7 @@
     
     [[UIBarButtonItem appearance] setTitleTextAttributes: barButtonItemAttributes forState:UIControlStateNormal];
     [[UIBarButtonItem appearance] setTitleTextAttributes: barButtonItemAttributes forState:UIControlStateHighlighted];
-    [[UIBarButtonItem appearance] setTitleTextAttributes: barButtonItemAttributes forState:UIControlStateSelected];
+    //[[UIBarButtonItem appearance] setTitleTextAttributes: barButtonItemAttributes forState:UIControlStateSelected];
     [[UIBarButtonItem appearance] setTitleTextAttributes: barButtonItemAttributes forState:UIControlStateDisabled];
     
     
@@ -313,7 +315,7 @@
     _seekBar.userInteractionEnabled = NO;
     
     [_seekBar setThumbImage:[UIImage new] forState:UIControlStateNormal];
-    [_seekBar setThumbImage:[UIImage new] forState:UIControlStateSelected];
+    //[_seekBar setThumbImage:[UIImage new] forState:UIControlStateSelected];
     [_seekBar setThumbImage:[UIImage new] forState:UIControlStateHighlighted];
 
     [_topContainer addSubview:_seekBar];

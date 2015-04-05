@@ -17,12 +17,11 @@
 		859D6D8A1A9926CA0024FBA4 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 859D6D891A9926CA0024FBA4 /* AppDelegate.m */; };
 		859D6D8D1A9926CA0024FBA4 /* dtvRemote.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 859D6D8B1A9926CA0024FBA4 /* dtvRemote.xcdatamodeld */; };
 		859D6D901A9926CA0024FBA4 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 859D6D8F1A9926CA0024FBA4 /* ViewController.m */; };
-		859D6D931A9926CA0024FBA4 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 859D6D911A9926CA0024FBA4 /* Main.storyboard */; };
 		859D6D951A9926CA0024FBA4 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 859D6D941A9926CA0024FBA4 /* Images.xcassets */; };
-		859D6D981A9926CA0024FBA4 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 859D6D961A9926CA0024FBA4 /* LaunchScreen.xib */; };
 		859D6DB11A9A8F5E0024FBA4 /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 859D6DB01A9A8F5E0024FBA4 /* CFNetwork.framework */; };
 		859D6DB31A9AA3F60024FBA4 /* iNet.m in Sources */ = {isa = PBXBuildFile; fileRef = 859D6DB21A9AA3F60024FBA4 /* iNet.m */; };
 		85AFB3D61AA35B4A000AEEB4 /* Channels.m in Sources */ = {isa = PBXBuildFile; fileRef = 85AFB3D51AA35B4A000AEEB4 /* Channels.m */; };
+		85D9B78C1AD195E100958450 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 85D9B78B1AD195E100958450 /* LaunchScreen.xib */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -44,14 +43,13 @@
 		859D6D8C1A9926CA0024FBA4 /* dtvRemote.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = dtvRemote.xcdatamodel; sourceTree = "<group>"; };
 		859D6D8E1A9926CA0024FBA4 /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
 		859D6D8F1A9926CA0024FBA4 /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
-		859D6D921A9926CA0024FBA4 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		859D6D941A9926CA0024FBA4 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
-		859D6D971A9926CA0024FBA4 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/LaunchScreen.xib; sourceTree = "<group>"; };
 		859D6DB01A9A8F5E0024FBA4 /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = System/Library/Frameworks/CFNetwork.framework; sourceTree = SDKROOT; };
 		859D6DB21A9AA3F60024FBA4 /* iNet.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = iNet.m; sourceTree = "<group>"; };
 		859D6DB41A9AA4040024FBA4 /* iNet.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = iNet.h; sourceTree = "<group>"; };
 		85AFB3D41AA35B38000AEEB4 /* Channels.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Channels.h; sourceTree = "<group>"; };
 		85AFB3D51AA35B4A000AEEB4 /* Channels.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Channels.m; sourceTree = "<group>"; };
+		85D9B78B1AD195E100958450 /* LaunchScreen.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = LaunchScreen.xib; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -99,8 +97,6 @@
 				859D6D941A9926CA0024FBA4 /* Images.xcassets */,
 				859D6DB41A9AA4040024FBA4 /* iNet.h */,
 				859D6DB21A9AA3F60024FBA4 /* iNet.m */,
-				859D6D961A9926CA0024FBA4 /* LaunchScreen.xib */,
-				859D6D911A9926CA0024FBA4 /* Main.storyboard */,
 				859D6D841A9926CA0024FBA4 /* Supporting Files */,
 				859D6D8E1A9926CA0024FBA4 /* ViewController.h */,
 				859D6D8F1A9926CA0024FBA4 /* ViewController.m */,
@@ -108,6 +104,7 @@
 				85428D601AA5379700134A23 /* Commands.m */,
 				85428D621AA559CA00134A23 /* Clients.h */,
 				85428D631AA559CA00134A23 /* Clients.m */,
+				85D9B78B1AD195E100958450 /* LaunchScreen.xib */,
 			);
 			path = dtvRemote;
 			sourceTree = "<group>";
@@ -180,8 +177,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				859D6D931A9926CA0024FBA4 /* Main.storyboard in Resources */,
-				859D6D981A9926CA0024FBA4 /* LaunchScreen.xib in Resources */,
+				85D9B78C1AD195E100958450 /* LaunchScreen.xib in Resources */,
 				859D6D951A9926CA0024FBA4 /* Images.xcassets in Resources */,
 				8580653E1AC89A36005672E8 /* categories.plist in Resources */,
 				858A4F651AA5FC5600B6226E /* images.bundle in Resources */,
@@ -209,25 +205,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
-
-/* Begin PBXVariantGroup section */
-		859D6D911A9926CA0024FBA4 /* Main.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				859D6D921A9926CA0024FBA4 /* Base */,
-			);
-			name = Main.storyboard;
-			sourceTree = "<group>";
-		};
-		859D6D961A9926CA0024FBA4 /* LaunchScreen.xib */ = {
-			isa = PBXVariantGroup;
-			children = (
-				859D6D971A9926CA0024FBA4 /* Base */,
-			);
-			name = LaunchScreen.xib;
-			sourceTree = "<group>";
-		};
-/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		859D6DA51A9926CA0024FBA4 /* Debug */ = {

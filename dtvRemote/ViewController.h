@@ -26,6 +26,7 @@
     
 }
 
+
 @property (nonatomic, strong) NSMutableDictionary *channels;
 @property (nonatomic, strong) NSMutableDictionary *allChannels;
 @property (nonatomic, strong) NSMutableDictionary *sortedChannels;
@@ -35,7 +36,6 @@
 @property (nonatomic, strong) NSMutableDictionary *clients;
 @property (nonatomic, strong) NSDictionary *currentClient;
 @property (nonatomic, strong) NSString *ssid;
-
 
 @property (nonatomic, strong) UITableView *mainTableView;
 @property (nonatomic, strong) IBOutlet UINavigationBar *navbar;
