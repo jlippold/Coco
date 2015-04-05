@@ -159,12 +159,27 @@
     UIColor *backgroundColor = [UIColor colorWithRed:30/255.0f green:30/255.0f blue:30/255.0f alpha:1.0f];
     [self.view setBackgroundColor:backgroundColor];
 
+    
+    //[self createRightView];
+    
     [self createTitleBar];
     [self createTopSection];
     [self createTableView];
     [self createToolbar];
     
 }
+
+- (void) createRightView {
+    
+    CGRect frm = [[UIScreen mainScreen] bounds];
+    frm.origin.x = frm.size.width * 0.5;
+    
+    UIView *v = [[UIView alloc] initWithFrame:frm];
+    [v setBackgroundColor:[UIColor redColor]];
+    [self.view addSubview:v];
+    
+}
+
 
 - (void) createTitleBar {
     
@@ -227,6 +242,7 @@
 
 - (void) createTopSection {
     
+    
     UIColor *textColor = [UIColor colorWithRed:193/255.0f green:193/255.0f blue:193/255.0f alpha:1.0f];
     UIColor *boxBackgroundColor = [UIColor colorWithRed:28/255.0f green:28/255.0f blue:28/255.0f alpha:1.0f];
     UIColor *tint = [UIColor colorWithRed:30/255.0f green:147/255.0f blue:212/255.0f alpha:1.0f];
@@ -235,6 +251,7 @@
                                                              [[UIScreen mainScreen] bounds].size.width,
                                                              tableXOffset - 64)];
     
+    _topContainer.userInteractionEnabled = YES;
     _topContainer.alpha = 0.0;
     [self.view addSubview:_topContainer];
     
@@ -405,6 +422,7 @@
     [_topContainer addSubview:_stars];
 
     
+    
 }
 
 - (void) createTableView {
@@ -546,6 +564,34 @@
 
 -(UIStatusBarStyle) preferredStatusBarStyle{
     return UIStatusBarStyleLightContent;
+}
+
+#pragma mark - Touch Events
+
+- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
+    UITouch *touch = [[event allTouches] anyObject];
+    CGPoint location = [touch locationInView:self.view.superview];
+    dragging = YES;
+    oldX = location.x;
+    oldY = location.y;
+}
+
+- (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
+    dragging = NO;
+}
+
+- (void) touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
+    if (dragging) {
+        UITouch *aTouch = [touches anyObject];
+        CGPoint location = [aTouch locationInView:self.view.superview];
+        NSLog(@"drag %f", location.x);
+        
+        [UIView beginAnimations:@"Drag" context:nil];
+        CGRect frm = _topContainer.frame;
+        frm.origin.x = location.x - oldX;
+        _topContainer.frame = frm;
+        [UIView commitAnimations];
+    }
 }
 
 #pragma mark - Table View Filtering

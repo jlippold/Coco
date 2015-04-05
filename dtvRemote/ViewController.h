@@ -24,6 +24,8 @@
     BOOL isEditing;
     BOOL isPlaying;
     
+    float oldX, oldY;
+    BOOL dragging;
 }
 
 
