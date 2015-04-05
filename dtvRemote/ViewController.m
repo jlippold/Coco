@@ -62,6 +62,8 @@
     
     xOffset = 140;
     searchBarMinWidth = 74;
+    tableXOffset = 255;
+    toolbarHeight = 40;
     searchBarMaxWidth = [[UIScreen mainScreen] bounds].size.width - xOffset;
     
     [self registerForNotifications];
@@ -227,34 +229,38 @@
     UIColor *boxBackgroundColor = [UIColor colorWithRed:28/255.0f green:28/255.0f blue:28/255.0f alpha:1.0f];
     UIColor *tint = [UIColor colorWithRed:30/255.0f green:147/255.0f blue:212/255.0f alpha:1.0f];
     
-    UIView *v = [[UIView alloc] initWithFrame:CGRectMake(5, 70, 120, 180)];
-    [v setBackgroundColor:boxBackgroundColor];
+    _topContainer = [[UIView alloc] initWithFrame:CGRectMake(0, 64,
+                                                             [[UIScreen mainScreen] bounds].size.width,
+                                                             tableXOffset - 64)];
     
-    //UITapGestureRecognizer *singleFingerTap = [[UITapGestureRecognizer alloc] initWithTarget:self
-    //action:@selector(dismissKeyboard:)];
-    //[v addGestureRecognizer:singleFingerTap];
+    _topContainer.alpha = 0.0;
+    [self.view addSubview:_topContainer];
+    
+    UIView *v = [[UIView alloc] initWithFrame:CGRectMake(5, 5, 120, 180)];
+    [v setBackgroundColor:boxBackgroundColor];
     
     _boxCover = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 120, 180)];
     [_boxCover setImage:[UIImage new]];
     [v addSubview:_boxCover];
-    [self.view addSubview:v];
-    
+    [_topContainer addSubview:v];
     
     _boxTitle = [[UILabel alloc] init];
     _boxTitle.translatesAutoresizingMaskIntoConstraints = YES;
     _boxTitle.text = @"";
     _boxTitle.font = [UIFont fontWithName:@"Helvetica-Bold" size:17];
     [_boxTitle setTextColor:textColor];
-    [_boxTitle setHidden:YES];
+
     _boxTitle.textAlignment = NSTextAlignmentLeft;
-    _boxTitle.frame = CGRectMake(xOffset, 82, [[UIScreen mainScreen] bounds].size.width - xOffset, 18);
-    [self.view addSubview:_boxTitle];
+    _boxTitle.frame = CGRectMake(xOffset, 8, [[UIScreen mainScreen] bounds].size.width - xOffset, 18);
+    [_topContainer addSubview:_boxTitle];
     
     
     _playBar = [[UIToolbar alloc] init];
     _playBar.tintColor = textColor;
-    _playBar.frame = CGRectMake(xOffset, 106, [[UIScreen mainScreen] bounds].size.width - (xOffset+5), 40);
-    [_playBar setHidden:YES];
+    _playBar.clipsToBounds = YES;
+    _playBar.frame = CGRectMake(xOffset,
+                                (_boxTitle.frame.size.height + _boxTitle.frame.origin.y) + 12,
+                                [[UIScreen mainScreen] bounds].size.width - (xOffset+5), 40);
     [_playBar setBackgroundImage:[UIImage new] forToolbarPosition:UIToolbarPositionAny barMetrics:UIBarMetricsDefault];
     
     UIBarButtonItem *flex = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:self action:nil ];
@@ -287,12 +293,15 @@
     [_playBar setItems: buttons animated:NO];
     
     
-    [self.view addSubview:_playBar];
+    [_topContainer addSubview:_playBar];
     
     
     //seekbar
     _seekBar = [[UISlider alloc] init];
-    _seekBar.frame = CGRectMake(xOffset, 146, [[UIScreen mainScreen] bounds].size.width - (xOffset+5), 10);
+    _seekBar.frame = CGRectMake(xOffset,
+                                (_playBar.frame.size.height + _playBar.frame.origin.y) ,
+                                [[UIScreen mainScreen] bounds].size.width - (xOffset+5),
+                                10);
     _seekBar.minimumValue = 0.0;
     _seekBar.maximumValue = 100.0;
     _seekBar.value = 0;
@@ -303,16 +312,11 @@
     _seekBar.thumbTintColor = textColor;
     _seekBar.userInteractionEnabled = NO;
     
-    /*
-    [_seekBar setThumbImage:[UIImage imageNamed:@"images.bundle/scrubber"] forState:UIControlStateNormal];
-    [_seekBar setThumbImage:[UIImage imageNamed:@"images.bundle/scrubber"] forState:UIControlStateSelected];
-    [_seekBar setThumbImage:[UIImage imageNamed:@"images.bundle/scrubber"] forState:UIControlStateHighlighted];
-    */
     [_seekBar setThumbImage:[UIImage new] forState:UIControlStateNormal];
     [_seekBar setThumbImage:[UIImage new] forState:UIControlStateSelected];
     [_seekBar setThumbImage:[UIImage new] forState:UIControlStateHighlighted];
-    [_seekBar setHidden:YES];
-    [self.view addSubview:_seekBar];
+
+    [_topContainer addSubview:_seekBar];
     
     _boxDescription = [[UILabel alloc] init];
     _boxDescription.translatesAutoresizingMaskIntoConstraints = YES;
@@ -321,11 +325,16 @@
     _boxDescription.font = [UIFont fontWithName:@"Helvetica" size:12];
     [_boxDescription setTextColor: textColor];
     _boxDescription.textAlignment = NSTextAlignmentLeft;
-    _boxDescription.frame = CGRectMake(xOffset, 165, [[UIScreen mainScreen] bounds].size.width - xOffset, 56);
-    [_boxDescription setHidden:YES];
-    [self.view addSubview:_boxDescription];
+    _boxDescription.frame = CGRectMake(xOffset,
+                                       (_seekBar.frame.size.height + _seekBar.frame.origin.y) + 4,
+                                       [[UIScreen mainScreen] bounds].size.width - xOffset,
+                                       56);
+
+    [_topContainer addSubview:_boxDescription];
     
-    _searchBar = [[UISearchBar alloc] initWithFrame:CGRectMake(xOffset - 10, 215, searchBarMinWidth, 44)];
+    _searchBar = [[UISearchBar alloc] initWithFrame:CGRectMake(xOffset - 10,
+                                                               (_topContainer.frame.size.height - 42),
+                                                               searchBarMinWidth, 44)];
     _searchBar.searchBarStyle = UISearchBarStyleMinimal;
     _searchBar.translucent = YES;
     _searchBar.tintColor = [UIColor whiteColor];
@@ -335,15 +344,12 @@
     _searchBar.delegate = self;
     
     _searchController = [[UISearchController alloc] initWithSearchResultsController:nil];
-    
-    //_searchController.searchResultsUpdater = self;
     _searchController.dimsBackgroundDuringPresentation = NO;
     _searchController.hidesNavigationBarDuringPresentation = NO;
     _searchController.searchBar.frame = _searchBar.frame;
     _searchBar.enablesReturnKeyAutomatically = NO;
 
-    [_searchBar setHidden:YES];
-    [self.view addSubview:_searchBar];
+    [_topContainer addSubview:_searchBar];
     
      _hdLabel= [[UILabel alloc] init];
     _hdLabel.text = @"HD";
@@ -355,12 +361,12 @@
     [_hdLabel setTextColor:textColor];
     _hdLabel.textAlignment = NSTextAlignmentCenter;
     _hdLabel.frame = CGRectMake(7,
-                               223,
+                               (_topContainer.frame.size.height - 36),
                                31,
                                24);
     [_hdLabel setHidden:YES];
     
-    [self.view addSubview:_hdLabel];
+    [_topContainer addSubview:_hdLabel];
     
     
     _ratingLabel = [[UILabel alloc] init];
@@ -371,13 +377,13 @@
     _ratingLabel.textAlignment = NSTextAlignmentCenter;
     _ratingLabel.frame = CGRectMake(
                                    _searchBar.frame.origin.x + searchBarMinWidth + 10,
-                                   223,
+                                   (_topContainer.frame.size.height - 36),
                                    64,
                                    29);
     
     [_ratingLabel setHidden:YES];
     
-    [self.view addSubview:_ratingLabel];
+    [_topContainer addSubview:_ratingLabel];
     
     _stars = [[UILabel alloc] init];
     _stars.text = @"★★★★★";
@@ -390,19 +396,17 @@
     _stars.textAlignment = NSTextAlignmentLeft;
     _stars.frame = CGRectMake(
                              0,
-                             223,
+                             (_topContainer.frame.size.height - 36),
                              0,
                              29);
     [_stars setHidden:YES];
-    [self.view addSubview:_stars];
+    [_topContainer addSubview:_stars];
 
     
 }
 
 - (void) createTableView {
-    double tableXOffset = 255;
-    double toolbarHeight = 40;
-    
+
     UIColor *seperatorColor = [UIColor colorWithRed:40/255.0f green:40/255.0f blue:40/255.0f alpha:1.0f];
     UIColor *backgroundColor = [UIColor colorWithRed:30/255.0f green:30/255.0f blue:30/255.0f alpha:1.0f];
     
@@ -416,16 +420,13 @@
     
     _mainTableView.separatorColor = seperatorColor;
     _mainTableView.backgroundColor = backgroundColor;
-    
-    
-    [self.view addSubview:_searchBar];
+
     [self.view addSubview:_mainTableView];
     
 }
 
 - (void) createToolbar {
     
-    double toolbarHeight = 40;
     double overlayHeight = 16;
     double progressHeight = 2;
     
@@ -1272,6 +1273,25 @@
     }
 }
 
+-(void)hideTopContainer:(BOOL) hide {
+    if (hide) {
+        [UIView animateWithDuration:0.25
+                         animations:^{
+                             _topContainer.alpha = 0.0;
+                             _boxTitle.text = @"";
+                             _boxDescription.text = @"";
+                             [_ratingLabel setHidden:YES];
+                             [_stars setHidden:YES];
+                         }];
+    } else {
+        [UIView animateWithDuration:0.5
+                         animations:^{
+                             _topContainer.alpha = 1.0;
+                         }];
+    }
+}
+
+
 - (void) setDefaultNowPlayingChannel {
     NSString *chId = [Channels getChannelIdForChannelCallSign:@"HBOe" channels:_channels];
     id channel = _channels[chId];
@@ -1325,9 +1345,8 @@
         return;
     }
     
+    [self hideTopContainer:YES];
     _currentProgramId = guideData[@"programID"];
-    _boxTitle.text = [NSString stringWithFormat:@"%@",
-                      guideData[@"title"]];
     
     if (guideData[@"hd"] && [[guideData[@"hd"] stringValue] isEqualToString:@"1"] ) {
         [_hdLabel setHidden:NO];
@@ -1336,15 +1355,9 @@
     }
     
     _navSubTitle.text = [NSString stringWithFormat:@"%@ %@", channel[@"chNum"], channel[@"chName"]];
-    [_playBar setHidden:NO];
-    [_searchBar setHidden:NO];
-    [_seekBar setHidden:NO];
-    [_boxCover setHidden:NO];
-    [_boxDescription setHidden:NO];
-    [_boxTitle setHidden:NO];
-    
-    [self setBoxCoverForChannel:guideData[@"boxcover"]];
     [self setDescriptionForProgramId:guideData[@"programID"]];
+    [self setBoxCoverForChannel:guideData[@"boxcover"]];
+
 }
 
 - (void) setStarRating:(double) rating {
@@ -1355,7 +1368,7 @@
     const CGSize textSize = [@"★★★★★" sizeWithAttributes: userAttributes];
     _stars.frame = CGRectMake(
                               [[UIScreen mainScreen] bounds].size.width - textSize.width - 10 ,
-                              223,
+                              (_topContainer.frame.size.height - 36),
                               textSize.width * rating,
                               29);
 }
@@ -1397,6 +1410,8 @@
     NSURL* programURL = [NSURL URLWithString:
                          [NSString stringWithFormat:@"https://www.directv.com/json/program/flip/%@", programID]];
     
+    _boxTitle.text = @"";
+    _boxDescription.text = @"";
     [NSURLConnection sendAsynchronousRequest:[NSURLRequest requestWithURL:programURL]
                                        queue:[NSOperationQueue mainQueue]
                            completionHandler:^(NSURLResponse *response,
@@ -1412,15 +1427,15 @@
                  if (show[@"description"]) {
                      _boxDescription.text = show[@"description"];
                  }
-                 NSString *title = _boxTitle.text;
+                 NSString *title = show[@"title"];
                  
                  if (show[@"title"] && show[@"episodeTitle"]) {
                      title = [NSString stringWithFormat:@"%@ - %@",
-                              _boxTitle.text, show[@"episodeTitle"]];
+                              title, show[@"episodeTitle"]];
                  }
                  if (show[@"title"] && show[@"releaseYear"]) {
                      title = [NSString stringWithFormat:@"%@ (%@)",
-                              _boxTitle.text, show[@"releaseYear"]];
+                              title, show[@"releaseYear"]];
                  }
                  
                  if (show[@"rating"]) {
@@ -1458,7 +1473,9 @@
              UIImage *image = [UIImage imageWithData:data];
              [_boxCover setImage:image];
          }
+         [self hideTopContainer:NO];
      }];
+
 }
 
 - (void) clearNowPlaying {

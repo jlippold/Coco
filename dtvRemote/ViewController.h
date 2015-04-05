@@ -17,6 +17,9 @@
     double searchBarMinWidth;
     double xOffset;
     
+    double tableXOffset;
+    double toolbarHeight;
+    
     BOOL guideIsRefreshing;
     BOOL isEditing;
     BOOL isPlaying;
@@ -48,6 +51,7 @@
 @property (nonatomic, strong) UILabel *boxTitle;
 @property (nonatomic, strong) UILabel *boxDescription;
 
+@property (nonatomic, strong) UIView *topContainer;
 
 @property (nonatomic, strong) UIToolbar *playBar;
 @property (nonatomic, strong) UIView *overlay;
