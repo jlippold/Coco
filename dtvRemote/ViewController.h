@@ -24,7 +24,7 @@
     BOOL isEditing;
     BOOL isPlaying;
     
-    float oldX, oldY;
+    float oldX;
     BOOL dragging;
 }
 
@@ -38,6 +38,10 @@
 @property (nonatomic, strong) NSMutableDictionary *clients;
 @property (nonatomic, strong) NSDictionary *currentClient;
 @property (nonatomic, strong) NSString *ssid;
+
+@property (nonatomic, strong) UIView *centerView;
+@property (nonatomic, strong) UIView *leftView;
+@property (nonatomic, strong) UIView *rightView;
 
 @property (nonatomic, strong) UITableView *mainTableView;
 @property (nonatomic, strong) IBOutlet UINavigationBar *navbar;

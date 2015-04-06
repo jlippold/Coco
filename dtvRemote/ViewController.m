@@ -69,7 +69,7 @@
     searchBarMaxWidth = [[UIScreen mainScreen] bounds].size.width - xOffset;
     
     [self registerForNotifications];
-    [self createMainView];
+    [self createViews];
     [self displayClient];
     
     
@@ -152,15 +152,41 @@
     self.ssid = [iNet fetchSSID];
 }
 
-#pragma mark - View Creations
+#pragma mark - View Creation
 
-- (void) createMainView {
+- (void) createViews {
 
     UIColor *backgroundColor = [UIColor colorWithRed:30/255.0f green:30/255.0f blue:30/255.0f alpha:1.0f];
     [self.view setBackgroundColor:backgroundColor];
 
+    CGRect frm = [[UIScreen mainScreen] bounds];
+    _centerView = [[UIView alloc] initWithFrame:frm];
+    [_centerView setBackgroundColor:backgroundColor];
     
-    //[self createRightView];
+    frm.size.width = frm.size.width * 0.75;
+    frm.origin.x = [[UIScreen mainScreen] bounds].size.width * 0.25;
+    _rightView = [[UIView alloc] initWithFrame:frm];
+    [_rightView setBackgroundColor:backgroundColor];
+    UILabel *rlabel = [[UILabel alloc] init];
+    rlabel.textColor = [UIColor whiteColor];
+    rlabel.text = @"Command list here";
+    rlabel.font = [UIFont fontWithName:@"Helvetica-Bold" size:17];
+    rlabel.frame = CGRectMake(10, 300, _rightView.bounds.size.width, 20);
+    [_rightView addSubview:rlabel];
+    
+    frm.origin.x = 0;
+    _leftView = [[UIView alloc] initWithFrame:frm];
+    [_leftView setBackgroundColor:backgroundColor];
+    UILabel *llabel = [[UILabel alloc] init];
+    llabel.textColor = [UIColor whiteColor];
+    llabel.text = @"Device list here";
+    llabel.font = [UIFont fontWithName:@"Helvetica-Bold" size:17];
+    llabel.frame = CGRectMake(10, 300, _leftView.bounds.size.width, 20);
+    [_leftView addSubview:llabel];
+
+    [self.view addSubview:_leftView];
+    [self.view addSubview:_rightView];
+    [self.view addSubview:_centerView];
     
     [self createTitleBar];
     [self createTopSection];
@@ -168,18 +194,6 @@
     [self createToolbar];
     
 }
-
-- (void) createRightView {
-    
-    CGRect frm = [[UIScreen mainScreen] bounds];
-    frm.origin.x = frm.size.width * 0.5;
-    
-    UIView *v = [[UIView alloc] initWithFrame:frm];
-    [v setBackgroundColor:[UIColor redColor]];
-    [self.view addSubview:v];
-    
-}
-
 
 - (void) createTitleBar {
     
@@ -237,7 +251,7 @@
     _navItem.rightBarButtonItem = _rightButton;
     
     [_navbar pushNavigationItem:_navItem animated:false];
-    [self.view addSubview:_navbar];
+    [_centerView addSubview:_navbar];
 }
 
 - (void) createTopSection {
@@ -253,7 +267,7 @@
     
     _topContainer.userInteractionEnabled = YES;
     _topContainer.alpha = 0.0;
-    [self.view addSubview:_topContainer];
+    [_centerView addSubview:_topContainer];
     
     UIView *v = [[UIView alloc] initWithFrame:CGRectMake(5, 5, 120, 180)];
     [v setBackgroundColor:boxBackgroundColor];
@@ -441,7 +455,7 @@
     _mainTableView.separatorColor = seperatorColor;
     _mainTableView.backgroundColor = backgroundColor;
 
-    [self.view addSubview:_mainTableView];
+    [_centerView addSubview:_mainTableView];
     
 }
 
@@ -478,7 +492,7 @@
 
     [_overlay addSubview:_overlayProgress];
     [_overlay addSubview:_overlayLabel];
-    [self.view addSubview:_overlay];
+    [_centerView addSubview:_overlay];
     
     _toolBar = [[UIToolbar alloc] init];
     _toolBar.clipsToBounds = YES;
@@ -512,7 +526,7 @@
     NSArray *buttons = [NSArray arrayWithObjects:  commands, flex , clock, flex, numberPad, flex, sort, flex, refresh, nil];
     [_toolBar setItems:buttons animated:NO];
     
-    [self.view addSubview:_toolBar];
+    [_centerView addSubview:_toolBar];
     
     
     _guideDatePicker = [[UIDatePicker alloc] init];
@@ -532,7 +546,7 @@
     [_guideTime setInputAccessoryView:guideTimeDone];
     _guideTime.text = @"";
     
-    [self.view addSubview:_guideTime];
+    [_centerView addSubview:_guideTime];
     
 
     _commandText = [[UITextField alloc] initWithFrame:CGRectMake(0,0,1,1)];
@@ -557,7 +571,7 @@
         forControlEvents:UIControlEventEditingChanged];
     
 
-    [self.view addSubview:_commandText];
+    [_centerView addSubview:_commandText];
 
     
 }
@@ -568,30 +582,66 @@
 
 #pragma mark - Touch Events
 
-- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
-    UITouch *touch = [[event allTouches] anyObject];
-    CGPoint location = [touch locationInView:self.view.superview];
-    dragging = YES;
-    oldX = location.x;
-    oldY = location.y;
-}
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
     dragging = NO;
+    
+    float position = _centerView.frame.origin.x;
+    float leftQuadrent = [[UIScreen mainScreen] bounds].size.width * 0.25;
+    float rightQuadrent = leftQuadrent * -1;
+    
+    if (position > 0 && position > leftQuadrent) {
+        [self snapToView:@"left"];
+        return;
+    }
+    
+    if (position < 0 && position < rightQuadrent) {
+        [self snapToView:@"right"];
+        return;
+    }
+    
+    [self snapToView:@"center"];
 }
 
 - (void) touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
-    if (dragging) {
-        UITouch *aTouch = [touches anyObject];
-        CGPoint location = [aTouch locationInView:self.view.superview];
-        NSLog(@"drag %f", location.x);
-        
-        [UIView beginAnimations:@"Drag" context:nil];
-        CGRect frm = _topContainer.frame;
-        frm.origin.x = location.x - oldX;
-        _topContainer.frame = frm;
-        [UIView commitAnimations];
+
+    UITouch *aTouch = [touches anyObject];
+    CGPoint location = [aTouch locationInView:self.view];
+    
+    CGPoint previousLocation = [aTouch previousLocationInView:self.view];
+    
+    _centerView.frame = CGRectOffset(_centerView.frame,
+                                     (location.x - previousLocation.x), 0);
+    
+    if (_centerView.frame.origin.x >= 0) {
+        [_rightView setHidden:YES];
+        [_leftView setHidden:NO];
+    } else {
+        [_rightView setHidden:NO];
+        [_leftView setHidden:YES];
     }
+
+}
+
+- (void) snapToView:(NSString *)viewName {
+    CGRect frm = [[UIScreen mainScreen] bounds];
+    
+    if ([viewName isEqualToString:@"left"]) {
+        frm.origin.x = [[UIScreen mainScreen] bounds].size.width * 0.75;
+    }
+    
+    if ([viewName isEqualToString:@"right"]) {
+        frm.origin.x = ([[UIScreen mainScreen] bounds].size.width * 0.75) * -1;
+    }
+    
+    if ([viewName isEqualToString:@"center"]) {
+        frm.origin.x = 0;
+    }
+    
+    [UIView animateWithDuration:0.3
+                     animations:^{
+                         _centerView.frame = frm;
+                     }];
 }
 
 #pragma mark - Table View Filtering
