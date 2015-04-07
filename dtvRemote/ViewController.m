@@ -155,39 +155,42 @@
 #pragma mark - View Creation
 
 - (void) createViews {
-
-    UIColor *backgroundColor = [UIColor colorWithRed:30/255.0f green:30/255.0f blue:30/255.0f alpha:1.0f];
+    
+    textColor = [UIColor colorWithRed:193/255.0f green:193/255.0f blue:193/255.0f alpha:1.0f];
+    backgroundColor = [UIColor colorWithRed:30/255.0f green:30/255.0f blue:30/255.0f alpha:1.0f];
+    boxBackgroundColor = [UIColor colorWithRed:28/255.0f green:28/255.0f blue:28/255.0f alpha:1.0f];
+    navBGColor = [UIColor colorWithRed:23/255.0f green:23/255.0f blue:23/255.0f alpha:1.0f];
+    tint = [UIColor colorWithRed:30/255.0f green:147/255.0f blue:212/255.0f alpha:1.0f];
+    seperatorColor = [UIColor colorWithRed:40/255.0f green:40/255.0f blue:40/255.0f alpha:1.0f];
+    
     [self.view setBackgroundColor:backgroundColor];
 
     CGRect frm = [[UIScreen mainScreen] bounds];
     _centerView = [[UIView alloc] initWithFrame:frm];
     [_centerView setBackgroundColor:backgroundColor];
+    _centerView.userInteractionEnabled = YES;
+    
+    _centerView.layer.masksToBounds = NO;
+    _centerView.layer.shadowOffset = CGSizeMake(0, 0);
+    _centerView.layer.shadowRadius = 3;
+    _centerView.layer.shadowOpacity = 0.5;
+    _centerView.layer.shadowPath = [UIBezierPath bezierPathWithRect:_centerView.bounds].CGPath;
     
     frm.size.width = frm.size.width * 0.75;
     frm.origin.x = [[UIScreen mainScreen] bounds].size.width * 0.25;
     _rightView = [[UIView alloc] initWithFrame:frm];
     [_rightView setBackgroundColor:backgroundColor];
-    UILabel *rlabel = [[UILabel alloc] init];
-    rlabel.textColor = [UIColor whiteColor];
-    rlabel.text = @"Command list here";
-    rlabel.font = [UIFont fontWithName:@"Helvetica-Bold" size:17];
-    rlabel.frame = CGRectMake(10, 300, _rightView.bounds.size.width, 20);
-    [_rightView addSubview:rlabel];
     
     frm.origin.x = 0;
     _leftView = [[UIView alloc] initWithFrame:frm];
     [_leftView setBackgroundColor:backgroundColor];
-    UILabel *llabel = [[UILabel alloc] init];
-    llabel.textColor = [UIColor whiteColor];
-    llabel.text = @"Device list here";
-    llabel.font = [UIFont fontWithName:@"Helvetica-Bold" size:17];
-    llabel.frame = CGRectMake(10, 300, _leftView.bounds.size.width, 20);
-    [_leftView addSubview:llabel];
 
     [self.view addSubview:_leftView];
     [self.view addSubview:_rightView];
     [self.view addSubview:_centerView];
     
+    [self createLeftView];
+    [self createRightView];
     [self createTitleBar];
     [self createTopSection];
     [self createTableView];
@@ -195,11 +198,67 @@
     
 }
 
-- (void) createTitleBar {
+- (void) createLeftView {
+
+    _leftTable = [[UITableView alloc] init];
+    CGRect tableFrame = [[UIScreen mainScreen] bounds];
+    tableFrame.size.width = tableFrame.size.width * 0.75;
+    tableFrame.size.height = tableFrame.size.height - 64;
+    tableFrame.origin.x = 0;
+    tableFrame.origin.y = 64;
+    _leftTable.frame = tableFrame;
     
-    UIColor *navBGColor = [UIColor colorWithRed:23/255.0f green:23/255.0f blue:23/255.0f alpha:1.0f];
-    UIColor *textColor = [UIColor colorWithRed:193/255.0f green:193/255.0f blue:193/255.0f alpha:1.0f];
-    UIColor *navTint = [UIColor colorWithRed:30/255.0f green:147/255.0f blue:212/255.0f alpha:1.0f];
+    //_leftTable.dataSource = self;
+    _leftTable.delegate = self;
+    _leftTable.separatorColor = seperatorColor;
+    _leftTable.backgroundColor = backgroundColor;
+    
+    [_leftView addSubview:_leftTable];
+    
+    CGRect navBarFrame = CGRectMake(0, 0, [[UIScreen mainScreen] bounds].size.width * 0.75, 64.0);
+    [[UINavigationBar appearance] setShadowImage:[[UIImage alloc] init]];
+    UINavigationBar *bar = [[UINavigationBar alloc] initWithFrame:navBarFrame];
+    bar.translucent = NO;
+    bar.tintColor = tint;
+    bar.barTintColor = navBGColor;
+    bar.titleTextAttributes = @{NSForegroundColorAttributeName : textColor};
+
+    UINavigationItem *navItem = [UINavigationItem alloc];
+    navItem.title = @"Device List";
+    [bar pushNavigationItem:navItem animated:false];
+    
+    [_leftView addSubview:bar];
+}
+
+- (void) createRightView {
+    _rightTable = [[UITableView alloc] init];
+    CGRect tableFrame = [[UIScreen mainScreen] bounds];
+    tableFrame.size.width = tableFrame.size.width * 0.75;
+    _rightTable.frame = tableFrame;
+    
+    //_rightTable = self;
+    _rightTable.delegate = self;
+    _rightTable.separatorColor = seperatorColor;
+    _rightTable.backgroundColor = backgroundColor;
+    
+    [_rightView addSubview:_rightTable];
+    
+    CGRect navBarFrame = CGRectMake(0, 0, [[UIScreen mainScreen] bounds].size.width * 0.75, 64.0);
+    [[UINavigationBar appearance] setShadowImage:[[UIImage alloc] init]];
+    UINavigationBar *bar = [[UINavigationBar alloc] initWithFrame:navBarFrame];
+    bar.translucent = NO;
+    bar.tintColor = tint;
+    bar.barTintColor = navBGColor;
+    bar.titleTextAttributes = @{NSForegroundColorAttributeName : textColor};
+    
+    UINavigationItem *navItem = [UINavigationItem alloc];
+    navItem.title = @"Command List";
+    [bar pushNavigationItem:navItem animated:false];
+    
+    [_rightView addSubview:bar];
+}
+
+- (void) createTitleBar {
     
     CGRect navBarFrame = CGRectMake(0, 0, [[UIScreen mainScreen] bounds].size.width, 64.0);
     [[UINavigationBar appearance] setShadowImage:[[UIImage alloc] init]];
@@ -207,15 +266,14 @@
     _navbar.barTintColor = navBGColor;
     
     _navbar.translucent = NO;
-    _navbar.tintColor = navTint;
+    _navbar.tintColor = tint;
     _navbar.titleTextAttributes = @{NSForegroundColorAttributeName : textColor};
-    
     
     _navTitle = [[UILabel alloc] init];
     _navTitle.translatesAutoresizingMaskIntoConstraints = YES;
     _navTitle.font = [UIFont fontWithName:@"Helvetica-Bold" size:17];
     [_navTitle setTextColor:textColor];
-    _navTitle.tintColor = navTint;
+    _navTitle.tintColor = tint;
     _navTitle.textAlignment = NSTextAlignmentCenter;
     _navTitle.frame = CGRectMake(0, 28, [[UIScreen mainScreen] bounds].size.width, 20);
     
@@ -232,7 +290,7 @@
     
     
     NSDictionary* barButtonItemAttributes =  @{NSFontAttributeName: [UIFont fontWithName:@"Helvetica" size:14.0f],
-                                               NSForegroundColorAttributeName: navTint};
+                                               NSForegroundColorAttributeName: tint};
     
     [[UIBarButtonItem appearance] setTitleTextAttributes: barButtonItemAttributes forState:UIControlStateNormal];
     [[UIBarButtonItem appearance] setTitleTextAttributes: barButtonItemAttributes forState:UIControlStateHighlighted];
@@ -257,15 +315,13 @@
 - (void) createTopSection {
     
     
-    UIColor *textColor = [UIColor colorWithRed:193/255.0f green:193/255.0f blue:193/255.0f alpha:1.0f];
-    UIColor *boxBackgroundColor = [UIColor colorWithRed:28/255.0f green:28/255.0f blue:28/255.0f alpha:1.0f];
-    UIColor *tint = [UIColor colorWithRed:30/255.0f green:147/255.0f blue:212/255.0f alpha:1.0f];
+
+
     
     _topContainer = [[UIView alloc] initWithFrame:CGRectMake(0, 64,
                                                              [[UIScreen mainScreen] bounds].size.width,
                                                              tableXOffset - 64)];
-    
-    _topContainer.userInteractionEnabled = YES;
+
     _topContainer.alpha = 0.0;
     [_centerView addSubview:_topContainer];
     
@@ -441,10 +497,6 @@
 
 - (void) createTableView {
 
-    UIColor *seperatorColor = [UIColor colorWithRed:40/255.0f green:40/255.0f blue:40/255.0f alpha:1.0f];
-    UIColor *backgroundColor = [UIColor colorWithRed:30/255.0f green:30/255.0f blue:30/255.0f alpha:1.0f];
-    
-    
     _mainTableView = [[UITableView alloc] init];
     [_mainTableView setFrame:CGRectMake(0, tableXOffset,
                                         [[UIScreen mainScreen] bounds].size.width,
@@ -454,17 +506,17 @@
     
     _mainTableView.separatorColor = seperatorColor;
     _mainTableView.backgroundColor = backgroundColor;
-
+    
     [_centerView addSubview:_mainTableView];
     
 }
+
 
 - (void) createToolbar {
     
     double overlayHeight = 16;
     double progressHeight = 2;
     
-    UIColor *textColor = [UIColor colorWithRed:193/255.0f green:193/255.0f blue:193/255.0f alpha:1.0f];
     
     _overlay = [[UIView alloc] init];
     _overlay.opaque = YES;
@@ -583,9 +635,20 @@
 #pragma mark - Touch Events
 
 
-- (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
-    dragging = NO;
+
+- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
+{
+    UITouch *aTouch = [touches anyObject];
+    CGPoint location = [aTouch locationInView:self.view];
     
+    if (CGRectContainsPoint(_centerView.frame, location)) {
+        dragging = YES;
+    }
+}
+
+- (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
+    
+    dragging = NO;
     float position = _centerView.frame.origin.x;
     float leftQuadrent = [[UIScreen mainScreen] bounds].size.width * 0.25;
     float rightQuadrent = leftQuadrent * -1;
@@ -604,23 +667,23 @@
 }
 
 - (void) touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
-
-    UITouch *aTouch = [touches anyObject];
-    CGPoint location = [aTouch locationInView:self.view];
-    
-    CGPoint previousLocation = [aTouch previousLocationInView:self.view];
-    
-    _centerView.frame = CGRectOffset(_centerView.frame,
-                                     (location.x - previousLocation.x), 0);
-    
-    if (_centerView.frame.origin.x >= 0) {
-        [_rightView setHidden:YES];
-        [_leftView setHidden:NO];
-    } else {
-        [_rightView setHidden:NO];
-        [_leftView setHidden:YES];
+    if (dragging) {
+        UITouch *aTouch = [touches anyObject];
+        CGPoint location = [aTouch locationInView:self.view];
+        
+        CGPoint previousLocation = [aTouch previousLocationInView:self.view];
+        
+        _centerView.frame = CGRectOffset(_centerView.frame,
+                                         (location.x - previousLocation.x), 0);
+        
+        if (_centerView.frame.origin.x >= 0) {
+            [_rightView setHidden:YES];
+            [_leftView setHidden:NO];
+        } else {
+            [_rightView setHidden:NO];
+            [_leftView setHidden:YES];
+        }
     }
-
 }
 
 - (void) snapToView:(NSString *)viewName {
@@ -752,6 +815,16 @@
     return [[[_sortedChannels objectForKey:sectionKey] allKeys] count];
 }
 
+- (void)tableView:(UITableView *)tableView willDisplayHeaderView:(UIView *)view forSection:(NSInteger)section {
+    UITableViewHeaderFooterView *v = (UITableViewHeaderFooterView *)view;
+    v.backgroundView.backgroundColor = [UIColor blackColor];
+    v.backgroundView.alpha = 0.9;
+    v.backgroundView.tintColor = tint;
+    
+    UITableViewHeaderFooterView *header = (UITableViewHeaderFooterView *)view;
+    [header.textLabel setTextColor:textColor];
+}
+
 - (NSString*) tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section {
     NSArray *sections = [[_sortedChannels allKeys] sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
     return [sections objectAtIndex:section];
@@ -759,23 +832,20 @@
 
 - (void) tableView:(UITableView *)tableView willDisplayCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    UIColor *backgroundColor = [UIColor colorWithRed:28/255.0f green:28/255.0f blue:28/255.0f alpha:1.0f];
-    UIColor *textColor = [UIColor colorWithRed:193/255.0f green:193/255.0f blue:193/255.0f alpha:1.0f];
-    UIColor *tintColor = [UIColor colorWithRed:30/255.0f green:147/255.0f blue:212/255.0f alpha:1.0f];
-    
+
     cell.indentationLevel = 1;
     cell.indentationWidth = 2;
     cell.accessoryType = UITableViewCellAccessoryCheckmark;
-    cell.backgroundColor = backgroundColor;
+    cell.backgroundColor = tableBackgroundColor;
     [cell.textLabel setTextColor: textColor];
     [cell.detailTextLabel setTextColor:textColor];
-    [cell setTintColor:tintColor];
+    
+    cell.userInteractionEnabled = YES;
+    [cell setTintColor:tint];
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     
-    UIColor *textColor = [UIColor colorWithRed:193/255.0f green:193/255.0f blue:193/255.0f alpha:1.0f];
-    UIColor *backgroundColor = [UIColor colorWithRed:28/255.0f green:28/255.0f blue:28/255.0f alpha:1.0f];
     
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"SomeId"];
     if (cell == nil) {
@@ -785,7 +855,7 @@
         label.textColor = textColor;
         label.font = [UIFont fontWithName:@"Helvetica" size:12];
         label.numberOfLines = 2;
-        label.backgroundColor = backgroundColor;
+        label.backgroundColor = [UIColor clearColor];
         [label setTag:1];
         label.textAlignment = NSTextAlignmentCenter;
         [label setFrame:CGRectMake([[UIScreen mainScreen] bounds].size.width - 40, 7, 40, 30)];

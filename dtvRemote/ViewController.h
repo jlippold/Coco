@@ -24,8 +24,16 @@
     BOOL isEditing;
     BOOL isPlaying;
     
-    float oldX;
     BOOL dragging;
+    
+    UIColor *textColor;
+    UIColor *backgroundColor;
+    UIColor *tableBackgroundColor;
+    UIColor *seperatorColor;
+    UIColor *boxBackgroundColor;
+    UIColor *navBGColor;
+    UIColor *tint;
+    
 }
 
 
@@ -42,6 +50,9 @@
 @property (nonatomic, strong) UIView *centerView;
 @property (nonatomic, strong) UIView *leftView;
 @property (nonatomic, strong) UIView *rightView;
+
+@property (nonatomic, strong) UITableView *leftTable;
+@property (nonatomic, strong) UITableView *rightTable;
 
 @property (nonatomic, strong) UITableView *mainTableView;
 @property (nonatomic, strong) IBOutlet UINavigationBar *navbar;
