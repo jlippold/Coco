@@ -26,6 +26,8 @@
     
     BOOL dragging;
     
+    id SideBarTableViewData;
+    
     UIColor *textColor;
     UIColor *backgroundColor;
     UIColor *tableBackgroundColor;
@@ -48,11 +50,8 @@
 @property (nonatomic, strong) NSString *ssid;
 
 @property (nonatomic, strong) UIView *centerView;
-@property (nonatomic, strong) UIView *leftView;
-@property (nonatomic, strong) UIView *rightView;
-
-@property (nonatomic, strong) UITableView *leftTable;
-@property (nonatomic, strong) UITableView *rightTable;
+@property (nonatomic, strong) UIView *sideBarView;
+@property (nonatomic, strong) UITableView *sideBarTable;
 
 @property (nonatomic, strong) UITableView *mainTableView;
 @property (nonatomic, strong) IBOutlet UINavigationBar *navbar;

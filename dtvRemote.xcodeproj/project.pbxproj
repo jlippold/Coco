@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		8523C75C1AD4B58D00F395B2 /* SideBarTableView.m in Sources */ = {isa = PBXBuildFile; fileRef = 8523C75B1AD4B58D00F395B2 /* SideBarTableView.m */; };
 		85428D5E1AA5368600134A23 /* Guide.m in Sources */ = {isa = PBXBuildFile; fileRef = 85428D5D1AA5368600134A23 /* Guide.m */; };
 		85428D611AA5379700134A23 /* Commands.m in Sources */ = {isa = PBXBuildFile; fileRef = 85428D601AA5379700134A23 /* Commands.m */; };
 		85428D641AA559CA00134A23 /* Clients.m in Sources */ = {isa = PBXBuildFile; fileRef = 85428D631AA559CA00134A23 /* Clients.m */; };
@@ -25,6 +26,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		8523C75A1AD4B58D00F395B2 /* SideBarTableView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SideBarTableView.h; sourceTree = "<group>"; };
+		8523C75B1AD4B58D00F395B2 /* SideBarTableView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SideBarTableView.m; sourceTree = "<group>"; };
 		85428D5C1AA5368600134A23 /* Guide.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Guide.h; sourceTree = "<group>"; };
 		85428D5D1AA5368600134A23 /* Guide.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Guide.m; sourceTree = "<group>"; };
 		85428D5F1AA5379700134A23 /* Commands.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Commands.h; sourceTree = "<group>"; };
@@ -84,26 +87,28 @@
 		859D6D831A9926CA0024FBA4 /* dtvRemote */ = {
 			isa = PBXGroup;
 			children = (
+				859D6D881A9926CA0024FBA4 /* AppDelegate.h */,
+				859D6D891A9926CA0024FBA4 /* AppDelegate.m */,
+				859D6D8E1A9926CA0024FBA4 /* ViewController.h */,
+				859D6D8F1A9926CA0024FBA4 /* ViewController.m */,
+				8523C75A1AD4B58D00F395B2 /* SideBarTableView.h */,
+				8523C75B1AD4B58D00F395B2 /* SideBarTableView.m */,
+				85AFB3D41AA35B38000AEEB4 /* Channels.h */,
+				85AFB3D51AA35B4A000AEEB4 /* Channels.m */,
+				85428D5C1AA5368600134A23 /* Guide.h */,
+				85428D5D1AA5368600134A23 /* Guide.m */,
+				85428D621AA559CA00134A23 /* Clients.h */,
+				85428D631AA559CA00134A23 /* Clients.m */,
+				85428D5F1AA5379700134A23 /* Commands.h */,
+				85428D601AA5379700134A23 /* Commands.m */,
+				859D6DB41A9AA4040024FBA4 /* iNet.h */,
+				859D6DB21A9AA3F60024FBA4 /* iNet.m */,
 				8564F7DA1AD06F520090F308 /* MBProgressHUD.h */,
 				8564F7DB1AD06F520090F308 /* MBProgressHUD.m */,
 				858A4F641AA5FC5600B6226E /* images.bundle */,
-				859D6D881A9926CA0024FBA4 /* AppDelegate.h */,
-				859D6D891A9926CA0024FBA4 /* AppDelegate.m */,
-				85AFB3D41AA35B38000AEEB4 /* Channels.h */,
-				85AFB3D51AA35B4A000AEEB4 /* Channels.m */,
 				859D6D8B1A9926CA0024FBA4 /* dtvRemote.xcdatamodeld */,
-				85428D5C1AA5368600134A23 /* Guide.h */,
-				85428D5D1AA5368600134A23 /* Guide.m */,
 				859D6D941A9926CA0024FBA4 /* Images.xcassets */,
-				859D6DB41A9AA4040024FBA4 /* iNet.h */,
-				859D6DB21A9AA3F60024FBA4 /* iNet.m */,
 				859D6D841A9926CA0024FBA4 /* Supporting Files */,
-				859D6D8E1A9926CA0024FBA4 /* ViewController.h */,
-				859D6D8F1A9926CA0024FBA4 /* ViewController.m */,
-				85428D5F1AA5379700134A23 /* Commands.h */,
-				85428D601AA5379700134A23 /* Commands.m */,
-				85428D621AA559CA00134A23 /* Clients.h */,
-				85428D631AA559CA00134A23 /* Clients.m */,
 				85D9B78B1AD195E100958450 /* LaunchScreen.xib */,
 			);
 			path = dtvRemote;
@@ -201,6 +206,7 @@
 				8564F7DC1AD06F520090F308 /* MBProgressHUD.m in Sources */,
 				859D6D871A9926CA0024FBA4 /* main.m in Sources */,
 				85428D611AA5379700134A23 /* Commands.m in Sources */,
+				8523C75C1AD4B58D00F395B2 /* SideBarTableView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

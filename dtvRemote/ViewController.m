@@ -15,6 +15,8 @@
 #import "Commands.h"
 #import "Clients.h"
 
+#import "SideBarTableView.h"
+
 #import "MBProgressHUD.h"
 
 @interface ViewController ()
@@ -177,20 +179,14 @@
     _centerView.layer.shadowPath = [UIBezierPath bezierPathWithRect:_centerView.bounds].CGPath;
     
     frm.size.width = frm.size.width * 0.75;
-    frm.origin.x = [[UIScreen mainScreen] bounds].size.width * 0.25;
-    _rightView = [[UIView alloc] initWithFrame:frm];
-    [_rightView setBackgroundColor:backgroundColor];
-    
     frm.origin.x = 0;
-    _leftView = [[UIView alloc] initWithFrame:frm];
-    [_leftView setBackgroundColor:backgroundColor];
+    _sideBarView = [[UIView alloc] initWithFrame:frm];
+    [_sideBarView setBackgroundColor:backgroundColor];
 
-    [self.view addSubview:_leftView];
-    [self.view addSubview:_rightView];
+    [self.view addSubview:_sideBarView];
     [self.view addSubview:_centerView];
     
-    [self createLeftView];
-    [self createRightView];
+    [self createSideBar];
     [self createTitleBar];
     [self createTopSection];
     [self createTableView];
@@ -198,22 +194,24 @@
     
 }
 
-- (void) createLeftView {
+- (void) createSideBar {
 
-    _leftTable = [[UITableView alloc] init];
+    _sideBarTable = [[UITableView alloc] init];
     CGRect tableFrame = [[UIScreen mainScreen] bounds];
     tableFrame.size.width = tableFrame.size.width * 0.75;
     tableFrame.size.height = tableFrame.size.height - 64;
     tableFrame.origin.x = 0;
     tableFrame.origin.y = 64;
-    _leftTable.frame = tableFrame;
+    _sideBarTable.frame = tableFrame;
     
-    //_leftTable.dataSource = self;
-    _leftTable.delegate = self;
-    _leftTable.separatorColor = seperatorColor;
-    _leftTable.backgroundColor = backgroundColor;
+    SideBarTableViewData = [[SideBarTableView alloc] init];
     
-    [_leftView addSubview:_leftTable];
+    _sideBarTable.dataSource = SideBarTableViewData;
+    _sideBarTable.delegate = SideBarTableViewData;
+    _sideBarTable.separatorColor = seperatorColor;
+    _sideBarTable.backgroundColor = backgroundColor;
+    
+    [_sideBarView addSubview:_sideBarTable];
     
     CGRect navBarFrame = CGRectMake(0, 0, [[UIScreen mainScreen] bounds].size.width * 0.75, 64.0);
     [[UINavigationBar appearance] setShadowImage:[[UIImage alloc] init]];
@@ -224,39 +222,12 @@
     bar.titleTextAttributes = @{NSForegroundColorAttributeName : textColor};
 
     UINavigationItem *navItem = [UINavigationItem alloc];
-    navItem.title = @"Device List";
+    navItem.title = @"Settings";
     [bar pushNavigationItem:navItem animated:false];
     
-    [_leftView addSubview:bar];
+    [_sideBarView addSubview:bar];
 }
 
-- (void) createRightView {
-    _rightTable = [[UITableView alloc] init];
-    CGRect tableFrame = [[UIScreen mainScreen] bounds];
-    tableFrame.size.width = tableFrame.size.width * 0.75;
-    _rightTable.frame = tableFrame;
-    
-    //_rightTable = self;
-    _rightTable.delegate = self;
-    _rightTable.separatorColor = seperatorColor;
-    _rightTable.backgroundColor = backgroundColor;
-    
-    [_rightView addSubview:_rightTable];
-    
-    CGRect navBarFrame = CGRectMake(0, 0, [[UIScreen mainScreen] bounds].size.width * 0.75, 64.0);
-    [[UINavigationBar appearance] setShadowImage:[[UIImage alloc] init]];
-    UINavigationBar *bar = [[UINavigationBar alloc] initWithFrame:navBarFrame];
-    bar.translucent = NO;
-    bar.tintColor = tint;
-    bar.barTintColor = navBGColor;
-    bar.titleTextAttributes = @{NSForegroundColorAttributeName : textColor};
-    
-    UINavigationItem *navItem = [UINavigationItem alloc];
-    navItem.title = @"Command List";
-    [bar pushNavigationItem:navItem animated:false];
-    
-    [_rightView addSubview:bar];
-}
 
 - (void) createTitleBar {
     
@@ -651,15 +622,9 @@
     dragging = NO;
     float position = _centerView.frame.origin.x;
     float leftQuadrent = [[UIScreen mainScreen] bounds].size.width * 0.25;
-    float rightQuadrent = leftQuadrent * -1;
     
     if (position > 0 && position > leftQuadrent) {
-        [self snapToView:@"left"];
-        return;
-    }
-    
-    if (position < 0 && position < rightQuadrent) {
-        [self snapToView:@"right"];
+        [self snapToView:@"sidebar"];
         return;
     }
     
@@ -676,12 +641,10 @@
         _centerView.frame = CGRectOffset(_centerView.frame,
                                          (location.x - previousLocation.x), 0);
         
-        if (_centerView.frame.origin.x >= 0) {
-            [_rightView setHidden:YES];
-            [_leftView setHidden:NO];
-        } else {
-            [_rightView setHidden:NO];
-            [_leftView setHidden:YES];
+        if (_centerView.frame.origin.x < 0) {
+            CGRect frm = _centerView.frame;
+            frm.origin.x = 0;
+            _centerView.frame = frm;
         }
     }
 }
@@ -689,12 +652,8 @@
 - (void) snapToView:(NSString *)viewName {
     CGRect frm = [[UIScreen mainScreen] bounds];
     
-    if ([viewName isEqualToString:@"left"]) {
+    if ([viewName isEqualToString:@"sidebar"]) {
         frm.origin.x = [[UIScreen mainScreen] bounds].size.width * 0.75;
-    }
-    
-    if ([viewName isEqualToString:@"right"]) {
-        frm.origin.x = ([[UIScreen mainScreen] bounds].size.width * 0.75) * -1;
     }
     
     if ([viewName isEqualToString:@"center"]) {
