@@ -7,12 +7,15 @@
 //
 
 #import "SideBarTableView.h"
+#import "Clients.h"
 
 @implementation SideBarTableView
 
 
 -(id) init{
     self = [super init];
+    _clients = [Clients loadClientList];
+    _currentClient = [Clients getClient];
     return self;
 }
 
@@ -34,7 +37,7 @@
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
     if (section == 0) { //Devices
-        return 3;
+        return [[[_clients objectForKey:@"Simulator"] allKeys] count];
     } else {    //Commands
         return 10;
     }
@@ -48,7 +51,11 @@
     }
     
     if (indexPath.section == 0) {
-        cell.textLabel.text = @"Some Device";
+        NSArray *keys = [[_clients objectForKey:@"Simulator"] allKeys];
+        id key = [keys objectAtIndex:indexPath.row];
+        NSDictionary *client = _clients[@"Simulator"][key];
+        cell.textLabel.text = client[@"name"];
+    
     }
     if (indexPath.section == 1) {
         cell.textLabel.text = @"Some Command";

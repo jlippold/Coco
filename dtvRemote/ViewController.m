@@ -1021,7 +1021,9 @@
         MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
         hud.mode = MBProgressHUDModeAnnularDeterminate;
         hud.labelText = @"Scanning wifi network for devices...";
-        [Clients searchWifiForDevices];
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
+            [Clients searchWifiForDevices];
+        });
     } else {
         [self showClientPicker:nil];
     }
@@ -1323,7 +1325,17 @@
 - (void) messageUpdatedClients:(NSNotification *)notification {
     _clients = notification.object;
     [MBProgressHUD hideHUDForView:self.view animated:YES];
-    [self chooseClient:nil];
+    
+    if ([[_clients[self.ssid] allKeys] count] == 0) {
+        UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"No Devices Found"
+                                                                       message:@"No devices found on this wifi network." preferredStyle:UIAlertControllerStyleAlert];
+        UIAlertAction* accept = [UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil];
+        [alert addAction:accept];
+        [self presentViewController:alert animated:YES completion:nil];
+        return;
+    } else {
+        [self chooseClient:nil];
+    }
 }
 
 - (void) messageUpdatedClientsProgress:(NSNotification *)notification {

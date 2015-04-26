@@ -36,8 +36,10 @@
             NSString *strUrl = [NSString stringWithFormat:@"http://%@:8080/info/getLocations",
                                 [prospectiveClients objectAtIndex:i]];
             
-            //NSLog(@"scanning %@", [addresses objectAtIndex:i]);
+            //NSLog(@"scanning %@", [prospectiveClients objectAtIndex:i]);
             NSURL *url = [NSURL URLWithString:strUrl];
+            
+
             
             NSURLRequest *request = [[NSURLRequest alloc] initWithURL:url
                                                           cachePolicy:1
