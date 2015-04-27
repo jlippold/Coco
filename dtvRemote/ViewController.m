@@ -211,6 +211,10 @@
     _sideBarTable.separatorColor = seperatorColor;
     _sideBarTable.backgroundColor = backgroundColor;
     
+    UIRefreshControl *refreshControl = [[UIRefreshControl alloc] init];
+    [refreshControl addTarget:self action:@selector(refreshSideBar:) forControlEvents:UIControlEventValueChanged];
+    [_sideBarTable addSubview:refreshControl];
+    
     [_sideBarView addSubview:_sideBarTable];
     
     CGRect navBarFrame = CGRectMake(0, 0, [[UIScreen mainScreen] bounds].size.width * 0.75, 64.0);
@@ -1410,6 +1414,10 @@
         _navSubTitle.text = @"N/A";
         [self clearNowPlaying];
     }
+}
+
+- (void)refreshSideBar:(UIRefreshControl *)refreshControl {
+    [refreshControl endRefreshing];
 }
 
 -(void)hideTopContainer:(BOOL) hide {

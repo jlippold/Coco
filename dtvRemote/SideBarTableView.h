@@ -9,7 +9,7 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 
-@interface SideBarTableView : NSObject <UITableViewDataSource> {
+@interface SideBarTableView : NSObject <UITableViewDataSource, UITableViewDelegate> {
 
 }
 @property (nonatomic, strong) NSMutableDictionary *clients;
