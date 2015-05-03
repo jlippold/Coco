@@ -18,6 +18,11 @@
 #import "SideBarTableView.h"
 #import "MBProgressHUD.h"
 #import "Reachability.h"
+#import "CDRTranslucentSideBar.h"
+
+@interface ViewController () <CDRTranslucentSideBarDelegate>
+    @property (nonatomic, strong) CDRTranslucentSideBar *sideBar;
+@end
 
 @implementation ViewController {
 
@@ -259,9 +264,7 @@
     frm.size.width = frm.size.width * 0.75;
     frm.origin.x = 0;
     sideBarView = [[UIView alloc] initWithFrame:frm];
-    [sideBarView setBackgroundColor:backgroundColor];
 
-    [self.view addSubview:sideBarView];
     [self.view addSubview:centerView];
     
     [self createSideBar];
@@ -269,7 +272,7 @@
     [self createTopSection];
     [self createTableView];
     [self createToolbar];
-    
+
 }
 
 - (void) createSideBar {
@@ -287,8 +290,9 @@
     sideBarTable.dataSource = SideBarTableViewData;
     sideBarTable.delegate = SideBarTableViewData;
     sideBarTable.separatorColor = seperatorColor;
-    sideBarTable.backgroundColor = backgroundColor;
+    sideBarTable.backgroundColor = [UIColor clearColor];
     
+
     UIRefreshControl *refreshControl = [[UIRefreshControl alloc] init];
     [refreshControl addTarget:self action:@selector(refreshSideBar:) forControlEvents:UIControlEventValueChanged];
     [sideBarTable addSubview:refreshControl];
@@ -308,6 +312,18 @@
     [bar pushNavigationItem:sideBarNavItem animated:false];
     
     [sideBarView addSubview:bar];
+    
+    self.sideBar = [[CDRTranslucentSideBar alloc] init];
+    self.sideBar.delegate = self;
+    self.sideBar.tag = 55;
+    self.sideBar.sideBarWidth = [[UIScreen mainScreen] bounds].size.width * 0.75;
+    self.sideBar.translucentStyle = UIBarStyleBlack;
+    [self.sideBar setContentViewInSideBar:sideBarView];
+    
+    UIPanGestureRecognizer *panGestureRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(panSideBar:)];
+    
+    [self.view addGestureRecognizer:panGestureRecognizer];
+    
 }
 
 
@@ -366,10 +382,6 @@
 }
 
 - (void) createTopSection {
-    
-    
-
-
     
     topContainer = [[UIView alloc] initWithFrame:CGRectMake(0, 64,
                                                              [[UIScreen mainScreen] bounds].size.width,
@@ -685,68 +697,6 @@
     return UIStatusBarStyleLightContent;
 }
 
-#pragma mark - Touch Events
-
-
-
-- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
-{
-    UITouch *aTouch = [touches anyObject];
-    CGPoint location = [aTouch locationInView:self.view];
-    
-    if (CGRectContainsPoint(centerView.frame, location)) {
-        dragging = YES;
-    }
-}
-
-- (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
-    
-    dragging = NO;
-    float position = centerView.frame.origin.x;
-    float leftQuadrent = [[UIScreen mainScreen] bounds].size.width * 0.25;
-    
-    if (position > 0 && position > leftQuadrent) {
-        [self snapToView:@"sidebar"];
-        return;
-    }
-    
-    [self snapToView:@"center"];
-}
-
-- (void) touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
-    if (dragging) {
-        UITouch *aTouch = [touches anyObject];
-        CGPoint location = [aTouch locationInView:self.view];
-        
-        CGPoint previousLocation = [aTouch previousLocationInView:self.view];
-        
-        centerView.frame = CGRectOffset(centerView.frame,
-                                         (location.x - previousLocation.x), 0);
-        
-        if (centerView.frame.origin.x < 0) {
-            CGRect frm = centerView.frame;
-            frm.origin.x = 0;
-            centerView.frame = frm;
-        }
-    }
-}
-
-- (void) snapToView:(NSString *)viewName {
-    CGRect frm = [[UIScreen mainScreen] bounds];
-    
-    if ([viewName isEqualToString:@"sidebar"]) {
-        frm.origin.x = [[UIScreen mainScreen] bounds].size.width * 0.75;
-    }
-    
-    if ([viewName isEqualToString:@"center"]) {
-        frm.origin.x = 0;
-    }
-    
-    [UIView animateWithDuration:0.3
-                     animations:^{
-                         centerView.frame = frm;
-                     }];
-}
 
 #pragma mark - Table View Filtering
 
@@ -1344,8 +1294,15 @@
 }
 
 - (IBAction) showCommands:(id)sender {
-    
+     [self.sideBar show];
 }
+
+- (void)panSideBar:(UIPanGestureRecognizer *)recognizer
+{
+    self.sideBar.isCurrentPanGestureTarget = YES;
+    [self.sideBar handlePanGestureToShow:recognizer inView:self.view];
+}
+
 
 - (void) commandSend:(id)sender {
     // there was a text change in some control
@@ -1355,6 +1312,23 @@
     }
     commandText.text = @"";
 }
+
+#pragma mark - Sidebar events
+
+
+- (void)sideBar:(CDRTranslucentSideBar *)sideBar didAppear:(BOOL)animated {
+    NSLog(@"didAppear");
+}
+- (void)sideBar:(CDRTranslucentSideBar *)sideBar willAppear:(BOOL)animated {
+    NSLog(@"willAppear");
+}
+- (void)sideBar:(CDRTranslucentSideBar *)sideBar didDisappear:(BOOL)animated {
+     NSLog(@"didDisappear");
+}
+- (void)sideBar:(CDRTranslucentSideBar *)sideBar willDisappear:(BOOL)animated {
+     NSLog(@"willDisappear");
+}
+
 
 #pragma mark - Messages / Events
 

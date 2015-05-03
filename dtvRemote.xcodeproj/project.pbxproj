@@ -28,6 +28,7 @@
 		859D6DB11A9A8F5E0024FBA4 /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 859D6DB01A9A8F5E0024FBA4 /* CFNetwork.framework */; };
 		859D6DB31A9AA3F60024FBA4 /* iNet.m in Sources */ = {isa = PBXBuildFile; fileRef = 859D6DB21A9AA3F60024FBA4 /* iNet.m */; };
 		85AFB3D61AA35B4A000AEEB4 /* dtvChannels.m in Sources */ = {isa = PBXBuildFile; fileRef = 85AFB3D51AA35B4A000AEEB4 /* dtvChannels.m */; };
+		85BF98081AF649EE00D0A189 /* CDRTranslucentSideBar.m in Sources */ = {isa = PBXBuildFile; fileRef = 85BF98071AF649EE00D0A189 /* CDRTranslucentSideBar.m */; };
 		85D9B78C1AD195E100958450 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 85D9B78B1AD195E100958450 /* LaunchScreen.xib */; };
 /* End PBXBuildFile section */
 
@@ -69,6 +70,8 @@
 		859D6DB41A9AA4040024FBA4 /* iNet.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = iNet.h; sourceTree = "<group>"; };
 		85AFB3D41AA35B38000AEEB4 /* dtvChannels.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = dtvChannels.h; sourceTree = "<group>"; };
 		85AFB3D51AA35B4A000AEEB4 /* dtvChannels.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = dtvChannels.m; sourceTree = "<group>"; };
+		85BF98061AF649EE00D0A189 /* CDRTranslucentSideBar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CDRTranslucentSideBar.h; sourceTree = "<group>"; };
+		85BF98071AF649EE00D0A189 /* CDRTranslucentSideBar.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CDRTranslucentSideBar.m; sourceTree = "<group>"; };
 		85D9B78B1AD195E100958450 /* LaunchScreen.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = LaunchScreen.xib; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -132,6 +135,8 @@
 				8564F7DB1AD06F520090F308 /* MBProgressHUD.m */,
 				857CAAFD1AF51E7F004F8058 /* Reachability.h */,
 				857CAAFE1AF51E7F004F8058 /* Reachability.m */,
+				85BF98061AF649EE00D0A189 /* CDRTranslucentSideBar.h */,
+				85BF98071AF649EE00D0A189 /* CDRTranslucentSideBar.m */,
 				859D6DB41A9AA4040024FBA4 /* iNet.h */,
 				859D6DB21A9AA3F60024FBA4 /* iNet.m */,
 				859D6D8B1A9926CA0024FBA4 /* dtvRemote.xcdatamodeld */,
@@ -228,6 +233,7 @@
 				855E080C1AF2DD780072B8AA /* dtvChannel.m in Sources */,
 				85428D5E1AA5368600134A23 /* dtvGuide.m in Sources */,
 				859D6DB31A9AA3F60024FBA4 /* iNet.m in Sources */,
+				85BF98081AF649EE00D0A189 /* CDRTranslucentSideBar.m in Sources */,
 				855E08151AF446630072B8AA /* dtvDevice.m in Sources */,
 				859D6D8D1A9926CA0024FBA4 /* dtvRemote.xcdatamodeld in Sources */,
 				859D6D8A1A9926CA0024FBA4 /* AppDelegate.m in Sources */,
