@@ -53,6 +53,7 @@
     UIView *overlay;
     UILabel *overlayLabel;
     UIView *overlayProgress;
+    UIRefreshControl *refreshControl;
 
     IBOutlet UIBarButtonItem *playButton;
 
@@ -232,6 +233,9 @@
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageAPIDown:)
                                                  name:@"messageAPIDown" object:nil];
     
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageRefreshSideBarDevices:)
+                                                 name:@"messageRefreshSideBarDevices" object:nil];
+    
     
     
 }
@@ -293,8 +297,8 @@
     sideBarTable.backgroundColor = [UIColor clearColor];
     
 
-    UIRefreshControl *refreshControl = [[UIRefreshControl alloc] init];
-    [refreshControl addTarget:self action:@selector(refreshSideBar:) forControlEvents:UIControlEventValueChanged];
+    refreshControl = [[UIRefreshControl alloc] init];
+    [refreshControl addTarget:self action:@selector(refreshDevices:) forControlEvents:UIControlEventValueChanged];
     [sideBarTable addSubview:refreshControl];
     
     [sideBarView addSubview:sideBarTable];
@@ -371,7 +375,7 @@
     navItem = [UINavigationItem alloc];
     navItem.title = @"";
     
-    UIBarButtonItem *leftButton = [[UIBarButtonItem alloc] initWithTitle:@"Devices" style:UIBarButtonItemStylePlain target:self action:@selector(chooseDevice:)];
+    UIBarButtonItem *leftButton = [[UIBarButtonItem alloc] initWithTitle:@"Devices" style:UIBarButtonItemStylePlain target:self action:@selector(toggleEditMode:)];
     navItem.leftBarButtonItem = leftButton;
     
     rightButton = [[UIBarButtonItem alloc] initWithTitle:@"Edit" style:UIBarButtonItemStylePlain target:self action:@selector(toggleEditMode:)];
@@ -1058,19 +1062,6 @@
     [self presentViewController:view animated:YES completion:nil];
 }
 
-- (IBAction) chooseDevice:(id)sender {
-    devices = [dtvDevices getSavedDevicesForActiveNetwork];
-    if ([devices count] == 0) {
-        MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
-        hud.mode = MBProgressHUDModeAnnularDeterminate;
-        hud.labelText = @"Scanning wifi network for devices...";
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
-            [dtvDevices refreshDevicesForNetworks];
-        });
-    } else {
-        [self showDevicePicker:nil];
-    }
-}
 
 - (void) displayNoDeviceError {
     //some message about no device
@@ -1089,7 +1080,7 @@
     UIAlertAction *ok = [UIAlertAction actionWithTitle:@"Yes" style:UIAlertActionStyleDefault handler:
                          ^(UIAlertAction * action) {
                              [view dismissViewControllerAnimated:YES completion:nil];
-                             [self chooseDevice:nil];
+                             [self refreshDevices:nil];
                              return;
                          }];
     
@@ -1099,48 +1090,6 @@
     UIViewController *vc = [[[[UIApplication sharedApplication] delegate] window] rootViewController];
     [vc presentViewController:view animated:YES completion:nil];
 
-}
-
-- (IBAction) showDevicePicker:(id)sender {
-    
-    [MBProgressHUD hideHUDForView:self.view animated:YES];
-    
-    UIAlertController *view = [UIAlertController
-                               alertControllerWithTitle:@""
-                               message:@"Choose a device"
-                               preferredStyle:UIAlertControllerStyleActionSheet];
-    
-    devices = [dtvDevices getSavedDevicesForActiveNetwork];
-    
-    for (NSString *deviceID in [devices allKeys] ) {
-        dtvDevice *device = devices[deviceID];
-        UIAlertAction *action = [UIAlertAction actionWithTitle:device.name style: UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
-            
-            [dtvDevices saveCurrentDeviceId:device.identifier];
-            currentDevice = device;
-            [self displayDevice];
-            
-            [view dismissViewControllerAnimated:YES completion:nil];
-        }];
-        [view addAction:action];
-    }
-    
-    UIAlertAction *cancel = [UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:^(UIAlertAction * action) {
-        [view dismissViewControllerAnimated:YES completion:nil];
-        return;
-    }];
-    [view addAction:cancel];
-    
-    UIAlertAction *refresh = [UIAlertAction actionWithTitle:@"Rescan Network" style:UIAlertActionStyleDestructive handler:^(UIAlertAction * action) {
-        [view dismissViewControllerAnimated:YES completion:nil];
-        [devices removeAllObjects];
-        [self chooseDevice:nil];
-        return;
-    }];
-    [view addAction:refresh];
-    
-    UIViewController *vc = [[[[UIApplication sharedApplication] delegate] window] rootViewController];
-    [vc presentViewController:view animated:YES completion:nil];
 }
 
 - (IBAction) refreshGuide:(id)sender {
@@ -1320,7 +1269,9 @@
     NSLog(@"didAppear");
 }
 - (void)sideBar:(CDRTranslucentSideBar *)sideBar willAppear:(BOOL)animated {
-    NSLog(@"willAppear");
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
+        [dtvDevices checkStatusOfDevices:devices];
+    });
 }
 - (void)sideBar:(CDRTranslucentSideBar *)sideBar didDisappear:(BOOL)animated {
      NSLog(@"didDisappear");
@@ -1388,9 +1339,9 @@
 
 - (void) messageUpdatedDevices:(NSNotification *)notification {
     devices = notification.object;
-    [MBProgressHUD hideHUDForView:self.view animated:YES];
     
     if ([devices count] == 0) {
+        [MBProgressHUD hideHUDForView:self.view animated:YES];
         UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"No Devices Found"
                                                                        message:@"No devices found on this wifi network." preferredStyle:UIAlertControllerStyleAlert];
         UIAlertAction* accept = [UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil];
@@ -1398,7 +1349,8 @@
         [self presentViewController:alert animated:YES completion:nil];
         return;
     } else {
-        [self chooseDevice:nil];
+        [sideBarTable reloadData];
+        [MBProgressHUD hideHUDForView:self.view animated:YES];
     }
 }
 
@@ -1462,6 +1414,14 @@
     [self setNowPlaying:channel];
 }
 
+- (void) messageRefreshSideBarDevices:(NSNotification *)notification {
+    [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+        [sideBarTable reloadData];
+    }];
+}
+
+
+
 #pragma mark - UI Updates
 
 - (void) displayDevice {
@@ -1475,8 +1435,14 @@
     }
 }
 
-- (void)refreshSideBar:(UIRefreshControl *)refreshControl {
+- (IBAction)refreshDevices:(id)sender {
     [refreshControl endRefreshing];
+    MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+    hud.mode = MBProgressHUDModeAnnularDeterminate;
+    hud.labelText = @"Scanning wifi network for devices...";
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
+        [dtvDevices refreshDevicesForNetworks];
+    });
 }
 
 -(void)hideTopContainer:(BOOL) hide {

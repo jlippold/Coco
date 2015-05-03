@@ -44,6 +44,9 @@
     tint = [UIColor colorWithRed:30/255.0f green:147/255.0f blue:212/255.0f alpha:1.0f];
     seperatorColor = [UIColor colorWithRed:40/255.0f green:40/255.0f blue:40/255.0f alpha:1.0f];
     
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageUpdatedStatusOfDevices:)
+                                                 name:@"messageUpdatedStatusOfDevices" object:nil];
+    
     return self;
 }
 
@@ -89,7 +92,7 @@
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
     if (section == 0) { //Devices
-        return [devices count] + 1;
+        return [devices count];
     } else {    //Commands
         return [commands count];
     }
@@ -105,22 +108,22 @@
 
     if (indexPath.section == 0) {
         NSArray *keys = [devices allKeys];
+        NSString *key = [keys objectAtIndex:indexPath.row];
+        dtvDevice *thisDevice = devices[key];
         
-        if (indexPath.row < [keys count]) {
-            NSString *key = [keys objectAtIndex:indexPath.row];
-            dtvDevice *thisDevice = devices[key];
-
-            cell.textLabel.text = thisDevice.name;
-            cell.detailTextLabel.text = [NSString stringWithFormat:@"Online: %@", thisDevice.address];
-            
-            if ([thisDevice.identifier isEqualToString:currentDevice.identifier]) {
-                [cell setAccessoryType:UITableViewCellAccessoryCheckmark];
-            }
+        cell.textLabel.text = thisDevice.name;
+        if (thisDevice.online) {
+            cell.detailTextLabel.text = @"Online";
         } else {
-            cell.textLabel.text = @"Scan for devices";
-            cell.detailTextLabel.text = @"Search wifi network for more devices";
+            cell.detailTextLabel.text = @"Offline";
+            cell.detailTextLabel.textColor = [UIColor redColor];
+        }
+
+        if ([thisDevice.identifier isEqualToString:currentDevice.identifier]) {
+            [cell setAccessoryType:UITableViewCellAccessoryCheckmark];
         }
     }
+    
     if (indexPath.section == 1) {
         dtvCommand *c = [commands objectAtIndex:indexPath.row];
         cell.textLabel.text = c.description;
@@ -132,24 +135,16 @@
 
 - (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    BOOL edit = NO;
-    if (indexPath.section == 0) {
-        if (indexPath.row < [devices count]) {
-            edit = YES;
-        }
-    }
-    return edit;
+    return NO;
 }
 
-- (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
-    if (editingStyle == UITableViewCellEditingStyleDelete) {
-        //[_objects removeObjectAtIndex:indexPath.row];
-        [tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationFade];
-    }
-}
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
     return 2;
+}
+
+- (void) messageUpdatedStatusOfDevices:(NSNotification *)notification {
+    devices = notification.object;
 }
 
 

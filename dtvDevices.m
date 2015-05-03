@@ -32,7 +32,7 @@
         
         NSOperationQueue *portScanQueue = [[NSOperationQueue alloc] init];
         portScanQueue.name = @"Scanner";
-        portScanQueue.maxConcurrentOperationCount = 20;
+        //portScanQueue.maxConcurrentOperationCount = 20;
         [portScanQueue cancelAllOperations];
         
         for (NSUInteger i = 0; i < [prospectiveDevices count]; i++) {
@@ -51,7 +51,7 @@
                  id client = [prospectiveDevices objectAtIndex:i];
                  
                  if (i == 50) {
-                     NSLog(@"%@", strUrl);
+                     //NSLog(@"%@", strUrl);
                  }
             
                  
@@ -73,7 +73,8 @@
                              NSDictionary *props = @{@"identifier" : clientId,
                                                           @"address" : client,
                                                           @"name" : [item objectForKey:@"locationName"],
-                                                          @"appendage": appendage};
+                                                          @"appendage": appendage
+                                                     };
                              
                              
                              dtvDevice *device = [[dtvDevice alloc] initWithProperties:props];
@@ -124,8 +125,50 @@
     }
 }
 
-+ (void) checkStatusOfDevices {
++ (void) checkStatusOfDevices:(NSMutableDictionary *) deviceList {
+
+    __block NSMutableDictionary *devices = [deviceList mutableCopy];
+    NSArray *keys = [devices allKeys];
+    __block int total = (double)[keys count];
+    __block int completed = 0;
     
+    for (NSString *deviceId in keys) {
+        dtvDevice *device = devices[deviceId];
+        
+        
+
+        NSURL *url = [NSURL URLWithString:
+                      [NSString stringWithFormat:@"http://%@:8080/tv/getTuned?%@",
+                       device.address, device.appendage ]];
+        
+        NSURLRequest *request = [[NSURLRequest alloc] initWithURL:url
+                                                      cachePolicy:1
+                                                  timeoutInterval:10];
+        
+        [self makeRequest:request queue:[NSOperationQueue mainQueue] completionHandler:
+         ^(NSURLResponse *response, NSData *data, NSError *connectionError)
+         {
+             device.online = NO;
+             
+             if (data.length > 0 && connectionError == nil) {
+                 NSDictionary *json = [NSJSONSerialization JSONObjectWithData:data options:0 error:NULL];
+                 NSNumber *statusCode = json[@"status"][@"code"];
+                 if ([statusCode isEqualToNumber:[NSNumber numberWithInt:200]]){
+                     device.online = YES;
+                 }
+             }
+             devices[deviceId] = device;
+             completed++;
+             if (completed == total){
+                 [[NSNotificationCenter defaultCenter] postNotificationName:@"messageUpdatedStatusOfDevices"
+                                                                     object:devices];
+                 [[NSNotificationCenter defaultCenter] postNotificationName:@"messageRefreshSideBarDevices"
+                                                                     object:nil];
+             }
+             
+         }];
+        
+    }
 }
 
 + (void) saveNetworksToDisk:(NSMutableDictionary *) devices {

@@ -12,7 +12,7 @@
 @interface dtvDevices : NSObject
 
 + (void) refreshDevicesForNetworks;
-+ (void) checkStatusOfDevices;
++ (void) checkStatusOfDevices:(NSMutableDictionary *) devices;
 
 + (dtvDevice *) getCurrentDevice;
 + (NSMutableDictionary *) getSavedDevicesForActiveNetwork;

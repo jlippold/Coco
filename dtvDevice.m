@@ -19,6 +19,7 @@
         _url = [NSString stringWithFormat:@"http://%@:8080/", properties[@"address"]];
         _name = properties[@"name"];
         _appendage = properties[@"appendage"];
+        _online = NO;
     }
     
     return self;
@@ -42,6 +43,7 @@
         _url = [decoder decodeObjectForKey:@"url"];
         _name = [decoder decodeObjectForKey:@"name"];
         _appendage = [decoder decodeObjectForKey:@"appendage"];
+        _online = NO;
     }
     return self;
 }
