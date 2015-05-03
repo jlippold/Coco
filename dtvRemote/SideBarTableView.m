@@ -7,7 +7,11 @@
 //
 
 #import "SideBarTableView.h"
-#import "Clients.h"
+#import "dtvDevices.h"
+#import "dtvDevice.h"
+#import "dtvCommands.h"
+#import "dtvCommand.h"
+
 
 @implementation SideBarTableView {
     UIColor *textColor;
@@ -17,14 +21,22 @@
     UIColor *boxBackgroundColor;
     UIColor *navBGColor;
     UIColor *tint;
+    NSArray *commands;
+    
+    NSMutableDictionary *devices;
+    dtvDevice *currentDevice;
+    
 }
 
 
--(id) init{
+-(id) init {
     self = [super init];
-    _clients = [Clients loadClientList];
-    _currentClient = [Clients getClient];
-
+    
+    devices = [dtvDevices getSavedDevicesForActiveNetwork];
+    currentDevice = [dtvDevices getCurrentDevice];
+    
+    commands = [dtvCommands getArrayOfCommands];
+    
     textColor = [UIColor colorWithRed:193/255.0f green:193/255.0f blue:193/255.0f alpha:1.0f];
     backgroundColor = [UIColor colorWithRed:30/255.0f green:30/255.0f blue:30/255.0f alpha:1.0f];
     boxBackgroundColor = [UIColor colorWithRed:28/255.0f green:28/255.0f blue:28/255.0f alpha:1.0f];
@@ -77,9 +89,9 @@
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
     if (section == 0) { //Devices
-        return [[[_clients objectForKey:@"Simulator"] allKeys] count] + 1;
+        return [devices count] + 1;
     } else {    //Commands
-        return 10;
+        return [commands count];
     }
 }
 
@@ -92,15 +104,16 @@
     }
 
     if (indexPath.section == 0) {
-        NSArray *keys = [[_clients objectForKey:@"Simulator"] allKeys];
+        NSArray *keys = [devices allKeys];
+        
         if (indexPath.row < [keys count]) {
-            id key = [keys objectAtIndex:indexPath.row];
-            //NSLog(@"%@", _currentClient);
-            NSDictionary *client = _clients[@"Simulator"][key];
-            cell.textLabel.text = client[@"name"];
-            cell.detailTextLabel.text = [NSString stringWithFormat:@"Online: %@", client[@"address"]];
+            NSString *key = [keys objectAtIndex:indexPath.row];
+            dtvDevice *thisDevice = devices[key];
+
+            cell.textLabel.text = thisDevice.name;
+            cell.detailTextLabel.text = [NSString stringWithFormat:@"Online: %@", thisDevice.address];
             
-            if ([_currentClient[@"id"] isEqualToString:client[@"id"]]) {
+            if ([thisDevice.identifier isEqualToString:currentDevice.identifier]) {
                 [cell setAccessoryType:UITableViewCellAccessoryCheckmark];
             }
         } else {
@@ -109,7 +122,9 @@
         }
     }
     if (indexPath.section == 1) {
-        cell.textLabel.text = @"Some Command";
+        dtvCommand *c = [commands objectAtIndex:indexPath.row];
+        cell.textLabel.text = c.description;
+        cell.detailTextLabel.text = c.action;
     }
 
     return cell;
@@ -119,8 +134,7 @@
 {
     BOOL edit = NO;
     if (indexPath.section == 0) {
-        NSArray *keys = [[_clients objectForKey:@"Simulator"] allKeys];
-        if (indexPath.row < [keys count]) {
+        if (indexPath.row < [devices count]) {
             edit = YES;
         }
     }

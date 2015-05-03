@@ -15,6 +15,7 @@
  
 }
 
++ (BOOL) isOnWifi;
 + (NSString *) getWifiAddress;
 + (NSString *) fetchSSID;
 

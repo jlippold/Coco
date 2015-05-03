@@ -1,5 +1,5 @@
 //
-//  Guide.h
+//  dtvGuide.h
 //  dtvRemote
 //
 //  Created by Jed Lippold on 3/2/15.
@@ -7,11 +7,14 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "dtvChannel.h"
+#import "dtvGuideItem.h"
+
 NSDate *guideTime;
 
-@interface Guide : NSObject
+@interface dtvGuide : NSObject
 
-+ (NSDictionary *)getDurationForChannel:(id)guideItem;
++ (NSDictionary *)getDurationForChannel:(dtvGuideItem *)guideItem;
 
 + (void) refreshGuide:(NSMutableDictionary *)channels
                sorted:(NSMutableDictionary *)sortedChannels
@@ -23,7 +26,7 @@ NSDate *guideTime;
                           channels:(NSMutableDictionary *)channels
                     sortedChannels:(NSMutableDictionary *)sortedChannels;
 
-+ (NSMutableDictionary *) getNowPlayingForChannel:(id)channel;
++ (NSMutableDictionary *) getNowPlayingForChannel:(dtvChannel *)channel;
 + (NSDate *)getHalfHourIncrement:(NSDate *)date;
 
 @end

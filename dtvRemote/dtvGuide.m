@@ -1,17 +1,18 @@
 //
-//  Guide.m
+//  dtvGuide.m
 //  dtvRemote
 //
 //  Created by Jed Lippold on 3/2/15.
 //  Copyright (c) 2015 jed. All rights reserved.
 //
 
-#import "Guide.h"
-#import "Channels.h"
-
+#import "dtvGuide.h"
+#import "dtvGuideItem.h"
+#import "dtvChannels.h"
+#import "dtvChannel.h"
 #include <math.h>
 
-@implementation Guide
+@implementation dtvGuide
 
 + (void) refreshGuide:(NSMutableDictionary *)channels sorted:(NSMutableDictionary *)sortedChannels forTime:(NSDate *)time {
     
@@ -39,13 +40,13 @@
         
         NSInteger offset = i*chunkSize;
         
-        NSString *chNums = [self getJoinedArrayByProp:@"chNum"
+        NSString *chNums = [self getJoinedArrayByProp:@"number"
                                           arrayOffset:offset
                                             chunkSize:chunkSize
                                              channels:channels
                                        sortedChannels:sortedChannels];
         
-        NSString *chIds = [self getJoinedArrayByProp:@"chId"
+        NSString *chIds = [self getJoinedArrayByProp:@"id"
                                          arrayOffset:offset
                                            chunkSize:chunkSize
                                             channels:channels
@@ -110,7 +111,7 @@
     
     NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:strUrl]];
     NSMutableURLRequest *mutableRequest = [request mutableCopy];
-    NSString *cookie = [Channels DTVCookie];
+    NSString *cookie = [dtvChannels DTVCookie];
     [mutableRequest addValue:cookie forHTTPHeaderField:@"Cookie"];
     request = [mutableRequest copy];
     
@@ -118,6 +119,11 @@
                                          returningResponse:&response error:&connectionError];
     
     NSMutableDictionary *results = [[NSMutableDictionary alloc] init];
+    
+    if (connectionError) {
+        [[NSNotificationCenter defaultCenter] postNotificationName:@"messageAPIDown" object:nil];
+    }
+    
     
     if (data.length > 0 && connectionError == nil) {
         
@@ -138,77 +144,26 @@
             int i;
             for (i = 0; i < [channelSchedule count]; i++) {
                 
-                id show = [channelSchedule objectAtIndex:i];
+                NSDictionary *show = [channelSchedule objectAtIndex:i];
+                dtvGuideItem *guideItem = [[[dtvGuideItem alloc]init] initWithJSON:show];
                 
-                NSDateFormatter* dateFormatter = [[NSDateFormatter alloc] init];
-                [dateFormatter setDateFormat:@"yyyy-MM-dd'T'HH:mm:ss.SSSZ"];
-
-                NSDate *startDate = [dateFormatter dateFromString:show[@"airTime"]];
-                NSInteger duration = [show[@"duration"] intValue];
-                
-                bool isPlaying = [self isNowPlaying:startDate duration:duration];
-                if ((isPlaying || refreshingFutureDate) && startDate) {
+                if ((guideItem.onAir || refreshingFutureDate) && guideItem.starts) {
                     
                     if (deDuplicate[chNum]) {
-                        //the channel has already been added
                         if ([[[channel objectForKey:@"chHd"] stringValue] isEqualToString:@"1"]) {
-                            //and new channel is in HD, overwrite the old with the new
                             [deDuplicate setObject:chId forKey:chNum];
-                        } else {
-                            continue;
                         }
                     } else {
-                        //new channel
                         [deDuplicate setObject:chId forKey:chNum];
                     }
                     
-                    NSMutableDictionary *guideItem = [[NSMutableDictionary alloc] init];
                     
-                    if (show[@"programID"]) {
-                        guideItem[@"programID"] = show[@"programID"];
-                    }
-                    if (show[@"title"]) {
-                        guideItem[@"title"] = show[@"title"];
-                    }
-                    if (show[@"title"] && show[@"episodeTitle"]) {
-                        guideItem[@"title"] = [NSString stringWithFormat:@"%@ - %@",
-                                               show[@"title"], show[@"episodeTitle"]];
-                    }
-                    if (show[@"title"] && show[@"releaseYear"]) {
-                        guideItem[@"title"] = [NSString stringWithFormat:@"%@ (%@)",
-                                               show[@"title"], show[@"releaseYear"]];
-                    }
-                    
-                    guideItem[@"category"] = @"Uncatagorized";
-                    if (show[@"mainCategory"]) {
-                        guideItem[@"category"] = show[@"mainCategory"];
-                    }
-                    
-                    if (show[@"starRatingNum"]) {
-                        guideItem[@"starRating"] = show[@"starRatingNum"];
-                    }
-                    if (show[@"primaryImageUrl"]) {
-                        guideItem[@"boxcover"] = show[@"primaryImageUrl"];
-                    }
-                    if (show[@"mainCategory"]) {
-                        guideItem[@"category"] = show[@"mainCategory"];
-                    }
-                    if (show[@"hd"]) {
-                        guideItem[@"hd"] = show[@"hd"];
-                    }
-                    if (show[@"rating"]) {
-                        guideItem[@"mpaaRating"] = show[@"rating"];
-                    }
-                    
-                    guideItem[@"starts"] = startDate;
                     if (refreshingFutureDate) {
-                        guideItem[@"FutureAiring"] = dt;
+                        guideItem.futureAiring = dt;
                     } else {
-                        guideItem[@"ends"] = [startDate dateByAddingTimeInterval:duration*60];
-                        guideItem[@"upNext"] = @"Not Available";
                         if (i < [channelSchedule count]-1) {
                             id nextShow = [channelSchedule objectAtIndex:i+1];
-                            guideItem[@"upNext"] = nextShow[@"title"];
+                            guideItem.upNext = nextShow[@"title"];
                         }
                     }
 
@@ -221,10 +176,10 @@
     return results;
 }
 
-+ (NSMutableDictionary *) getNowPlayingForChannel:(id)channel {
++ (NSMutableDictionary *) getNowPlayingForChannel:(dtvChannel *) channel {
     NSDate *dt = [self getHalfHourIncrement:[NSDate date]];
-    NSMutableDictionary *guideData = [self getGuideDataForChannels:[channel[@"chId"] stringValue]
-                                                       channelNums:[channel[@"chNum"] stringValue]
+    NSMutableDictionary *guideData = [self getGuideDataForChannels: @(channel.identifier).stringValue
+                                                       channelNums: @(channel.number).stringValue
                                                            forTime:dt];
     return guideData;
 }
@@ -250,11 +205,15 @@
         
         for (NSUInteger y = 0; y < [sectionChannels count]; y++) {
             
-            id sectionChannelKey = [sectionChannels objectAtIndex:y];
-            id chId = [[sectionData objectForKey:sectionChannelKey] stringValue];
-            NSDictionary *channel = channels[chId];
+            NSString *chId = [sectionChannels objectAtIndex:y];
+            dtvChannel *channel = channels[chId];
             if (overallCounter <= (offset + size)) {
-                [outArray addObject:[channel[prop] stringValue]];
+                if ([prop isEqualToString:@"number"]) {
+                    [outArray addObject:@(channel.number).stringValue];
+                }
+                if ([prop isEqualToString:@"id"]) {
+                    [outArray addObject:@(channel.identifier).stringValue];
+                }
             }
             overallCounter++;
         }
@@ -282,22 +241,13 @@
     
 }
 
-+ (BOOL)isNowPlaying:(NSDate *)startDate duration:(NSInteger)duration {
-//    NSDateFormatter* dateFormatter = [[NSDateFormatter alloc] init];
- //   [dateFormatter setTimeZone:[NSTimeZone defaultTimeZone]];
-    NSDate *now = [[NSDate alloc] init];
-    if ([startDate timeIntervalSinceDate:now] > 0) {
-        return NO;
-    }
-    NSDate *endDate = [startDate dateByAddingTimeInterval:duration*60];
-    return ([endDate timeIntervalSinceDate:now] > 0);
-}
 
-+ (NSDictionary *)getDurationForChannel:(id)guideItem {
+
++ (NSDictionary *)getDurationForChannel:(dtvGuideItem *)guideItem {
     
     NSDate *now = [NSDate new];
-    NSDate *ends = [guideItem objectForKey:@"ends"];
-    NSDate *starts = [guideItem objectForKey:@"starts"];
+    NSDate *ends = guideItem.ends;
+    NSDate *starts = guideItem.starts;
     BOOL showIsEndingSoon = NO;
     
     NSTimeInterval duration = [ends timeIntervalSinceDate:starts];

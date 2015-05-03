@@ -1,21 +1,22 @@
 //
-//  channels.m
+//  dtvChannels.m
 //  dtvRemote
 //
 //  Created by Jed Lippold on 3/1/15.
 //  Copyright (c) 2015 jed. All rights reserved.
 //  Returns Channels for a location
 
-#import "Channels.h"
+#import "dtvChannels.h"
+#import "dtvChannel.h"
 
-@implementation Channels
+@implementation dtvChannels
 
 
-+ (void)save:(NSMutableDictionary *) channelList {
-    NSString *key = @"channelList";
++ (void)save:(NSMutableDictionary *) channels {
+    NSString *key = @"channels";
     NSMutableDictionary *dataDict = [[NSMutableDictionary alloc] init];
-    if (channelList != nil) {
-        [dataDict setObject:channelList forKey:key];
+    if (channels != nil) {
+        [dataDict setObject:channels forKey:key];
     }
     NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
     NSString *documentsDirectoryPath = [paths objectAtIndex:0];
@@ -24,8 +25,8 @@
 }
 
 + (NSMutableDictionary *) load:(BOOL)showBlocks {
-    NSString *key = @"channelList";
-    NSMutableDictionary *channelList = [[NSMutableDictionary alloc] init];
+    NSString *key = @"channels";
+    NSMutableDictionary *channels = [[NSMutableDictionary alloc] init];
     NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
     NSString *documentsDirectoryPath = [paths objectAtIndex:0];
     NSString *filePath = [documentsDirectoryPath stringByAppendingPathComponent:key];
@@ -35,23 +36,23 @@
         NSDictionary *savedData = [NSKeyedUnarchiver unarchiveObjectWithData:data];
         
         if ([savedData objectForKey:key] != nil) {
-            channelList = [[NSMutableDictionary alloc] initWithDictionary:[savedData objectForKey:key]];
+            channels = [[NSMutableDictionary alloc] initWithDictionary:[savedData objectForKey:key]];
         }
     }
     
     //remove blocks
     if (!showBlocks) {
-        NSMutableArray *blocks = [self loadBlockedChannels:channelList];
+        NSMutableArray *blocks = [self loadBlockedChannels:channels];
         for (id block in blocks) {
-            [channelList removeObjectForKey:block];
+            [channels removeObjectForKey:block];
         }
         //NSLog(@"Removed: %lu", (unsigned long)[blocks count]);
     }
     
-    return channelList;
+    return channels;
 }
 
-+ (NSMutableArray *) loadBlockedChannels:(NSMutableDictionary *)channelList {
++ (NSMutableArray *) loadBlockedChannels:(NSMutableDictionary *)channels {
     NSString *key = @"blockedChannels";
     NSMutableArray *blocks = [[NSMutableArray alloc] init];
     NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
@@ -68,10 +69,6 @@
     }
     
     if ([blocks count] == 0) {
-        //load some defaults
-        NSURL *url = [[NSBundle mainBundle] URLForResource:@"categories" withExtension:@"plist"];
-        NSDictionary *categories = [[NSDictionary dictionaryWithContentsOfURL:url] objectForKey: @"Categories"];
-        
         NSArray *blockCallSigns = [NSArray arrayWithObjects:
                                    @"CINE", @"CINEHD", @"SONIC", @"PPV", @"DTV",
                                    @"BSN", @"NHL", @"MLS", @"PPVHD", @"IACHD",
@@ -80,17 +77,15 @@
                                    @"UEFA", @"RGBY", @"EPL", @"MAS", @"NBA", @"PTNW", @"ACT", nil];
         
         NSArray *blockCategories = [NSArray arrayWithObjects:
-                                   @"Foreign", @"Religious", @"Shopping", @"Sports", @"Uncatagorized", @"(null)", nil];
+                                   @"Foreign", @"Religious", @"Shopping", @"Sports", @"Uncategorized", @"(null)", nil];
         
-        for (id key in channelList) {
-            id channel = [channelList objectForKey:key];
-            NSString *callSign = [[NSString stringWithFormat:@"%@", channel[@"chCall"]] uppercaseString];
-            NSString *category = [NSString stringWithFormat:@"%@", categories[callSign]];
+        for (NSString *key in channels) {
+            dtvChannel *channel = [channels objectForKey:key];
             
-            if ([channel[@"chAdult"] intValue] == 1 ||
-                [blockCallSigns containsObject:callSign] ||
-                [blockCategories containsObject:category]) {
-                [blocks addObject:[channel[@"chId"] stringValue]];
+            if (channel.adult ||
+                [blockCallSigns containsObject:[channel.callsign uppercaseString]] ||
+                [blockCategories containsObject:channel.category]) {
+                [blocks addObject:key];
             }
             
         }
@@ -119,12 +114,14 @@
                                        queue:[NSOperationQueue mainQueue]
                            completionHandler:^(NSURLResponse *response,
                                                NSData *data,
-                                               NSError *connectionError)
+                                               NSError *error)
      {
          NSMutableDictionary *locations = [[NSMutableDictionary alloc] init];
          
-         if (data.length > 0 && connectionError == nil) {
-             
+         if (error) {
+             [[NSNotificationCenter defaultCenter] postNotificationName:@"messageAPIDown" object:nil];
+             [[NSNotificationCenter defaultCenter] postNotificationName:@"messagePromptForZipCode" object:nil];
+         } else {
              NSDictionary *json = [NSJSONSerialization JSONObjectWithData:data options:0 error:NULL];
              if (json[@"zipCodes"]) {
                  for (id item in [json objectForKey: @"zipCodes"]) {
@@ -135,11 +132,13 @@
                                                   @"timeZone": item[@"timeZone"][@"tzId"] };
                      [locations setObject:dictionary forKey:zip];
                  }
+                 [[NSNotificationCenter defaultCenter] postNotificationName:@"messageUpdatedLocations" object:locations];
+                 
+             } else {
+                 [[NSNotificationCenter defaultCenter] postNotificationName:@"messageAPIDown" object:nil];
+                 [[NSNotificationCenter defaultCenter] postNotificationName:@"messagePromptForZipCode" object:nil];
              }
-             
          }
-         
-         [[NSNotificationCenter defaultCenter] postNotificationName:@"messageUpdatedLocations" object:locations];
          
      }];
     
@@ -148,7 +147,11 @@
 + (void) populateChannels:(NSMutableDictionary *)location {
     NSLog(@"%@",location);
     
-    NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:@"https://www.directv.com/guide"]];
+    NSURL *url = [[NSBundle mainBundle] URLForResource:@"categories" withExtension:@"plist"];
+    NSDictionary *categories = [[NSDictionary dictionaryWithContentsOfURL:url] objectForKey: @"Categories"];
+
+    
+    NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:@"https://www.directv.com/json/channels"]];
     NSMutableURLRequest *mutableRequest = [request mutableCopy];
     NSString *cookie = [NSString stringWithFormat:@"dtve-prospect-state=%@; dtve-prospect-zip=%@%%7C%@;",
                         location[@"state"], location[@"zipCode"],
@@ -160,87 +163,97 @@
     
     request = [mutableRequest copy];
     
-    [NSURLConnection sendAsynchronousRequest:request queue:[NSOperationQueue mainQueue] completionHandler:
+    [NSURLConnection sendAsynchronousRequest:request
+                                       queue:[NSOperationQueue mainQueue]
+                           completionHandler:
      ^(NSURLResponse *response, NSData *data, NSError *error) {
-         NSString *responseText = [[NSString alloc] initWithData:data encoding:NSASCIIStringEncoding];
-         for (NSString *line in [responseText componentsSeparatedByString:@"\n"]) {
-             NSString *searchTerm = @"var dtvClientData = ";
-             if ([line hasPrefix:@"<!--[if gt IE 8]>"] && [line containsString:searchTerm]) {
-                 NSRange range = [line rangeOfString:searchTerm];
-                 NSString *json = [line substringFromIndex:(range.location + searchTerm.length)];
-                 NSRange endrange = [json rangeOfString:@"};"];
-                 json = [json substringToIndex:endrange.location+1];
+         
+         NSMutableDictionary *channels = [[NSMutableDictionary alloc] init];
+         
+         if (error) {
+             
+             [[NSNotificationCenter defaultCenter] postNotificationName:@"messageAPIDown" object:nil];
+             [[NSNotificationCenter defaultCenter] postNotificationName:@"messagePromptForZipCode" object:nil];
+             
+         } else {
+             
+             NSDictionary *json = [NSJSONSerialization JSONObjectWithData:data options:0 error:NULL];
+             if (json[@"channels"]) {
                  
-                 NSMutableDictionary *channelList = [[NSMutableDictionary alloc] init];
+                 NSMutableDictionary *deDuplicate = [[NSMutableDictionary alloc] init];
                  
-                 NSDictionary *jsonchannels = [NSJSONSerialization JSONObjectWithData:[json dataUsingEncoding:NSUTF8StringEncoding] options:0 error:NULL];
-                 
-                 if (jsonchannels[@"guideData"]) {
-                     id root = jsonchannels[@"guideData"];
-                     if (root[@"channels"]) {
-                         
-                         NSMutableDictionary *deDuplicate = [[NSMutableDictionary alloc] init];
-                         
-                         for (id item in [root objectForKey: @"channels"]) {
-                             
-                             id chId = [item objectForKey:@"chId"];
-                             id chNum = [item objectForKey:@"chNum"];
-                             
-                             if (deDuplicate[chNum]) {
-                                 //the channel has already been added
-                                 if ([[[item objectForKey:@"chHd"] stringValue] isEqualToString:@"1"]) {
-                                     //and new channel is in HD, overwrite the old with the new
-                                     [deDuplicate setObject:chId forKey:chNum];
-                                 }
-                             } else {
-                                 //new channel
-                                 [deDuplicate setObject:chId forKey:chNum];
-                             }
-                             
-                             NSDictionary *channel = @{@"chId" : deDuplicate[chNum],
-                                                       @"chName" : [item objectForKey:@"chName"],
-                                                       @"chCall" : [item objectForKey:@"chCall"],
-                                                       @"chLogoId" : [item objectForKey:@"chLogoId"],
-                                                       @"chNum": [item objectForKey:@"chNum"],
-                                                       @"chHd": [item objectForKey:@"chHd"],
-                                                       @"chCat": @"Uncategorized",
-                                                       @"chAdult": [item objectForKey:@"chAdult"]};
-                             
-                             [channelList setObject:[channel mutableCopy] forKey:[deDuplicate[chNum] stringValue]];
-
+                 for (id item in [json objectForKey: @"channels"]) {
+                     
+                     id chId = [item objectForKey:@"chId"];
+                     id chNum = [item objectForKey:@"chNum"];
+                     
+                     if (deDuplicate[chNum]) {
+                         //the channel has already been added
+                         if ([[[item objectForKey:@"chHd"] stringValue] isEqualToString:@"1"]) {
+                             //and new channel is in HD, overwrite the old with the new
+                             [deDuplicate setObject:chId forKey:chNum];
                          }
-                         
+                     } else {
+                         //new channel
+                         [deDuplicate setObject:chId forKey:chNum];
                      }
+                     
+                     NSString *category = @"Uncategorized";
+                     if (categories[[item objectForKey:@"chCall"]]) {
+                         category = categories[[item objectForKey:@"chCall"]];
+                     }
+                     
+                     if ([category isEqualToString:@"Uncategorized"] &&
+                         [[[item objectForKey:@"chCall"] substringFromIndex:1] isEqualToString:@"W"]) {
+                         category = @"Local";
+                     }
+                     
+                     NSDictionary *props = @{@"chId" : deDuplicate[chNum],
+                                             @"chName" : [item objectForKey:@"chName"],
+                                             @"chCall" : [item objectForKey:@"chCall"],
+                                             @"chLogoId" : [item objectForKey:@"chLogoId"],
+                                             @"chNum": [item objectForKey:@"chNum"],
+                                             @"chHd": [item objectForKey:@"chHd"],
+                                             @"chCat": category,
+                                             @"chAdult": [item objectForKey:@"chAdult"]};
+                     
+                     dtvChannel *channel = [[dtvChannel alloc] initWithProperties:props];
+                     
+                     [channels setObject:channel forKey:[deDuplicate[chNum] stringValue]];
+                     
                  }
-                 
-                 
-                 [Channels save:channelList];
-                 
+                 [dtvChannels save:channels];
                  [[NSNotificationCenter defaultCenter] postNotificationName:@"messageDownloadChannelLogos"
-                                                                     object:channelList];
+                                                                     object:channels];
+                 
+             } else {
+                 [[NSNotificationCenter defaultCenter] postNotificationName:@"messageAPIDown" object:nil];
+                 [[NSNotificationCenter defaultCenter] postNotificationName:@"messagePromptForZipCode" object:nil];
              }
+             
          }
+         
      }];
 }
 
-+ (void) downloadChannelImages:(NSMutableDictionary *)channelList {
++ (void) downloadChannelImages:(NSMutableDictionary *)channels {
     [self clearCaches];
-                     //NSLog(@"checking channels");
     
     NSOperationQueue *channelImagesQueue = [[NSOperationQueue alloc] init];
     channelImagesQueue.name = @"Channel Images Cache";
     channelImagesQueue.maxConcurrentOperationCount = 5;
     
     NSString *cacheDirectory = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) lastObject];
-    NSArray *keys = [channelList allKeys];
+    NSArray *keys = [channels allKeys];
     
     __block int completed = 0;
     __block int total = (double)[keys count];
     
-    for (id channel in keys) {
+    for (NSString *channelId in keys) {
         
-        NSString *channelId =  [channelList[channel] objectForKey:@"chLogoId"];
-        NSURL *location = [NSURL URLWithString:[NSString stringWithFormat:@"https://www.directv.com/images/logos/channels/dark/medium/%03d.png", [channelId intValue]]];
+        dtvChannel *channel = channels[channelId];
+        
+        NSURL *location = [NSURL URLWithString:[NSString stringWithFormat:@"https://www.directv.com/images/logos/channels/dark/medium/%03d.png", channel.logoId]];
         
         NSString *imagePath =[cacheDirectory stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.png",channelId]];
         
@@ -256,7 +269,7 @@
              completed++;
              if (completed >= total) {
                  NSLog(@"channels refreshed");
-                 [[NSNotificationCenter defaultCenter] postNotificationName:@"messageUpdatedChannels" object:channelList];
+                 [[NSNotificationCenter defaultCenter] postNotificationName:@"messageUpdatedChannels" object:channels];
              } else {
                  long double progress =(completed*1.0/total*1.0);
                  NSNumber *nsprogress = [NSNumber numberWithDouble:progress];
@@ -280,28 +293,28 @@
     }
 }
 
-+ (NSString *)getChannelIdForChannelNumber:(NSString *)chNum channels:(NSMutableDictionary *)channels {
-    NSString *chan = @"";
++ (dtvChannel *)getChannelByNumber:(int)number channels:(NSMutableDictionary *)channels {
+    dtvChannel *channel;
     for (NSString *chId in channels) {
-        id channel = [channels objectForKey:chId];
-        if ( [channel[@"chNum"] integerValue] == [chNum integerValue] ) {
-            chan = chId;
+        dtvChannel *thisChannel = [channels objectForKey:chId];
+        if (thisChannel.number == number) {
+            channel = thisChannel;
             break;
         }
     }
-    return chan;
+    return channel;
 }
 
-+ (NSString *)getChannelIdForChannelCallSign:(NSString *)callSign channels:(NSMutableDictionary *)channels {
-    NSString *chan = @"";
++ (dtvChannel *)getChannelByCallSign:(NSString *)callSign channels:(NSMutableDictionary *)channels {
+    dtvChannel *channel;
     for (NSString *chId in channels) {
-        id channel = [channels objectForKey:chId];
-        if ( [channel[@"chCall"] isEqualToString:callSign] ) {
-            chan = chId;
+        dtvChannel *thisChannel = [channels objectForKey:chId];
+        if ( [channel.callsign isEqualToString:callSign] ) {
+            channel = thisChannel;
             break;
         }
     }
-    return chan;
+    return channel;
 }
 
 + (NSMutableDictionary *) sortChannels:(NSMutableDictionary *)channels sortBy:(NSString *)sort {
@@ -311,80 +324,44 @@
     
     if ([sort isEqualToString:@"default"]) {
         if ([[NSUserDefaults standardUserDefaults] stringForKey:@"sort"] == nil) {
-            [[NSUserDefaults standardUserDefaults] setObject:@"channelGroup" forKey:@"sort"];
+            [[NSUserDefaults standardUserDefaults] setObject:@"category" forKey:@"sort"];
             [[NSUserDefaults standardUserDefaults] synchronize];
         }
         sort = [[NSUserDefaults standardUserDefaults] stringForKey:@"sort"];
     }
     
     if ([sort isEqualToString:@"name"]) {
-        for (id channel in keys) {
-            NSString *chId = [channels[channel] objectForKey:@"chId"];
-            NSString *chName = [channels[channel] objectForKey:@"chName"];
-            NSString *header = [[chName substringToIndex:1] uppercaseString];
-            
+        for (NSString *chId in keys) {
+            dtvChannel *channel = channels[chId];
+            NSString *header = [[channel.name substringToIndex:1] uppercaseString];
             if (![sortedChannels objectForKey:header]) {
                 [sortedChannels setObject:[[NSMutableDictionary alloc] init] forKey:header];
             }
-            
-            [sortedChannels[header] setObject:chId forKey:chName];
+            [sortedChannels[header] setObject:channel forKey:chId];
         }
     }
     
     if ([sort isEqualToString:@"number"]) {
-        for (id channel in keys) {
-            NSString *chId = [channels[channel] objectForKey:@"chId"];
-            NSString *chNum = [channels[channel] objectForKey:@"chNum"];
-            int section = floor([chNum intValue]/100)*100;
+        for (NSString *chId in keys) {
+            dtvChannel *channel = channels[chId];
+            int section = floor(channel.number/100)*100;
             NSString *header = [NSString stringWithFormat:@"%04d-%04d", section, section+100];
-            
             if (![sortedChannels objectForKey:header]) {
                 [sortedChannels setObject:[[NSMutableDictionary alloc] init] forKey:header];
             }
-
-            [sortedChannels[header] setObject:chId forKey:chNum];
+            [sortedChannels[header] setObject:channel forKey:chId];
         }
     }
     
     if ([sort isEqualToString:@"category"]) {
-        for (id channel in keys) {
-            NSString *chId = [channels[channel] objectForKey:@"chId"];
-            NSString *chNum = [channels[channel] objectForKey:@"chNum"];
-            NSString *header = [channels[channel] objectForKey:@"chCat"];
-            
+        
+        for (NSString *chId in keys) {
+            dtvChannel *channel = channels[chId];
+            NSString *header = channel.category;
             if (![sortedChannels objectForKey:header]) {
                 [sortedChannels setObject:[[NSMutableDictionary alloc] init] forKey:header];
             }
-            
-            [sortedChannels[header] setObject:chId forKey:chNum];
-        }
-    }
-    
-    if ([sort isEqualToString:@"channelGroup"]) {
-        
-        
-        NSURL *url = [[NSBundle mainBundle] URLForResource:@"categories" withExtension:@"plist"];
-        NSDictionary *categories = [[NSDictionary dictionaryWithContentsOfURL:url] objectForKey: @"Categories"];
-
-        for (id channel in keys) {
-            NSString *chId = [channels[channel] objectForKey:@"chId"];
-            NSString *chNum = [channels[channel] objectForKey:@"chNum"];
-            NSString *chCall = [[channels[channel] objectForKey:@"chCall"] uppercaseString];
-            NSString *header = @"Uncatagorized";
-            if (categories[chCall]) {
-                header = categories[chCall];
-            }
-            
-            if ([header isEqualToString:@"Uncatagorized"] &&
-                [[chCall substringFromIndex:1] isEqualToString:@"W"]) {
-                header = @"Local";
-            }
-
-            if (![sortedChannels objectForKey:header]) {
-                [sortedChannels setObject:[[NSMutableDictionary alloc] init] forKey:header];
-            }
-            
-            [sortedChannels[header] setObject:chId forKey:chNum];
+            [sortedChannels[header] setObject:channel forKey:chId];
         }
     }
     
@@ -412,27 +389,16 @@
     return cookie;
 }
 
-+ (void)saveDTVCookie:(NSString *) channelList {
++ (void)saveDTVCookie:(NSString *) channels {
     NSString *key = @"saveDTVCookie";
     NSMutableDictionary *dataDict = [[NSMutableDictionary alloc] init];
-    if (channelList != nil) {
-        [dataDict setObject:channelList forKey:key];
+    if (channels != nil) {
+        [dataDict setObject:channels forKey:key];
     }
     NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
     NSString *documentsDirectoryPath = [paths objectAtIndex:0];
     NSString *filePath = [documentsDirectoryPath stringByAppendingPathComponent:key];
     [NSKeyedArchiver archiveRootObject:dataDict toFile:filePath];
-}
-
-+ (NSMutableDictionary *) addChannelCategoriesFromGuide:(NSMutableDictionary *)guide
-                                               channels:(NSMutableDictionary *)channels  {
-    for (NSString *chId in channels) {
-        if ([guide objectForKey:chId]) {
-            NSDictionary *guideItem = [guide objectForKey:chId];
-            channels[chId][@"chCat"] = guideItem[@"category"];
-        }
-    }
-    return channels;
 }
 
 

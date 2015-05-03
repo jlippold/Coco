@@ -625,13 +625,13 @@
 		<key>GEM</key>
 		<string>Shopping</string>
 		<key>HOME</key>
-		<string>Uncatagorized</string>
+		<string>Uncategorized</string>
 		<key>HSN</key>
 		<string>Shopping</string>
 		<key>JTV</key>
 		<string>Shopping</string>
 		<key>LC</key>
-		<string>Uncatagorized</string>
+		<string>Uncategorized</string>
 		<key>LOOK</key>
 		<string>Shopping</string>
 		<key>PAID</key>
@@ -857,9 +857,9 @@
 		<key>YESHD</key>
 		<string>Sports</string>
 		<key>WGN</key>
-		<string>Uncatagorized</string>
+		<string>Uncategorized</string>
 		<key>WOW</key>
-		<string>Uncatagorized</string>
+		<string>Uncategorized</string>
 	</dict>
 </dict>
 </plist>

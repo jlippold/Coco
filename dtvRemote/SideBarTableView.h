@@ -12,8 +12,7 @@
 @interface SideBarTableView : NSObject <UITableViewDataSource, UITableViewDelegate> {
 
 }
-@property (nonatomic, strong) NSMutableDictionary *clients;
-@property (nonatomic, strong) NSDictionary *currentClient;
+
 
 
 @end

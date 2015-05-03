@@ -6,17 +6,40 @@
 //  Copyright (c) 2015 jed. All rights reserved.
 //
 
-#import "Commands.h"
+#import "dtvCommands.h"
+#import "dtvCommand.h"
+#import "dtvChannel.h"
+#import "dtvDevice.h"
 
-@implementation Commands
+@implementation dtvCommands
 
-+ (void)changeChannel:(NSString *)chNum device:(NSMutableDictionary *)client  {
-    NSLog(@"%@ set to channel %@", client, chNum);
+
+- (id) init {
+    return self;
+}
+
++ (NSArray *) getArrayOfCommands {
+
+    NSArray *someList = [NSArray arrayWithObjects: @"power",@"poweron",@"poweroff",@"format",@"pause",@"rew",@"replay",@"stop",@"advance",@"ffwd",@"record",@"play",@"guide",@"active",@"list",@"exit",@"back",@"menu",@"info",@"up",@"down",@"left",@"right",@"select",@"red",@"green",@"yellow",@"blue",@"chanup",@"chandown",@"prev",@"0",@"1",@"2",@"3",@"4",@"5",@"6",@"7",@"8",@"9",@"dash",@"enter", nil];
     
-    if (client) {
+    NSMutableArray *someList2 = [[NSMutableArray alloc] init];
+    for (NSString *val in someList) {
+        dtvCommand *command = [[dtvCommand alloc] init];
+        command.description = val;
+        command.action = val;
+        [someList2 addObject:command];
+    }
+    return someList2;
+
+}
+
++ (void)changeChannel:(dtvChannel *)channel device:(dtvDevice *)device  {
+    NSLog(@"%@ set to channel %d", device.address, channel.number);
+    
+    if (device) {
         NSURL *url = [NSURL URLWithString:
-                      [NSString stringWithFormat:@"http://%@:8080/tv/tune?major=%@&%@",
-                       client[@"address"], chNum, client[@"appendage"] ]];
+                      [NSString stringWithFormat:@"http://%@:8080/tv/tune?major=%d&%@",
+                       device.address, channel.number, device.appendage]];
         [NSURLConnection sendAsynchronousRequest:[NSURLRequest requestWithURL:url]
                                            queue:[NSOperationQueue mainQueue]
                                completionHandler:^(NSURLResponse *response,
@@ -37,18 +60,19 @@
              
          }];
     } else {
-        [[NSNotificationCenter defaultCenter] postNotificationName:@"messageSetNowPlayingChannel" object:chNum];
+        [[NSNotificationCenter defaultCenter] postNotificationName:@"messageSetNowPlayingChannel"
+                                                            object:@(channel.number).stringValue];
     }
 
 }
 
-+ (NSString *)getChannelOnClient:(NSDictionary *) client {
++ (NSString *)getChannelOnDevice:(dtvDevice *)device {
     
     NSString *chNum = @"";
                                  
     NSURL *url = [NSURL URLWithString:
                   [NSString stringWithFormat:@"http://%@:8080/tv/getTuned?%@",
-                   client[@"address"], client[@"appendage"] ]];
+                   device.address, device.appendage ]];
     
     NSURLResponse* response;
     NSError *connectionError;
@@ -66,24 +90,23 @@
     return chNum;
 }
 
-+ (BOOL) sendCommand:(NSString *)command client:(NSDictionary *) client {
++ (BOOL) sendCommand:(NSString *)command device:(dtvDevice *)device {
 
-    if ([[client allKeys] count] == 0) {
+    if (device) {
         NSLog(@"You must choose a device, llamah");
         return NO;
     }
     
-    NSArray *validCommands = [NSArray arrayWithObjects:
-                      @"power",@"poweron",@"poweroff",@"format",@"pause",@"rew",@"replay",@"stop",@"advance",@"ffwd",@"record",@"play",@"guide",@"active",@"list",@"exit",@"back",@"menu",@"info",@"up",@"down",@"left",@"right",@"select",@"red",@"green",@"yellow",@"blue",@"chanup",@"chandown",@"prev",@"0",@"1",@"2",@"3",@"4",@"5",@"6",@"7",@"8",@"9",@"dash",@"enter", nil];
-    
-    if (![validCommands containsObject:command]) {
+    NSArray *commands = [self getArrayOfCommands];
+
+    if (![commands containsObject:command]) {
         NSLog(@"Unknown Command: %@", command);
         return NO;
     }
     
     NSURL *url = [NSURL URLWithString:
                   [NSString stringWithFormat:@"http://%@:8080/remote/processKey?key=%@&%@",
-                   client[@"address"], command, client[@"appendage"] ]];
+                   device.address, command, device.appendage ]];
     
     NSURLResponse* response;
     NSError *connectionError;

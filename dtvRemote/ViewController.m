@@ -9,21 +9,87 @@
 #import "ViewController.h"
 #import <QuartzCore/QuartzCore.h>
 
-#import "iNet.h"
-#import "Channels.h"
-#import "Guide.h"
-#import "Commands.h"
-#import "Clients.h"
-
+#import "dtvChannels.h"
+#import "dtvChannel.h"
+#import "dtvGuide.h"
+#import "dtvCommands.h"
+#import "dtvDevices.h"
+#import "dtvDevice.h"
 #import "SideBarTableView.h"
-
 #import "MBProgressHUD.h"
+#import "Reachability.h"
 
-@interface ViewController ()
+@implementation ViewController {
 
-@end
+    NSMutableDictionary *channels;
+    NSMutableDictionary *allChannels;
+    NSMutableDictionary *sortedChannels;
+    NSMutableArray *blockedChannels;
+    NSMutableDictionary *guide;
+    NSMutableDictionary *devices;
+    dtvDevice *currentDevice;
+    
+    UIView *centerView;
+    UIView *sideBarView;
+    UITableView *sideBarTable;
+    UITableView *mainTableView;
+    IBOutlet UINavigationBar *navbar;
+    IBOutlet UILabel *navTitle;
+    IBOutlet UILabel *navSubTitle;
+    IBOutlet UINavigationItem *navItem;
+    IBOutlet UIBarButtonItem *rightButton;
+    UISearchController *searchController;
+    UISearchBar *searchBar;
+    UIImageView *boxCover;
+    UILabel *boxTitle;
+    UILabel *boxDescription;
+    UIView *topContainer;
+    UIToolbar *playBar;
+    UIView *overlay;
+    UILabel *overlayLabel;
+    UIView *overlayProgress;
 
-@implementation ViewController
+    IBOutlet UIBarButtonItem *playButton;
+
+    UILabel *hdLabel;
+    UILabel *stars;
+    UILabel *ratingLabel;
+    IBOutlet UISlider *seekBar;
+    UIToolbar *toolBar;
+    UITextField *commandText;
+    UITextField *guideTime;
+    UIDatePicker *guideDatePicker;
+    NSTimer *timer;
+    NSTimer *ssidTimer;
+    
+    NSDate *nextRefresh;
+    NSString *currentProgramId;
+    
+    double searchBarMaxWidth;
+    double searchBarMinWidth;
+    double xOffset;
+    double tableXOffset;
+    double toolbarHeight;
+    
+    BOOL guideIsRefreshing;
+    BOOL isEditing;
+    BOOL isPlaying;
+    
+    BOOL dragging;
+    
+    id SideBarTableViewData;
+    
+    UIColor *textColor;
+    UIColor *backgroundColor;
+    UIColor *tableBackgroundColor;
+    UIColor *seperatorColor;
+    UIColor *boxBackgroundColor;
+    UIColor *navBGColor;
+    UIColor *tint;
+    Reachability *reach;
+    
+    
+}
 
 #pragma mark - Initialization
 
@@ -31,7 +97,21 @@
 - (void) viewDidLoad {
     [super viewDidLoad];
     [self setNeedsStatusBarAppearanceUpdate];
+    
+    reach = [Reachability reachabilityForLocalWiFi];
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(reachabilityChanged:)
+                                                 name:kReachabilityChangedNotification
+                                               object:nil];
+    
+    [reach startNotifier];
+    
     [self initiate];
+}
+
+- (IBAction) reachabilityChanged:(id)sender  {
+    NSLog(@"Network has changed, refreshing device list");
+    [dtvDevices refreshDevicesForNetworks];
 }
 
 - (void) didReceiveMemoryWarning {
@@ -44,26 +124,25 @@
 
 - (void) initiate {
     
-    _nextRefresh = [NSDate date];
-    _currentProgramId = @"";
+    nextRefresh = [NSDate date];
+    currentProgramId = @"";
     
-    _channels = [Channels load:NO];
-    _allChannels = [Channels load:YES];
-    _sortedChannels = [Channels sortChannels:_channels sortBy:@"default"];
-    _blockedChannels = [Channels loadBlockedChannels:_channels];
+    channels = [dtvChannels load:NO];
+    allChannels = [dtvChannels load:YES];
+    sortedChannels = [dtvChannels sortChannels:channels sortBy:@"default"];
+    blockedChannels = [dtvChannels loadBlockedChannels:channels];
     
-    _guide = [[NSMutableDictionary alloc] init];
+    guide = [[NSMutableDictionary alloc] init];
     
-    _ssid = [iNet fetchSSID];
-    _clients = [Clients loadClientList];
-    _currentClient = [Clients getClient];
+    devices = [dtvDevices getSavedDevicesForActiveNetwork];
+    currentDevice = [dtvDevices getCurrentDevice];
     isEditing = NO;
     isPlaying = YES;
     
-    _ssidTimer = [[NSTimer alloc] init];
+    ssidTimer = [[NSTimer alloc] init];
     
-    _timer = [[NSTimer alloc] init];
-    
+    timer = [[NSTimer alloc] init];
+
     xOffset = 140;
     searchBarMinWidth = 74;
     tableXOffset = 255;
@@ -72,17 +151,17 @@
     
     [self registerForNotifications];
     [self createViews];
-    [self displayClient];
+    [self displayDevice];
     
     
-    if ([[_channels allKeys] count] == 0) { //run initial setup
+    if ([[channels allKeys] count] == 0) { //run initial setup
         dispatch_after(0, dispatch_get_main_queue(), ^{
-            [self promptForZipCode];
+            [self promptForZipCode:nil];
         });
     } else {
         [self refreshGuide:nil];
         
-        if ([[_currentClient allKeys] count] != 0) {
+        if (currentDevice) {
             [self refreshNowPlaying:nil scrollToPlayingChanel:YES];
         } else {
             [self setDefaultNowPlayingChannel];
@@ -90,34 +169,29 @@
         
     }
     
-    _timer = [NSTimer scheduledTimerWithTimeInterval:60.0
+    timer = [NSTimer scheduledTimerWithTimeInterval:60.0
                                               target:self
                                             selector:@selector(onTimerFire:)
                                             userInfo:nil
                                              repeats:YES];
     
-   _ssidTimer = [NSTimer scheduledTimerWithTimeInterval:30.0
-                                                 target:self
-                                               selector:@selector(fetchSSID:)
-                                               userInfo:nil
-                                                repeats:YES];
 
 }
 
 - (void) onTimerFire:(id)sender {
     [self refreshNowPlaying:nil scrollToPlayingChanel:NO];
     
-    if ([[NSDate date] timeIntervalSinceDate:_nextRefresh] >= 0) {
+    if ([[NSDate date] timeIntervalSinceDate:nextRefresh] >= 0) {
         [self refreshGuide:nil];
     }
 }
 
 - (void) registerForNotifications {
     
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageUpdatedClients:)
-                                                 name:@"messageUpdatedClients" object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageUpdatedClientsProgress:)
-                                                 name:@"messageUpdatedClientsProgress" object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageUpdatedDevices:)
+                                                 name:@"messageUpdatedDevices" object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageUpdatedDevicesProgress:)
+                                                 name:@"messageUpdatedDevicesProgress" object:nil];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageDownloadChannelLogos:)
                                                  name:@"messageDownloadChannelLogos" object:nil];
@@ -141,18 +215,22 @@
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageUpdatedLocations:)
                                                  name:@"messageUpdatedLocations" object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(promptForZipCode:)
+                                                 name:@"messagePromptForZipCode" object:nil];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageChannelChanged:)
                                                  name:@"messageChannelChanged" object:nil];
  
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageSetNowPlayingChannel:)
                                                  name:@"messageSetNowPlayingChannel" object:nil];
+
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageAPIDown:)
+                                                 name:@"messageAPIDown" object:nil];
+    
+    
     
 }
 
-- (void) fetchSSID:(id)sender {
-    self.ssid = [iNet fetchSSID];
-}
 
 #pragma mark - View Creation
 
@@ -168,23 +246,23 @@
     [self.view setBackgroundColor:backgroundColor];
 
     CGRect frm = [[UIScreen mainScreen] bounds];
-    _centerView = [[UIView alloc] initWithFrame:frm];
-    [_centerView setBackgroundColor:backgroundColor];
-    _centerView.userInteractionEnabled = YES;
+    centerView = [[UIView alloc] initWithFrame:frm];
+    [centerView setBackgroundColor:backgroundColor];
+    centerView.userInteractionEnabled = YES;
     
-    _centerView.layer.masksToBounds = NO;
-    _centerView.layer.shadowOffset = CGSizeMake(0, 0);
-    _centerView.layer.shadowRadius = 3;
-    _centerView.layer.shadowOpacity = 0.5;
-    _centerView.layer.shadowPath = [UIBezierPath bezierPathWithRect:_centerView.bounds].CGPath;
+    centerView.layer.masksToBounds = NO;
+    centerView.layer.shadowOffset = CGSizeMake(0, 0);
+    centerView.layer.shadowRadius = 3;
+    centerView.layer.shadowOpacity = 0.5;
+    centerView.layer.shadowPath = [UIBezierPath bezierPathWithRect:centerView.bounds].CGPath;
     
     frm.size.width = frm.size.width * 0.75;
     frm.origin.x = 0;
-    _sideBarView = [[UIView alloc] initWithFrame:frm];
-    [_sideBarView setBackgroundColor:backgroundColor];
+    sideBarView = [[UIView alloc] initWithFrame:frm];
+    [sideBarView setBackgroundColor:backgroundColor];
 
-    [self.view addSubview:_sideBarView];
-    [self.view addSubview:_centerView];
+    [self.view addSubview:sideBarView];
+    [self.view addSubview:centerView];
     
     [self createSideBar];
     [self createTitleBar];
@@ -196,26 +274,26 @@
 
 - (void) createSideBar {
 
-    _sideBarTable = [[UITableView alloc] init];
+    sideBarTable = [[UITableView alloc] init];
     CGRect tableFrame = [[UIScreen mainScreen] bounds];
     tableFrame.size.width = tableFrame.size.width * 0.75;
     tableFrame.size.height = tableFrame.size.height - 64;
     tableFrame.origin.x = 0;
     tableFrame.origin.y = 64;
-    _sideBarTable.frame = tableFrame;
+    sideBarTable.frame = tableFrame;
     
     SideBarTableViewData = [[SideBarTableView alloc] init];
     
-    _sideBarTable.dataSource = SideBarTableViewData;
-    _sideBarTable.delegate = SideBarTableViewData;
-    _sideBarTable.separatorColor = seperatorColor;
-    _sideBarTable.backgroundColor = backgroundColor;
+    sideBarTable.dataSource = SideBarTableViewData;
+    sideBarTable.delegate = SideBarTableViewData;
+    sideBarTable.separatorColor = seperatorColor;
+    sideBarTable.backgroundColor = backgroundColor;
     
     UIRefreshControl *refreshControl = [[UIRefreshControl alloc] init];
     [refreshControl addTarget:self action:@selector(refreshSideBar:) forControlEvents:UIControlEventValueChanged];
-    [_sideBarTable addSubview:refreshControl];
+    [sideBarTable addSubview:refreshControl];
     
-    [_sideBarView addSubview:_sideBarTable];
+    [sideBarView addSubview:sideBarTable];
     
     CGRect navBarFrame = CGRectMake(0, 0, [[UIScreen mainScreen] bounds].size.width * 0.75, 64.0);
     [[UINavigationBar appearance] setShadowImage:[[UIImage alloc] init]];
@@ -225,11 +303,11 @@
     bar.barTintColor = navBGColor;
     bar.titleTextAttributes = @{NSForegroundColorAttributeName : textColor};
 
-    UINavigationItem *navItem = [UINavigationItem alloc];
-    navItem.title = @"Settings";
-    [bar pushNavigationItem:navItem animated:false];
+    UINavigationItem *sideBarNavItem = [UINavigationItem alloc];
+    sideBarNavItem.title = @"Settings";
+    [bar pushNavigationItem:sideBarNavItem animated:false];
     
-    [_sideBarView addSubview:bar];
+    [sideBarView addSubview:bar];
 }
 
 
@@ -237,31 +315,31 @@
     
     CGRect navBarFrame = CGRectMake(0, 0, [[UIScreen mainScreen] bounds].size.width, 64.0);
     [[UINavigationBar appearance] setShadowImage:[[UIImage alloc] init]];
-    _navbar = [[UINavigationBar alloc] initWithFrame:navBarFrame];
-    _navbar.barTintColor = navBGColor;
+    navbar = [[UINavigationBar alloc] initWithFrame:navBarFrame];
+    navbar.barTintColor = navBGColor;
     
-    _navbar.translucent = NO;
-    _navbar.tintColor = tint;
-    _navbar.titleTextAttributes = @{NSForegroundColorAttributeName : textColor};
+    navbar.translucent = NO;
+    navbar.tintColor = tint;
+    navbar.titleTextAttributes = @{NSForegroundColorAttributeName : textColor};
     
-    _navTitle = [[UILabel alloc] init];
-    _navTitle.translatesAutoresizingMaskIntoConstraints = YES;
-    _navTitle.font = [UIFont fontWithName:@"Helvetica-Bold" size:17];
-    [_navTitle setTextColor:textColor];
-    _navTitle.tintColor = tint;
-    _navTitle.textAlignment = NSTextAlignmentCenter;
-    _navTitle.frame = CGRectMake(0, 28, [[UIScreen mainScreen] bounds].size.width, 20);
+    navTitle = [[UILabel alloc] init];
+    navTitle.translatesAutoresizingMaskIntoConstraints = YES;
+    navTitle.font = [UIFont fontWithName:@"Helvetica-Bold" size:17];
+    [navTitle setTextColor:textColor];
+    navTitle.tintColor = tint;
+    navTitle.textAlignment = NSTextAlignmentCenter;
+    navTitle.frame = CGRectMake(0, 28, [[UIScreen mainScreen] bounds].size.width, 20);
     
-    _navSubTitle = [[UILabel alloc] init];
-    _navSubTitle.translatesAutoresizingMaskIntoConstraints = YES;
-    _navSubTitle.font = [UIFont fontWithName:@"Helvetica" size:15];
-    [_navSubTitle setTextColor: textColor];
-    _navSubTitle.textAlignment = NSTextAlignmentCenter;
-    _navSubTitle.frame = CGRectMake(0, 44, [[UIScreen mainScreen] bounds].size.width, 20);
-    [_navSubTitle setFont:[UIFont systemFontOfSize:14]];
+    navSubTitle = [[UILabel alloc] init];
+    navSubTitle.translatesAutoresizingMaskIntoConstraints = YES;
+    navSubTitle.font = [UIFont fontWithName:@"Helvetica" size:15];
+    [navSubTitle setTextColor: textColor];
+    navSubTitle.textAlignment = NSTextAlignmentCenter;
+    navSubTitle.frame = CGRectMake(0, 44, [[UIScreen mainScreen] bounds].size.width, 20);
+    [navSubTitle setFont:[UIFont systemFontOfSize:14]];
     
-    [_navbar addSubview:_navTitle];
-    [_navbar addSubview:_navSubTitle];
+    [navbar addSubview:navTitle];
+    [navbar addSubview:navSubTitle];
     
     
     NSDictionary* barButtonItemAttributes =  @{NSFontAttributeName: [UIFont fontWithName:@"Helvetica" size:14.0f],
@@ -274,17 +352,17 @@
     
     
     
-    _navItem = [UINavigationItem alloc];
-    _navItem.title = @"";
+    navItem = [UINavigationItem alloc];
+    navItem.title = @"";
     
-    UIBarButtonItem *leftButton = [[UIBarButtonItem alloc] initWithTitle:@"Devices" style:UIBarButtonItemStylePlain target:self action:@selector(chooseClient:)];
-    _navItem.leftBarButtonItem = leftButton;
+    UIBarButtonItem *leftButton = [[UIBarButtonItem alloc] initWithTitle:@"Devices" style:UIBarButtonItemStylePlain target:self action:@selector(chooseDevice:)];
+    navItem.leftBarButtonItem = leftButton;
     
-    _rightButton = [[UIBarButtonItem alloc] initWithTitle:@"Edit" style:UIBarButtonItemStylePlain target:self action:@selector(toggleEditMode:)];
-    _navItem.rightBarButtonItem = _rightButton;
+    rightButton = [[UIBarButtonItem alloc] initWithTitle:@"Edit" style:UIBarButtonItemStylePlain target:self action:@selector(toggleEditMode:)];
+    navItem.rightBarButtonItem = rightButton;
     
-    [_navbar pushNavigationItem:_navItem animated:false];
-    [_centerView addSubview:_navbar];
+    [navbar pushNavigationItem:navItem animated:false];
+    [centerView addSubview:navbar];
 }
 
 - (void) createTopSection {
@@ -293,39 +371,39 @@
 
 
     
-    _topContainer = [[UIView alloc] initWithFrame:CGRectMake(0, 64,
+    topContainer = [[UIView alloc] initWithFrame:CGRectMake(0, 64,
                                                              [[UIScreen mainScreen] bounds].size.width,
                                                              tableXOffset - 64)];
 
-    _topContainer.alpha = 0.0;
-    [_centerView addSubview:_topContainer];
+    topContainer.alpha = 0.0;
+    [centerView addSubview:topContainer];
     
     UIView *v = [[UIView alloc] initWithFrame:CGRectMake(5, 5, 120, 180)];
     [v setBackgroundColor:boxBackgroundColor];
     
-    _boxCover = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 120, 180)];
-    [_boxCover setImage:[UIImage new]];
-    [v addSubview:_boxCover];
-    [_topContainer addSubview:v];
+    boxCover = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 120, 180)];
+    [boxCover setImage:[UIImage new]];
+    [v addSubview:boxCover];
+    [topContainer addSubview:v];
     
-    _boxTitle = [[UILabel alloc] init];
-    _boxTitle.translatesAutoresizingMaskIntoConstraints = YES;
-    _boxTitle.text = @"";
-    _boxTitle.font = [UIFont fontWithName:@"Helvetica-Bold" size:17];
-    [_boxTitle setTextColor:textColor];
+    boxTitle = [[UILabel alloc] init];
+    boxTitle.translatesAutoresizingMaskIntoConstraints = YES;
+    boxTitle.text = @"";
+    boxTitle.font = [UIFont fontWithName:@"Helvetica-Bold" size:17];
+    [boxTitle setTextColor:textColor];
 
-    _boxTitle.textAlignment = NSTextAlignmentLeft;
-    _boxTitle.frame = CGRectMake(xOffset, 8, [[UIScreen mainScreen] bounds].size.width - xOffset, 18);
-    [_topContainer addSubview:_boxTitle];
+    boxTitle.textAlignment = NSTextAlignmentLeft;
+    boxTitle.frame = CGRectMake(xOffset, 8, [[UIScreen mainScreen] bounds].size.width - xOffset, 18);
+    [topContainer addSubview:boxTitle];
     
     
-    _playBar = [[UIToolbar alloc] init];
-    _playBar.tintColor = textColor;
-    _playBar.clipsToBounds = YES;
-    _playBar.frame = CGRectMake(xOffset,
-                                (_boxTitle.frame.size.height + _boxTitle.frame.origin.y) + 12,
+    playBar = [[UIToolbar alloc] init];
+    playBar.tintColor = textColor;
+    playBar.clipsToBounds = YES;
+    playBar.frame = CGRectMake(xOffset,
+                                (boxTitle.frame.size.height + boxTitle.frame.origin.y) + 12,
                                 [[UIScreen mainScreen] bounds].size.width - (xOffset+5), 40);
-    [_playBar setBackgroundImage:[UIImage new] forToolbarPosition:UIToolbarPositionAny barMetrics:UIBarMetricsDefault];
+    [playBar setBackgroundImage:[UIImage new] forToolbarPosition:UIToolbarPositionAny barMetrics:UIBarMetricsDefault];
     
     UIBarButtonItem *flex = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:self action:nil ];
     UIBarButtonItem *fit = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFixedSpace target:self action:nil ];
@@ -335,11 +413,11 @@
                                      initWithImage:[UIImage imageNamed:@"images.bundle/rewind.png"]
                                      style:UIBarButtonItemStylePlain target:self action:@selector(rewind:)];
     
-    _playButton = [[UIBarButtonItem alloc]
+    playButton = [[UIBarButtonItem alloc]
                    initWithImage:[UIImage imageNamed:@"images.bundle/pause"]
                    style:UIBarButtonItemStylePlain target:self action:@selector(playpause:) ];
     
-    _playButton.tintColor = textColor;
+    playButton.tintColor = textColor;
     
     UIBarButtonItem *forwardButton = [[UIBarButtonItem alloc]
                                       initWithImage:[UIImage imageNamed:@"images.bundle/forward.png"]
@@ -353,118 +431,118 @@
     recButton.tintColor = [UIColor colorWithRed:0.722 green:0.094 blue:0.094 alpha:0.5];
     
     NSArray *buttons = [NSArray arrayWithObjects:
-                        flex, rewindButton, flex, flex, recButton, flex, _playButton, flex, flex, forwardButton, flex, nil];
-    [_playBar setItems: buttons animated:NO];
+                        flex, rewindButton, flex, flex, recButton, flex, playButton, flex, flex, forwardButton, flex, nil];
+    [playBar setItems: buttons animated:NO];
     
     
-    [_topContainer addSubview:_playBar];
+    [topContainer addSubview:playBar];
     
     
     //seekbar
-    _seekBar = [[UISlider alloc] init];
-    _seekBar.frame = CGRectMake(xOffset,
-                                (_playBar.frame.size.height + _playBar.frame.origin.y) ,
+    seekBar = [[UISlider alloc] init];
+    seekBar.frame = CGRectMake(xOffset,
+                                (playBar.frame.size.height + playBar.frame.origin.y) ,
                                 [[UIScreen mainScreen] bounds].size.width - (xOffset+5),
                                 10);
-    _seekBar.minimumValue = 0.0;
-    _seekBar.maximumValue = 100.0;
-    _seekBar.value = 0;
-    [_seekBar setMaximumTrackTintColor:boxBackgroundColor];
-    [_seekBar setMinimumTrackTintColor:tint];
+    seekBar.minimumValue = 0.0;
+    seekBar.maximumValue = 100.0;
+    seekBar.value = 0;
+    [seekBar setMaximumTrackTintColor:boxBackgroundColor];
+    [seekBar setMinimumTrackTintColor:tint];
     
-    _seekBar.tintColor = textColor;
-    _seekBar.thumbTintColor = textColor;
-    _seekBar.userInteractionEnabled = NO;
+    seekBar.tintColor = textColor;
+    seekBar.thumbTintColor = textColor;
+    seekBar.userInteractionEnabled = NO;
     
-    [_seekBar setThumbImage:[UIImage new] forState:UIControlStateNormal];
-    //[_seekBar setThumbImage:[UIImage new] forState:UIControlStateSelected];
-    [_seekBar setThumbImage:[UIImage new] forState:UIControlStateHighlighted];
+    [seekBar setThumbImage:[UIImage new] forState:UIControlStateNormal];
+    //[seekBar setThumbImage:[UIImage new] forState:UIControlStateSelected];
+    [seekBar setThumbImage:[UIImage new] forState:UIControlStateHighlighted];
 
-    [_topContainer addSubview:_seekBar];
+    [topContainer addSubview:seekBar];
     
-    _boxDescription = [[UILabel alloc] init];
-    _boxDescription.translatesAutoresizingMaskIntoConstraints = YES;
-    _boxDescription.numberOfLines = 4;
-    _boxDescription.text = @"";
-    _boxDescription.font = [UIFont fontWithName:@"Helvetica" size:12];
-    [_boxDescription setTextColor: textColor];
-    _boxDescription.textAlignment = NSTextAlignmentLeft;
-    _boxDescription.frame = CGRectMake(xOffset,
-                                       (_seekBar.frame.size.height + _seekBar.frame.origin.y) + 4,
+    boxDescription = [[UILabel alloc] init];
+    boxDescription.translatesAutoresizingMaskIntoConstraints = YES;
+    boxDescription.numberOfLines = 4;
+    boxDescription.text = @"";
+    boxDescription.font = [UIFont fontWithName:@"Helvetica" size:12];
+    [boxDescription setTextColor: textColor];
+    boxDescription.textAlignment = NSTextAlignmentLeft;
+    boxDescription.frame = CGRectMake(xOffset,
+                                       (seekBar.frame.size.height + seekBar.frame.origin.y) + 4,
                                        [[UIScreen mainScreen] bounds].size.width - xOffset,
                                        56);
 
-    [_topContainer addSubview:_boxDescription];
+    [topContainer addSubview:boxDescription];
     
-    _searchBar = [[UISearchBar alloc] initWithFrame:CGRectMake(xOffset - 10,
-                                                               (_topContainer.frame.size.height - 42),
+    searchBar = [[UISearchBar alloc] initWithFrame:CGRectMake(xOffset - 10,
+                                                               (topContainer.frame.size.height - 42),
                                                                searchBarMinWidth, 44)];
-    _searchBar.searchBarStyle = UISearchBarStyleMinimal;
-    _searchBar.translucent = YES;
-    _searchBar.tintColor = [UIColor whiteColor];
-    _searchBar.backgroundColor = [UIColor clearColor];
+    searchBar.searchBarStyle = UISearchBarStyleMinimal;
+    searchBar.translucent = YES;
+    searchBar.tintColor = [UIColor whiteColor];
+    searchBar.backgroundColor = [UIColor clearColor];
     
-    _searchBar.barStyle = UIBarStyleBlackOpaque;
-    _searchBar.delegate = self;
+    searchBar.barStyle = UIBarStyleBlackOpaque;
+    searchBar.delegate = self;
     
-    _searchController = [[UISearchController alloc] initWithSearchResultsController:nil];
-    _searchController.dimsBackgroundDuringPresentation = NO;
-    _searchController.hidesNavigationBarDuringPresentation = NO;
-    _searchController.searchBar.frame = _searchBar.frame;
-    _searchBar.enablesReturnKeyAutomatically = NO;
+    searchController = [[UISearchController alloc] initWithSearchResultsController:nil];
+    searchController.dimsBackgroundDuringPresentation = NO;
+    searchController.hidesNavigationBarDuringPresentation = NO;
+    searchController.searchBar.frame = searchBar.frame;
+    searchBar.enablesReturnKeyAutomatically = NO;
 
-    [_topContainer addSubview:_searchBar];
+    [topContainer addSubview:searchBar];
     
-     _hdLabel= [[UILabel alloc] init];
-    _hdLabel.text = @"HD";
-    _hdLabel.font = [UIFont fontWithName:@"Helvetica-Bold" size:14];
-    [_hdLabel setBackgroundColor:[UIColor blackColor]];
-    _hdLabel.layer.cornerRadius = 5;
-    _hdLabel.layer.masksToBounds = YES;
+    hdLabel= [[UILabel alloc] init];
+    hdLabel.text = @"HD";
+    hdLabel.font = [UIFont fontWithName:@"Helvetica-Bold" size:14];
+    [hdLabel setBackgroundColor:[UIColor blackColor]];
+    hdLabel.layer.cornerRadius = 5;
+    hdLabel.layer.masksToBounds = YES;
     
-    [_hdLabel setTextColor:textColor];
-    _hdLabel.textAlignment = NSTextAlignmentCenter;
-    _hdLabel.frame = CGRectMake(7,
-                               (_topContainer.frame.size.height - 36),
+    [hdLabel setTextColor:textColor];
+    hdLabel.textAlignment = NSTextAlignmentCenter;
+    hdLabel.frame = CGRectMake(7,
+                               (topContainer.frame.size.height - 36),
                                31,
                                24);
-    [_hdLabel setHidden:YES];
+    [hdLabel setHidden:YES];
     
-    [_topContainer addSubview:_hdLabel];
+    [topContainer addSubview:hdLabel];
     
     
-    _ratingLabel = [[UILabel alloc] init];
-    _ratingLabel.text = @"";
-    _ratingLabel.font = [UIFont fontWithName:@"Helvetica-Bold" size:14];
-    [_ratingLabel setBackgroundColor:[UIColor clearColor]];
-    [_ratingLabel setTextColor:textColor];
-    _ratingLabel.textAlignment = NSTextAlignmentCenter;
-    _ratingLabel.frame = CGRectMake(
-                                   _searchBar.frame.origin.x + searchBarMinWidth + 10,
-                                   (_topContainer.frame.size.height - 36),
+    ratingLabel = [[UILabel alloc] init];
+    ratingLabel.text = @"";
+    ratingLabel.font = [UIFont fontWithName:@"Helvetica-Bold" size:14];
+    [ratingLabel setBackgroundColor:[UIColor clearColor]];
+    [ratingLabel setTextColor:textColor];
+    ratingLabel.textAlignment = NSTextAlignmentCenter;
+    ratingLabel.frame = CGRectMake(
+                                   searchBar.frame.origin.x + searchBarMinWidth + 10,
+                                   (topContainer.frame.size.height - 36),
                                    64,
                                    29);
     
-    [_ratingLabel setHidden:YES];
+    [ratingLabel setHidden:YES];
     
-    [_topContainer addSubview:_ratingLabel];
+    [topContainer addSubview:ratingLabel];
     
-    _stars = [[UILabel alloc] init];
-    _stars.text = @"★★★★★";
-    _stars.font = [UIFont fontWithName:@"Helvetica-Bold" size:16];
-    _stars.clipsToBounds = YES;
-    _stars.adjustsFontSizeToFitWidth = NO;
-    _stars.lineBreakMode = NSLineBreakByClipping;
-    _stars.layer.masksToBounds = YES;
-    [_stars setTextColor:[UIColor colorWithRed:0.941 green:0.812 blue:0.376 alpha:1]];  /*#f0cf60*/
-    _stars.textAlignment = NSTextAlignmentLeft;
-    _stars.frame = CGRectMake(
+    stars = [[UILabel alloc] init];
+    stars.text = @"★★★★★";
+    stars.font = [UIFont fontWithName:@"Helvetica-Bold" size:16];
+    stars.clipsToBounds = YES;
+    stars.adjustsFontSizeToFitWidth = NO;
+    stars.lineBreakMode = NSLineBreakByClipping;
+    stars.layer.masksToBounds = YES;
+    [stars setTextColor:[UIColor colorWithRed:0.941 green:0.812 blue:0.376 alpha:1]];  /*#f0cf60*/
+    stars.textAlignment = NSTextAlignmentLeft;
+    stars.frame = CGRectMake(
                              0,
-                             (_topContainer.frame.size.height - 36),
+                             (topContainer.frame.size.height - 36),
                              0,
                              29);
-    [_stars setHidden:YES];
-    [_topContainer addSubview:_stars];
+    [stars setHidden:YES];
+    [topContainer addSubview:stars];
 
     
     
@@ -472,17 +550,17 @@
 
 - (void) createTableView {
 
-    _mainTableView = [[UITableView alloc] init];
-    [_mainTableView setFrame:CGRectMake(0, tableXOffset,
+    mainTableView = [[UITableView alloc] init];
+    [mainTableView setFrame:CGRectMake(0, tableXOffset,
                                         [[UIScreen mainScreen] bounds].size.width,
                                         [[UIScreen mainScreen] bounds].size.height-(tableXOffset+ toolbarHeight))];
-    _mainTableView.dataSource = self;
-    _mainTableView.delegate = self;
+    mainTableView.dataSource = self;
+    mainTableView.delegate = self;
     
-    _mainTableView.separatorColor = seperatorColor;
-    _mainTableView.backgroundColor = backgroundColor;
+    mainTableView.separatorColor = seperatorColor;
+    mainTableView.backgroundColor = backgroundColor;
     
-    [_centerView addSubview:_mainTableView];
+    [centerView addSubview:mainTableView];
     
 }
 
@@ -493,39 +571,39 @@
     double progressHeight = 2;
     
     
-    _overlay = [[UIView alloc] init];
-    _overlay.opaque = YES;
-    _overlay.alpha = 0;
-    _overlay.backgroundColor = [UIColor blackColor];
-    _overlay.frame = CGRectMake(0, [[UIScreen mainScreen] bounds].size.height - (toolbarHeight + overlayHeight),
+    overlay = [[UIView alloc] init];
+    overlay.opaque = YES;
+    overlay.alpha = 0;
+    overlay.backgroundColor = [UIColor blackColor];
+    overlay.frame = CGRectMake(0, [[UIScreen mainScreen] bounds].size.height - (toolbarHeight + overlayHeight),
                                [[UIScreen mainScreen] bounds].size.width, overlayHeight);
     
-    _overlayProgress = [[UIView alloc] init];
-    _overlayProgress.frame = CGRectMake(0, overlayHeight - progressHeight,
+    overlayProgress = [[UIView alloc] init];
+    overlayProgress.frame = CGRectMake(0, overlayHeight - progressHeight,
                                         0, progressHeight);
     
-    _overlayProgress.opaque = YES;
-    _overlayProgress.alpha = 0.8;
-    _overlayProgress.backgroundColor = [UIColor redColor];
+    overlayProgress.opaque = YES;
+    overlayProgress.alpha = 0.8;
+    overlayProgress.backgroundColor = [UIColor redColor];
     
 
     
-    _overlayLabel = [[UILabel alloc] init];
-    _overlayLabel.textColor = textColor;
-    _overlayLabel.frame = CGRectMake(0, 0,[[UIScreen mainScreen] bounds].size.width, overlayHeight);
-    _overlayLabel.text = @"";
-    _overlayLabel.font = [UIFont fontWithName:@"Helvetica" size:12];
-    _overlayLabel.textAlignment = NSTextAlignmentCenter;
+    overlayLabel = [[UILabel alloc] init];
+    overlayLabel.textColor = textColor;
+    overlayLabel.frame = CGRectMake(0, 0,[[UIScreen mainScreen] bounds].size.width, overlayHeight);
+    overlayLabel.text = @"";
+    overlayLabel.font = [UIFont fontWithName:@"Helvetica" size:12];
+    overlayLabel.textAlignment = NSTextAlignmentCenter;
 
-    [_overlay addSubview:_overlayProgress];
-    [_overlay addSubview:_overlayLabel];
-    [_centerView addSubview:_overlay];
+    [overlay addSubview:overlayProgress];
+    [overlay addSubview:overlayLabel];
+    [centerView addSubview:overlay];
     
-    _toolBar = [[UIToolbar alloc] init];
-    _toolBar.clipsToBounds = YES;
-    _toolBar.frame = CGRectMake(0, [[UIScreen mainScreen] bounds].size.height - toolbarHeight, [[UIScreen mainScreen] bounds].size.width, toolbarHeight);
-    [_toolBar setBackgroundImage:[UIImage new] forToolbarPosition:UIToolbarPositionAny barMetrics:UIBarMetricsDefault];
-    _toolBar.tintColor = textColor;
+    toolBar = [[UIToolbar alloc] init];
+    toolBar.clipsToBounds = YES;
+    toolBar.frame = CGRectMake(0, [[UIScreen mainScreen] bounds].size.height - toolbarHeight, [[UIScreen mainScreen] bounds].size.width, toolbarHeight);
+    [toolBar setBackgroundImage:[UIImage new] forToolbarPosition:UIToolbarPositionAny barMetrics:UIBarMetricsDefault];
+    toolBar.tintColor = textColor;
     
     UIBarButtonItem *flex = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:self action:nil ];
     
@@ -551,16 +629,16 @@
     
     
     NSArray *buttons = [NSArray arrayWithObjects:  commands, flex , clock, flex, numberPad, flex, sort, flex, refresh, nil];
-    [_toolBar setItems:buttons animated:NO];
+    [toolBar setItems:buttons animated:NO];
     
-    [_centerView addSubview:_toolBar];
+    [centerView addSubview:toolBar];
     
     
-    _guideDatePicker = [[UIDatePicker alloc] init];
-    _guideTime = [[UITextField alloc] initWithFrame:CGRectMake(0,0,1,1)];
-    [_guideTime setHidden:YES];
-    [_guideTime setInputView:_guideDatePicker];
-    [_guideDatePicker addTarget:self action:@selector(changedGuideTime:)
+    guideDatePicker = [[UIDatePicker alloc] init];
+    guideTime = [[UITextField alloc] initWithFrame:CGRectMake(0,0,1,1)];
+    [guideTime setHidden:YES];
+    [guideTime setInputView:guideDatePicker];
+    [guideDatePicker addTarget:self action:@selector(changedGuideTime:)
          forControlEvents:UIControlEventValueChanged];
     
     UIToolbar *guideTimeDone = [[UIToolbar alloc] initWithFrame:CGRectMake(0, 0, [[UIScreen mainScreen] bounds].size.width, 44)];
@@ -570,13 +648,13 @@
                                                             target:nil action:@selector(selectedGuideTime:)];
     
     [guideTimeDone setItems: [NSArray arrayWithObjects:flex, done, nil]];
-    [_guideTime setInputAccessoryView:guideTimeDone];
-    _guideTime.text = @"";
+    [guideTime setInputAccessoryView:guideTimeDone];
+    guideTime.text = @"";
     
-    [_centerView addSubview:_guideTime];
+    [centerView addSubview:guideTime];
     
 
-    _commandText = [[UITextField alloc] initWithFrame:CGRectMake(0,0,1,1)];
+    commandText = [[UITextField alloc] initWithFrame:CGRectMake(0,0,1,1)];
     
     UIToolbar *commandTextDone = [[UIToolbar alloc] initWithFrame:CGRectMake(0, 0, [[UIScreen mainScreen] bounds].size.width, 44)];
     [commandTextDone setBarStyle:UIBarStyleBlackTranslucent];
@@ -589,16 +667,16 @@
                                                             target:nil action:@selector(closeCommands:)];
     
     [commandTextDone setItems: [NSArray arrayWithObjects:b2, flex, b1, flex, done3, nil]];
-    [_commandText setInputAccessoryView:commandTextDone];
-    _commandText.keyboardType = UIKeyboardTypeNumberPad;
-    [_commandText setHidden:YES];
-    _commandText.text = @"";
-    [_commandText addTarget:self
+    [commandText setInputAccessoryView:commandTextDone];
+    commandText.keyboardType = UIKeyboardTypeNumberPad;
+    [commandText setHidden:YES];
+    commandText.text = @"";
+    [commandText addTarget:self
                   action:@selector(commandSend:)
         forControlEvents:UIControlEventEditingChanged];
     
 
-    [_centerView addSubview:_commandText];
+    [centerView addSubview:commandText];
 
     
 }
@@ -616,7 +694,7 @@
     UITouch *aTouch = [touches anyObject];
     CGPoint location = [aTouch locationInView:self.view];
     
-    if (CGRectContainsPoint(_centerView.frame, location)) {
+    if (CGRectContainsPoint(centerView.frame, location)) {
         dragging = YES;
     }
 }
@@ -624,7 +702,7 @@
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
     
     dragging = NO;
-    float position = _centerView.frame.origin.x;
+    float position = centerView.frame.origin.x;
     float leftQuadrent = [[UIScreen mainScreen] bounds].size.width * 0.25;
     
     if (position > 0 && position > leftQuadrent) {
@@ -642,13 +720,13 @@
         
         CGPoint previousLocation = [aTouch previousLocationInView:self.view];
         
-        _centerView.frame = CGRectOffset(_centerView.frame,
+        centerView.frame = CGRectOffset(centerView.frame,
                                          (location.x - previousLocation.x), 0);
         
-        if (_centerView.frame.origin.x < 0) {
-            CGRect frm = _centerView.frame;
+        if (centerView.frame.origin.x < 0) {
+            CGRect frm = centerView.frame;
             frm.origin.x = 0;
-            _centerView.frame = frm;
+            centerView.frame = frm;
         }
     }
 }
@@ -666,7 +744,7 @@
     
     [UIView animateWithDuration:0.3
                      animations:^{
-                         _centerView.frame = frm;
+                         centerView.frame = frm;
                      }];
 }
 
@@ -686,8 +764,8 @@
 
 - (void) searchBar:(UISearchBar *)searchBar textDidChange:(NSString *)searchText {
     if ([searchText isEqualToString:@""]) {
-        _sortedChannels = [Channels sortChannels:_channels sortBy:@"default"];
-        [_mainTableView reloadData];
+        sortedChannels = [dtvChannels sortChannels:channels sortBy:@"default"];
+        [mainTableView reloadData];
         [self closeSearchBar];
     } else {
         [self filterResults:searchText];
@@ -695,63 +773,62 @@
 }
 
 - (void) closeSearchBar {
-    [_searchBar resignFirstResponder];
-    if ([_searchBar.text isEqualToString:@""]) {
-        if (_searchBar.tag == 2) {
+    [searchBar resignFirstResponder];
+    if ([searchBar.text isEqualToString:@""]) {
+        if (searchBar.tag == 2) {
             return;
         }
-        _searchBar.tag = 2;
-        _sortedChannels = [Channels sortChannels:_channels sortBy:@"default"];
+        searchBar.tag = 2;
+        sortedChannels = [dtvChannels sortChannels:channels sortBy:@"default"];
         
-        CGRect newFrame = _searchBar.frame;
+        CGRect newFrame = searchBar.frame;
         newFrame.size.width = searchBarMinWidth;
         [UIView animateWithDuration:0.50
                          animations:^{
-                             _searchBar.frame = newFrame;
-                             _ratingLabel.alpha = 1.0;
-                             _stars.alpha = 1.0;
+                             searchBar.frame = newFrame;
+                             ratingLabel.alpha = 1.0;
+                             stars.alpha = 1.0;
                          }];
     }
 }
 
 - (void) openSearchBar {
-    if (_searchBar.tag == 1) {
+    if (searchBar.tag == 1) {
         return;
     }
-    _searchBar.tag = 1;
+    searchBar.tag = 1;
     
-    CGRect newFrame = _searchBar.frame;
+    CGRect newFrame = searchBar.frame;
     newFrame.size.width = searchBarMaxWidth;
     
     [UIView animateWithDuration:0.25
                      animations:^{
-                         _searchBar.frame = newFrame;
-                         _ratingLabel.alpha = 0.0;
-                         _stars.alpha = 0.0;
+                         searchBar.frame = newFrame;
+                         ratingLabel.alpha = 0.0;
+                         stars.alpha = 0.0;
                      }];
 }
 
 - (void) filterResults:(NSString *) term {
     NSMutableDictionary *results = [[NSMutableDictionary alloc] init];
-    NSArray *keys = [_channels allKeys];
+    NSArray *keys = [channels allKeys];
     
     NSString *header = @"Filtered Results";
     [results setObject:[[NSMutableDictionary alloc] init] forKey:header];
 
-    for (id channel in keys) {
-        NSString *chId = [_channels[channel] objectForKey:@"chId"];
-        NSString *chName = [_channels[channel] objectForKey:@"chName"];
-        NSString *title = _guide[channel][@"title"];
-        if (title && [title rangeOfString:term options:NSCaseInsensitiveSearch].location != NSNotFound ) {
-            [results[header] setObject:chId forKey:chName];
+    for (NSString *chId in keys) {
+        dtvChannel *channel = channels[chId];
+        dtvGuideItem *guideItem = guide[chId];
+        if (guideItem.title && [guideItem.title rangeOfString:term options:NSCaseInsensitiveSearch].location != NSNotFound ) {
+            [results[header] setObject:channel forKey:chId];
         } else {
-            if ([chName rangeOfString:term options:NSCaseInsensitiveSearch].location != NSNotFound ) {
-                [results[header] setObject:chId forKey:chName];
+            if ([channel.name rangeOfString:term options:NSCaseInsensitiveSearch].location != NSNotFound ) {
+                [results[header] setObject:channel forKey:chId];
             }
         }
     }
-    _sortedChannels = results;
-    [_mainTableView reloadData];
+    sortedChannels = results;
+    [mainTableView reloadData];
 }
 
 - (BOOL) searchBarShouldEndEditing:(UISearchBar *)searchBar {
@@ -769,13 +846,13 @@
 }
 
 - (NSInteger) numberOfSectionsInTableView:(UITableView *)tableView {
-    return [[_sortedChannels allKeys] count];
+    return [[sortedChannels allKeys] count];
 }
 
 - (NSInteger) tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    NSArray *sections = [[_sortedChannels allKeys] sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
+    NSArray *sections = [[sortedChannels allKeys] sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
     NSString *sectionKey = [sections objectAtIndex:section];
-    return [[[_sortedChannels objectForKey:sectionKey] allKeys] count];
+    return [[[sortedChannels objectForKey:sectionKey] allKeys] count];
 }
 
 - (void)tableView:(UITableView *)tableView willDisplayHeaderView:(UIView *)view forSection:(NSInteger)section {
@@ -789,7 +866,7 @@
 }
 
 - (NSString*) tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section {
-    NSArray *sections = [[_sortedChannels allKeys] sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
+    NSArray *sections = [[sortedChannels allKeys] sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
     return [sections objectAtIndex:section];
 }
 
@@ -826,29 +903,28 @@
     }
     
     //cell data
-    NSArray *sections = [[_sortedChannels allKeys] sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
+    NSArray *sections = [[sortedChannels allKeys] sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
     NSString *sectionKey = [sections objectAtIndex:indexPath.section];
-    NSMutableDictionary *sectionData = [_sortedChannels objectForKey:sectionKey];
+    NSMutableDictionary *sectionData = [sortedChannels objectForKey:sectionKey];
     NSArray *sectionChannels = [[sectionData allKeys] sortedArrayUsingSelector: @selector(compare:)];
-    id sectionChannelKey = [sectionChannels objectAtIndex:indexPath.row];
-    id chId = [[sectionData objectForKey:sectionChannelKey] stringValue];
+    NSString *chId = [sectionChannels objectAtIndex:indexPath.row];
     
-    NSDictionary *channel = _channels[chId];
-    NSDictionary *guideItem = [_guide objectForKey:chId];
+    dtvChannel *channel = sectionData[chId];
+    dtvGuideItem *guideItem = guide[chId];
 
     cell.textLabel.text = @"Not Available";
     cell.detailTextLabel.text = @" ";
     if (guideItem) {
-        cell.textLabel.text = [guideItem objectForKey:@"title"];
-        if ([guideItem objectForKey:@"FutureAiring"]) {
+        cell.textLabel.text = guideItem.title;
+        if (guideItem.futureAiring) {
             cell.detailTextLabel.text = [NSString stringWithFormat:@"%@",
-                                         [guideItem objectForKey:@"FutureAiring"]];
+                                         guideItem.futureAiring];
         } else {
-            if ([guideItem objectForKey:@"upNext"]) {
-                NSDictionary *duration = [Guide getDurationForChannel:guideItem];
+            if (guideItem.upNext) {
+                NSDictionary *duration = [dtvGuide getDurationForChannel:guideItem];
                 cell.detailTextLabel.text = [NSString stringWithFormat:@"-%@ %@",
                                              duration[@"timeLeft"],
-                                             [guideItem objectForKey:@"upNext"]];
+                                             guideItem.upNext];
             }
         }
     }
@@ -858,10 +934,10 @@
     if (isEditing) {
         [l2 setHidden:YES];
         
-        cell.textLabel.text = channel[@"chName"];
-        cell.detailTextLabel.text = [NSString stringWithFormat:@"%@ - %@", channel[@"chNum"], channel[@"chCall"]];
+        cell.textLabel.text = channel.name;
+        cell.detailTextLabel.text = [NSString stringWithFormat:@"%d - %@", channel.number, channel.callsign];
         
-        if ([_blockedChannels containsObject:chId]) {
+        if ([blockedChannels containsObject:chId]) {
             cell.accessoryView = [[UIImageView alloc] initWithImage:[UIImage new]];
             cell.accessoryType = UITableViewCellAccessoryNone;
         } else {
@@ -872,7 +948,7 @@
         cell.accessoryView = [[UIImageView alloc] initWithImage:[UIImage new]];
         
         [l2 setHidden:NO];
-        l2.text =  [NSString stringWithFormat:@"%@", [channel objectForKey:@"chNum"]];
+        l2.text = [NSString stringWithFormat:@"%d", channel.number];
 
     }
 
@@ -881,7 +957,7 @@
     UIImage *image = [UIImage new];
     NSString *cacheDirectory = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) lastObject];
     NSString *imagePath =[cacheDirectory stringByAppendingPathComponent:
-                          [NSString stringWithFormat:@"%@.png", [channel objectForKey:@"chLogoId"]]];
+                          [NSString stringWithFormat:@"%d.png", channel.identifier]];
     
     if ([[NSFileManager defaultManager] fileExistsAtPath:imagePath]) {
         image = [UIImage imageWithContentsOfFile:imagePath];
@@ -895,36 +971,37 @@
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
-    NSArray *sections = [[_sortedChannels allKeys] sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
+    NSArray *sections = [[sortedChannels allKeys] sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
     NSString *sectionKey = [sections objectAtIndex:indexPath.section];
-    NSMutableDictionary *sectionData = [_sortedChannels objectForKey:sectionKey];
+    NSMutableDictionary *sectionData = [sortedChannels objectForKey:sectionKey];
     NSArray *sectionChannels = [[sectionData allKeys] sortedArrayUsingSelector: @selector(compare:)];
-    id sectionChannelKey = [sectionChannels objectAtIndex:indexPath.row];
-    id chId = [[sectionData objectForKey:sectionChannelKey] stringValue];
+    NSString *chId = [sectionChannels objectAtIndex:indexPath.row];
+    dtvChannel *channel = [sectionData objectForKey:chId];
+    dtvGuideItem *guideItem = guide[chId];
     
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
     
     if (isEditing) {
         
         UITableViewCell *cell =[tableView cellForRowAtIndexPath:indexPath];
-        if ([_blockedChannels containsObject:chId]) {
-            [_blockedChannels removeObject:chId];
+        if ([blockedChannels containsObject:chId]) {
+            [blockedChannels removeObject:chId];
             cell.accessoryView = [[UIImageView alloc] initWithImage:[UIImage new]];
             cell.accessoryType = UITableViewCellAccessoryNone;
         } else {
-            [_blockedChannels addObject:chId];
+            [blockedChannels addObject:chId];
             cell.accessoryView = nil;
             cell.accessoryType = UITableViewCellAccessoryCheckmark;
         }
-        [_mainTableView reloadRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationNone];
+        [mainTableView reloadRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationNone];
     } else {
         
-        if ([[_currentClient allKeys] count] == 0) {
-            [self displayNoClientError];
+        if (!currentDevice) {
+            [self displayNoDeviceError];
+            return;
         }
         
-        id guideItem = _guide[chId];
-        if ([guideItem objectForKey:@"FutureAiring"]) {
+        if (guideItem.futureAiring) {
             UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Cannot Change Channel"
                                                                            message:@"This program is not on the air" preferredStyle:UIAlertControllerStyleAlert];
             UIAlertAction* accept = [UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil];
@@ -932,14 +1009,15 @@
              [self presentViewController:alert animated:YES completion:nil];
             return;
         }
-        [Commands changeChannel:_channels[chId][@"chNum"] device:_currentClient];
+
+        [dtvCommands changeChannel:channel device:currentDevice];
     }
     
 }
 
 #pragma mark - IB Actions
 
-- (void) promptForZipCode {
+- (IBAction) promptForZipCode:(id)sender {
     UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Guide Listing"
                                                                    message:@"Please enter your 5 digit zipcode" preferredStyle:UIAlertControllerStyleAlert];
     
@@ -956,10 +1034,15 @@
          [[NSUserDefaults standardUserDefaults] synchronize];
          
          if ([zip length] != 5) {
-             [self promptForZipCode];
+             [self promptForZipCode:nil];
              return;
          }
-         [Channels getLocationsForZipCode:zip];
+         
+         MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+         hud.mode = MBProgressHUDModeIndeterminate;
+         hud.labelText = [NSString stringWithFormat:@"Getting locations in %@", zip];
+         
+         [dtvChannels getLocationsForZipCode:zip];
          return;
      }];
     
@@ -980,14 +1063,14 @@
     
     if ([keys count] == 0 ) {
         //somethings wrong, ask again for zip
-        [self promptForZipCode];
+        [self promptForZipCode:nil];
         return;
     }
     
     if ([keys count] == 1 ) {
         //only 1 location, dont ask, just confirm
         id key = [keys objectAtIndex: 0];
-        [Channels populateChannels:locations[key]];
+        [dtvChannels populateChannels:locations[key]];
         return;
     }
     
@@ -1004,7 +1087,12 @@
         [UIAlertAction actionWithTitle: item[@"countyName"] style: UIAlertActionStyleDefault handler:
          ^(UIAlertAction * action) {
              [view dismissViewControllerAnimated:YES completion:nil];
-             [Channels populateChannels:item];
+
+             MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+             hud.mode = MBProgressHUDModeIndeterminate;
+             hud.labelText = [NSString stringWithFormat:@"Loading channels for %@", item[@"countyName"]];
+             
+             [dtvChannels populateChannels:item];
              return;
          }];
         [view addAction:action];
@@ -1013,28 +1101,29 @@
     
     UIAlertAction* cancel = [UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleDestructive handler:^(UIAlertAction * action) {
         [view dismissViewControllerAnimated:YES completion:nil];
-        [self promptForZipCode];
+        [self promptForZipCode:nil];
     }];
     
     [view addAction:cancel];
     [self presentViewController:view animated:YES completion:nil];
 }
 
-- (IBAction) chooseClient:(id)sender {
-    if ([[_clients[self.ssid] allKeys] count] == 0) {
+- (IBAction) chooseDevice:(id)sender {
+    devices = [dtvDevices getSavedDevicesForActiveNetwork];
+    if ([devices count] == 0) {
         MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
         hud.mode = MBProgressHUDModeAnnularDeterminate;
         hud.labelText = @"Scanning wifi network for devices...";
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
-            [Clients searchWifiForDevices];
+            [dtvDevices refreshDevicesForNetworks];
         });
     } else {
-        [self showClientPicker:nil];
+        [self showDevicePicker:nil];
     }
 }
 
-- (void) displayNoClientError {
-    //some message about no clien
+- (void) displayNoDeviceError {
+    //some message about no device
     UIAlertController *view = [UIAlertController
                                alertControllerWithTitle:@"No device selected"
                                message:@"Would you like to search for available devices?"
@@ -1050,7 +1139,7 @@
     UIAlertAction *ok = [UIAlertAction actionWithTitle:@"Yes" style:UIAlertActionStyleDefault handler:
                          ^(UIAlertAction * action) {
                              [view dismissViewControllerAnimated:YES completion:nil];
-                             [self chooseClient:nil];
+                             [self chooseDevice:nil];
                              return;
                          }];
     
@@ -1062,7 +1151,7 @@
 
 }
 
-- (IBAction) showClientPicker:(id)sender {
+- (IBAction) showDevicePicker:(id)sender {
     
     [MBProgressHUD hideHUDForView:self.view animated:YES];
     
@@ -1071,20 +1160,15 @@
                                message:@"Choose a device"
                                preferredStyle:UIAlertControllerStyleActionSheet];
     
+    devices = [dtvDevices getSavedDevicesForActiveNetwork];
     
-    
-    
-    for (NSString *key in [_clients objectForKey:self.ssid] ) {
-        
-        NSLog(@"%@", key);
-        NSDictionary *client = _clients[self.ssid][key];
-        
-        //id item = [_clients[self.ssid] objectAtIndex: i];
-        UIAlertAction *action = [UIAlertAction actionWithTitle: client[@"name"] style: UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
+    for (NSString *deviceID in [devices allKeys] ) {
+        dtvDevice *device = devices[deviceID];
+        UIAlertAction *action = [UIAlertAction actionWithTitle:device.name style: UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
             
-            [Clients setCurrentClientId:client[@"id"]];
-            _currentClient = [Clients getClient];
-            [self displayClient];
+            [dtvDevices saveCurrentDeviceId:device.identifier];
+            currentDevice = device;
+            [self displayDevice];
             
             [view dismissViewControllerAnimated:YES completion:nil];
         }];
@@ -1099,8 +1183,8 @@
     
     UIAlertAction *refresh = [UIAlertAction actionWithTitle:@"Rescan Network" style:UIAlertActionStyleDestructive handler:^(UIAlertAction * action) {
         [view dismissViewControllerAnimated:YES completion:nil];
-        [_clients removeAllObjects];
-        [self chooseClient:nil];
+        [devices removeAllObjects];
+        [self chooseDevice:nil];
         return;
     }];
     [view addAction:refresh];
@@ -1129,9 +1213,9 @@
         [[NSUserDefaults standardUserDefaults] setObject:@"name" forKey:@"sort"];
         [[NSUserDefaults standardUserDefaults] synchronize];
         
-        _sortedChannels = [Channels sortChannels:_channels sortBy:@"name"];
-        [_mainTableView scrollRectToVisible:CGRectMake(0, 0, 1, 1) animated:NO];
-        [_mainTableView reloadData];
+        sortedChannels = [dtvChannels sortChannels:channels sortBy:@"name"];
+        [mainTableView scrollRectToVisible:CGRectMake(0, 0, 1, 1) animated:NO];
+        [mainTableView reloadData];
         [view dismissViewControllerAnimated:YES completion:nil];
     }];
     [view addAction:name];
@@ -1142,38 +1226,25 @@
         [[NSUserDefaults standardUserDefaults] setObject:@"number" forKey:@"sort"];
         [[NSUserDefaults standardUserDefaults] synchronize];
         
-        _sortedChannels = [Channels sortChannels:_channels sortBy:@"number"];
-        [_mainTableView scrollRectToVisible:CGRectMake(0, 0, 1, 1) animated:NO];
-        [_mainTableView reloadData];
+        sortedChannels = [dtvChannels sortChannels:channels sortBy:@"number"];
+        [mainTableView scrollRectToVisible:CGRectMake(0, 0, 1, 1) animated:NO];
+        [mainTableView reloadData];
         [view dismissViewControllerAnimated:YES completion:nil];
     }];
     [view addAction:number];
     
-    UIAlertAction* category = [UIAlertAction actionWithTitle:@"Show Type" style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
+    UIAlertAction* category = [UIAlertAction actionWithTitle:@"Channel Type" style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
         
         //save sort
         [[NSUserDefaults standardUserDefaults] setObject:@"category" forKey:@"sort"];
         [[NSUserDefaults standardUserDefaults] synchronize];
         
-        _sortedChannels = [Channels sortChannels:_channels sortBy:@"category"];
-        [_mainTableView scrollRectToVisible:CGRectMake(0, 0, 1, 1) animated:NO];
-        [_mainTableView reloadData];
+        sortedChannels = [dtvChannels sortChannels:channels sortBy:@"category"];
+        [mainTableView scrollRectToVisible:CGRectMake(0, 0, 1, 1) animated:NO];
+        [mainTableView reloadData];
         [view dismissViewControllerAnimated:YES completion:nil];
     }];
     [view addAction:category];
-    
-    UIAlertAction* channelGroup = [UIAlertAction actionWithTitle:@"Channel Type" style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
-        
-        //save sort
-        [[NSUserDefaults standardUserDefaults] setObject:@"channelGroup" forKey:@"sort"];
-        [[NSUserDefaults standardUserDefaults] synchronize];
-        
-        _sortedChannels = [Channels sortChannels:_channels sortBy:@"channelGroup"];
-        [_mainTableView scrollRectToVisible:CGRectMake(0, 0, 1, 1) animated:NO];
-        [_mainTableView reloadData];
-        [view dismissViewControllerAnimated:YES completion:nil];
-    }];
-    [view addAction:channelGroup];
     
     
     UIAlertAction* cancel = [UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:^(UIAlertAction * action) {
@@ -1188,59 +1259,59 @@
 - (IBAction) toggleEditMode:(id)sender {
     if (isEditing) {
         //Going back to regular mode
-        [Channels saveBlockedChannels:_blockedChannels];
+        [dtvChannels saveBlockedChannels:blockedChannels];
         isEditing = NO;
-        _rightButton.title = @"Edit";
-        _channels = [Channels load:NO];
-        _blockedChannels = [[NSMutableArray alloc] init];
-        _sortedChannels = [Channels sortChannels:_channels sortBy:@"default"];
+        rightButton.title = @"Edit";
+        channels = [dtvChannels load:NO];
+        blockedChannels = [[NSMutableArray alloc] init];
+        sortedChannels = [dtvChannels sortChannels:channels sortBy:@"default"];
         //NSIndexPath *indexpath = (NSIndexPath*)[[_mainTableView indexPathsForVisibleRows] objectAtIndex:0];
         
     } else {
         //Going into edit mode
         isEditing = YES;
-        _rightButton.title = @"Done";
-        _channels = [Channels load:YES];
-        _blockedChannels = [Channels loadBlockedChannels:_channels];
-        _sortedChannels = [Channels sortChannels:_channels sortBy:@"default"];
+        rightButton.title = @"Done";
+        channels = [dtvChannels load:YES];
+        blockedChannels = [dtvChannels loadBlockedChannels:channels];
+        sortedChannels = [dtvChannels sortChannels:channels sortBy:@"default"];
     }
     
-    [_mainTableView reloadData];
+    [mainTableView reloadData];
 }
 
 - (IBAction) showNumberPad:(id)sender {
     
-    if ([[_currentClient allKeys] count] == 0) {
+    if (!currentDevice) {
         return;
     }
     
-    [_commandText becomeFirstResponder];
+    [commandText becomeFirstResponder];
 }
 
 - (IBAction) playpause:(id)sender {
     if (isPlaying) {
-        if ([Commands sendCommand:@"pause" client:_currentClient]) {
-            _playButton.image = [UIImage imageNamed:@"images.bundle/play"];
+        if ([dtvCommands sendCommand:@"pause" device:currentDevice]) {
+            playButton.image = [UIImage imageNamed:@"images.bundle/play"];
             isPlaying = NO;
         }
     } else {
-        if ([Commands sendCommand:@"play" client:_currentClient]) {
-            _playButton.image = [UIImage imageNamed:@"images.bundle/pause"];
+        if ([dtvCommands sendCommand:@"play" device:currentDevice]) {
+            playButton.image = [UIImage imageNamed:@"images.bundle/pause"];
             isPlaying = YES;
         }
     }
 }
 
 - (IBAction) rewind:(id)sender {
-    if ([Commands sendCommand:@"rew" client:_currentClient]) {
-        _playButton.image = [UIImage imageNamed:@"images.bundle/play"];
+    if ([dtvCommands sendCommand:@"rew" device:currentDevice]) {
+        playButton.image = [UIImage imageNamed:@"images.bundle/play"];
         isPlaying = NO;
     }
 }
 
 - (IBAction) forward:(id)sender {
-    if ([Commands sendCommand:@"ffwd" client:_currentClient]) {
-        _playButton.image = [UIImage imageNamed:@"images.bundle/play"];
+    if ([dtvCommands sendCommand:@"ffwd" device:currentDevice]) {
+        playButton.image = [UIImage imageNamed:@"images.bundle/play"];
         isPlaying = NO;
     }
 }
@@ -1248,28 +1319,28 @@
 - (IBAction) selectGuideTime:(id)sender {
     if (!guideIsRefreshing) {
         guideIsRefreshing = YES;
-        [_guideDatePicker setDate:[NSDate date]];
-        _guideDatePicker.maximumDate=[[NSDate date] dateByAddingTimeInterval:(48*60*60)];
-        _guideDatePicker.minimumDate=[[NSDate date] dateByAddingTimeInterval:(90*60*-1)];
-        [_guideTime becomeFirstResponder];
+        [guideDatePicker setDate:[NSDate date]];
+        guideDatePicker.maximumDate=[[NSDate date] dateByAddingTimeInterval:(48*60*60)];
+        guideDatePicker.minimumDate=[[NSDate date] dateByAddingTimeInterval:(90*60*-1)];
+        [guideTime becomeFirstResponder];
     }
 }
 
 - (IBAction) selectedGuideTime:(id)sender {
-    if (![_guideTime.text isEqualToString:@""]) {
+    if (![guideTime.text isEqualToString:@""]) {
         NSDateFormatter *dateFormat = [[NSDateFormatter alloc] init];
         [dateFormat setDateStyle:NSDateFormatterFullStyle];
         [dateFormat setTimeStyle:NSDateFormatterFullStyle];
-        NSDate *date = [dateFormat dateFromString:_guideTime.text];
+        NSDate *date = [dateFormat dateFromString:guideTime.text];
         [self refreshGuideForTime:date];
-        _guideTime.text = @"";
+        guideTime.text = @"";
     }
-    [_guideTime resignFirstResponder];
+    [guideTime resignFirstResponder];
 }
 
 - (IBAction) closeCommands:(id)sender {
-    _commandText.text = @"";
-    [_commandText resignFirstResponder];
+    commandText.text = @"";
+    [commandText resignFirstResponder];
 }
 
 - (IBAction) showCommands:(id)sender {
@@ -1278,41 +1349,56 @@
 
 - (void) commandSend:(id)sender {
     // there was a text change in some control
-    NSString *command = _commandText.text;
+    NSString *command = commandText.text;
     if (![command isEqualToString:@""]) {
-        [Commands sendCommand:command client:_currentClient];
+        [dtvCommands sendCommand:command device:currentDevice];
     }
-    _commandText.text = @"";
+    commandText.text = @"";
 }
 
 #pragma mark - Messages / Events
 
 - (void) messageUpdatedLocations:(NSNotification *)notification {
+    [MBProgressHUD hideHUDForView:self.view animated:YES];
     NSMutableDictionary *locations = [notification object];
     [self promptForLocation:locations];
 }
 
+
+- (void) messageAPIDown:(NSNotification *)notification {
+    [MBProgressHUD hideHUDForView:self.view animated:YES];
+    
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Connection Error"
+                                                                   message:@"Error accessing directv guide" preferredStyle:UIAlertControllerStyleAlert];
+    UIAlertAction* accept = [UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil];
+    [alert addAction:accept];
+    [self presentViewController:alert animated:YES completion:nil];
+    
+}
+
+
 - (void) messageDownloadChannelLogos:(NSNotification *)notification {
-    _channels = [notification object];
-    _allChannels = [notification object];
+    [MBProgressHUD hideHUDForView:self.view animated:YES];
+    channels = [notification object];
+    allChannels = [notification object];
     dispatch_async(dispatch_get_main_queue(), ^{
         [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
         MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
         hud.mode = MBProgressHUDModeAnnularDeterminate;
         hud.labelText = @"Downloading channel logos";
         hud.detailsLabelText = @"for first use";
-        [Channels downloadChannelImages:_channels];
+        [dtvChannels downloadChannelImages:channels];
     });
     
 }
 
 - (void) messageUpdatedChannels:(NSNotification *)notification {
-    _channels = [notification object];
+    channels = [notification object];
     dispatch_async(dispatch_get_main_queue(), ^{
         [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
         [MBProgressHUD hideHUDForView:self.view animated:YES];
-        _sortedChannels = [Channels sortChannels:_channels sortBy:@"default"];
-        [_mainTableView reloadData];
+        sortedChannels = [dtvChannels sortChannels:channels sortBy:@"default"];
+        [mainTableView reloadData];
         [self refreshGuide:nil];
         [self setDefaultNowPlayingChannel];
     });
@@ -1326,11 +1412,11 @@
     
 }
 
-- (void) messageUpdatedClients:(NSNotification *)notification {
-    _clients = notification.object;
+- (void) messageUpdatedDevices:(NSNotification *)notification {
+    devices = notification.object;
     [MBProgressHUD hideHUDForView:self.view animated:YES];
     
-    if ([[_clients[self.ssid] allKeys] count] == 0) {
+    if ([devices count] == 0) {
         UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"No Devices Found"
                                                                        message:@"No devices found on this wifi network." preferredStyle:UIAlertControllerStyleAlert];
         UIAlertAction* accept = [UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil];
@@ -1338,11 +1424,11 @@
         [self presentViewController:alert animated:YES completion:nil];
         return;
     } else {
-        [self chooseClient:nil];
+        [self chooseDevice:nil];
     }
 }
 
-- (void) messageUpdatedClientsProgress:(NSNotification *)notification {
+- (void) messageUpdatedDevicesProgress:(NSNotification *)notification {
     [[NSOperationQueue mainQueue] addOperationWithBlock:^{
         MBProgressHUD *hud = [MBProgressHUD HUDForView:self.view];
         hud.mode = MBProgressHUDModeAnnularDeterminate;
@@ -1351,13 +1437,13 @@
 }
 
 - (void) messageNextGuideRefreshTime:(NSNotification *)notification {
-    _nextRefresh = [notification object];
+    nextRefresh = [notification object];
     
     [[NSOperationQueue mainQueue] addOperationWithBlock:^{
         NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
         [formatter setDateFormat:@"h:mm a"];
-        _overlayLabel.text = [NSString stringWithFormat:@"Next Refresh at %@",
-                              [formatter stringFromDate:_nextRefresh]];
+        overlayLabel.text = [NSString stringWithFormat:@"Next Refresh at %@",
+                              [formatter stringFromDate:nextRefresh]];
         [self toggleOverlay:@"hide"];
     }];
 }
@@ -1373,21 +1459,21 @@
 - (void) messageUpdatedGuideProgress:(NSNotification *)notification {
     [[NSOperationQueue mainQueue] addOperationWithBlock:^{
         float percent = [[notification object] floatValue];
-        CGRect frm = _overlayProgress.frame;
+        CGRect frm = overlayProgress.frame;
         frm.size.width = [[UIScreen mainScreen] bounds].size.width * percent;
         
         [UIView animateWithDuration:0.25
                          animations:^{
-                             _overlayProgress.frame = frm;
+                             overlayProgress.frame = frm;
                          }];
         
     }];
 }
 
 - (void) messageUpdatedGuidePartial:(NSNotification *)notification {
-    _guide = notification.object;
+    guide = notification.object;
     [[NSOperationQueue mainQueue] addOperationWithBlock:^{
-        [_mainTableView reloadData];
+        [mainTableView reloadData];
     }];
 }
 
@@ -1398,20 +1484,19 @@
 
 - (void) messageSetNowPlayingChannel:(NSNotification *)notification {
     NSString *chNum = notification.object;
-    NSString *chId = [Channels getChannelIdForChannelNumber:chNum channels:_channels];
-    id channel = _channels[chId];
-    [self setNowPlaying:[channel[@"chId"] stringValue] chNum:[channel[@"chNum"] stringValue]];
+    dtvChannel *channel = [dtvChannels getChannelByNumber:[chNum intValue] channels:channels];
+    [self setNowPlaying:channel];
 }
 
 #pragma mark - UI Updates
 
-- (void) displayClient {
-    if (_currentClient) {
-        _navTitle.text = [_currentClient[@"name"] capitalizedString];
+- (void) displayDevice {
+    if (currentDevice) {
+        navTitle.text = [currentDevice.name capitalizedString];
         [self refreshNowPlaying:nil scrollToPlayingChanel:YES];
     } else {
-        _navTitle.text = @"No Device Selected";
-        _navSubTitle.text = @"N/A";
+        navTitle.text = @"No Device Selected";
+        navSubTitle.text = @"N/A";
         [self clearNowPlaying];
     }
 }
@@ -1424,40 +1509,39 @@
     if (hide) {
         [UIView animateWithDuration:0.25
                          animations:^{
-                             _topContainer.alpha = 0.0;
-                             _boxTitle.text = @"";
-                             _boxDescription.text = @"";
-                             [_ratingLabel setHidden:YES];
-                             [_stars setHidden:YES];
+                             topContainer.alpha = 0.0;
+                             boxTitle.text = @"";
+                             boxDescription.text = @"";
+                             [ratingLabel setHidden:YES];
+                             [stars setHidden:YES];
                          }];
     } else {
         [UIView animateWithDuration:0.5
                          animations:^{
-                             _topContainer.alpha = 1.0;
+                             topContainer.alpha = 1.0;
                          }];
     }
 }
 
 
 - (void) setDefaultNowPlayingChannel {
-    NSString *chId = [Channels getChannelIdForChannelCallSign:@"HBOe" channels:_channels];
-    id channel = _channels[chId];
-    [self setNowPlaying:[channel[@"chId"] stringValue] chNum:[channel[@"chNum"] stringValue]];
+    dtvChannel *channel = [dtvChannels getChannelByCallSign:@"HBOe" channels:channels];
+    [self setNowPlaying:channel];
 }
 
 - (void) refreshNowPlaying:(id)sender scrollToPlayingChanel:(BOOL)scroll {
-    if (_currentClient) {
+    if (currentDevice) {
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
-            NSString *channelNum = [Commands getChannelOnClient:_currentClient];
-            NSString *channelId = [Channels getChannelIdForChannelNumber:channelNum channels:_allChannels];
+            NSString *channelNum = [dtvCommands getChannelOnDevice:currentDevice];
+            dtvChannel *channel = [dtvChannels getChannelByNumber:[channelNum intValue] channels:allChannels];
             
-            if ([channelId isEqualToString:@""]) {
+            if (channel.identifier == 0) {
                 [self clearNowPlaying];
             } else {
                 dispatch_async(dispatch_get_main_queue(), ^{
-                    [self setNowPlaying:channelId chNum:channelNum];
+                    [self setNowPlaying:channel];
                     if (scroll) {
-                        [self scrollToChannel:channelNum];
+                        [self scrollToChannel:channel];
                     }
                 });
             }
@@ -1465,45 +1549,44 @@
     }
 }
 
-- (void) setNowPlaying:(NSString *)chId chNum:(NSString *)chNum {
+- (void) setNowPlaying:(dtvChannel *) channel {
 
-    __block id channel = [_allChannels objectForKey:chId];
-    NSLog(@"Querying Now Playing");
+   // NSLog(@"Querying Now Playing");
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
-        NSDictionary *guide = [Guide getNowPlayingForChannel:channel];
-        if ([[guide allKeys] count] == 0) {
+        NSDictionary *guideData = [dtvGuide getNowPlayingForChannel:channel];
+        if ([[guideData allKeys] count] == 0) {
             return;
         }
-        NSDictionary *guideData = [guide objectForKey:[guide allKeys][0]];
-        NSDictionary *duration = [Guide getDurationForChannel:guideData];
+        dtvGuideItem *guideItem = [guide objectForKey:[guideData allKeys][0]];
+        NSDictionary *duration = [dtvGuide getDurationForChannel:guideItem];
         
         dispatch_async(dispatch_get_main_queue(), ^{
-            [self setNowPlayingForChannel:channel guideData:guideData duration:duration];
+            [self setNowPlayingForChannel:channel guideItem:guideItem duration:duration];
         });
     });
 
 }
 
-- (void) setNowPlayingForChannel:(id)channel guideData:(id)guideData duration:(NSDictionary *)duration {
+- (void) setNowPlayingForChannel:(dtvChannel *)channel guideItem:(dtvGuideItem*)guideItem duration:(NSDictionary *)duration {
     
-    _seekBar.value = [duration[@"percentage"] doubleValue];
+    seekBar.value = [duration[@"percentage"] doubleValue];
 
-    if ([_currentProgramId isEqualToString:guideData[@"programID"]]) {
+    if ([currentProgramId isEqualToString:guideItem.programID]) {
         return;
     }
     
     [self hideTopContainer:YES];
-    _currentProgramId = guideData[@"programID"];
+    currentProgramId = guideItem.programID;
     
-    if (guideData[@"hd"] && [[guideData[@"hd"] stringValue] isEqualToString:@"1"] ) {
-        [_hdLabel setHidden:NO];
+    if (guideItem.hd) {
+        [hdLabel setHidden:NO];
     } else {
-        [_hdLabel setHidden:YES];
+        [hdLabel setHidden:YES];
     }
     
-    _navSubTitle.text = [NSString stringWithFormat:@"%@ %@", channel[@"chNum"], channel[@"chName"]];
-    [self setDescriptionForProgramId:guideData[@"programID"]];
-    [self setBoxCoverForChannel:guideData[@"boxcover"]];
+    navSubTitle.text = [NSString stringWithFormat:@"%d %@", channel.number, channel.name];
+    [self setDescriptionForProgramId:guideItem.programID];
+    [self setBoxCoverForChannel:guideItem.imageUrl];
 
 }
 
@@ -1513,28 +1596,27 @@
     UIFont *font = [UIFont fontWithName:@"Helvetica-Bold" size:16];
     NSDictionary *userAttributes = @{NSFontAttributeName: font};
     const CGSize textSize = [@"★★★★★" sizeWithAttributes: userAttributes];
-    _stars.frame = CGRectMake(
+    stars.frame = CGRectMake(
                               [[UIScreen mainScreen] bounds].size.width - textSize.width - 10 ,
-                              (_topContainer.frame.size.height - 36),
+                              (topContainer.frame.size.height - 36),
                               textSize.width * rating,
                               29);
 }
 
-- (void) scrollToChannel:(NSString *)scrollToChNum {
+- (void) scrollToChannel:(dtvChannel *) channel {
     int row = -1;
     int section = -1;
 
     int sectionCounter = 0;
     int rowCounter = 0;
     
-    NSArray *sections = [[_sortedChannels allKeys] sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
+    NSArray *sections = [[sortedChannels allKeys] sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
     for (NSString *sectionKey in sections) {
-        NSMutableDictionary *sectionData = [_sortedChannels objectForKey:sectionKey];
+        NSMutableDictionary *sectionData = [sortedChannels objectForKey:sectionKey];
         NSArray *sectionChannels = [[sectionData allKeys] sortedArrayUsingSelector: @selector(compare:)];
         for (id sectionChannelKey in sectionChannels) {
-            NSString *chId = [sectionData[sectionChannelKey] stringValue];
-            NSString *chNum = [_channels[chId][@"chNum"] stringValue];
-            if ([chNum isEqualToString:scrollToChNum]) {
+            dtvChannel *thisChannel = sectionData[sectionChannelKey];
+            if (channel.number == thisChannel.number) {
                 row = rowCounter;
                 section = sectionCounter;
             }
@@ -1546,7 +1628,7 @@
     
     if (row > -1 && section > -1) {
         NSIndexPath *indexPath = [NSIndexPath indexPathForRow:row inSection:section];
-        [_mainTableView scrollToRowAtIndexPath:indexPath
+        [mainTableView scrollToRowAtIndexPath:indexPath
                              atScrollPosition:UITableViewScrollPositionTop
                                      animated:YES];
     }
@@ -1557,8 +1639,8 @@
     NSURL* programURL = [NSURL URLWithString:
                          [NSString stringWithFormat:@"https://www.directv.com/json/program/flip/%@", programID]];
     
-    _boxTitle.text = @"";
-    _boxDescription.text = @"";
+    boxTitle.text = @"";
+    boxDescription.text = @"";
     [NSURLConnection sendAsynchronousRequest:[NSURLRequest requestWithURL:programURL]
                                        queue:[NSOperationQueue mainQueue]
                            completionHandler:^(NSURLResponse *response,
@@ -1572,7 +1654,7 @@
 
                  id show = json[@"programDetail"];
                  if (show[@"description"]) {
-                     _boxDescription.text = show[@"description"];
+                     boxDescription.text = show[@"description"];
                  }
                  NSString *title = show[@"title"];
                  
@@ -1586,20 +1668,20 @@
                  }
                  
                  if (show[@"rating"]) {
-                     _ratingLabel.text = show[@"rating"];
-                     [_ratingLabel setHidden:NO];
+                     ratingLabel.text = show[@"rating"];
+                     [ratingLabel setHidden:NO];
                  } else {
-                     [_ratingLabel setHidden:YES];
+                     [ratingLabel setHidden:YES];
                  }
                  
                  if (show[@"starRatingNum"]) {
                      [self setStarRating:[show[@"starRatingNum"] doubleValue]];
-                     [_stars setHidden:NO];
+                     [stars setHidden:NO];
                  } else {
-                     [_stars setHidden:YES];
+                     [stars setHidden:YES];
                  }
                  
-                 _boxTitle.text = title;
+                 boxTitle.text = title;
                  
              }
          }
@@ -1618,7 +1700,7 @@
      {
          if (data.length > 0 && connectionError == nil) {
              UIImage *image = [UIImage imageWithData:data];
-             [_boxCover setImage:image];
+             [boxCover setImage:image];
          }
          [self hideTopContainer:NO];
      }];
@@ -1626,9 +1708,9 @@
 }
 
 - (void) clearNowPlaying {
-    _boxCover.image = [UIImage new];
-    _boxTitle.text = @"";
-    _boxDescription.text = @"";
+    boxCover.image = [UIImage new];
+    boxTitle.text = @"";
+    boxDescription.text = @"";
 }
 
 #pragma mark - Guide Updates
@@ -1636,45 +1718,44 @@
 - (void) refreshGuideForTime:(NSDate *)time {
 
     [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
-    CGRect frm = _overlayProgress.frame;
+    CGRect frm = overlayProgress.frame;
     frm.size.width = 0;
-    _overlayProgress.frame = frm;
-    _overlayProgress.hidden = NO;
+    overlayProgress.frame = frm;
+    overlayProgress.hidden = NO;
     [self toggleOverlay:@"show"];
     
 
-    NSDate *dt = [Guide getHalfHourIncrement:time];
+    NSDate *dt = [dtvGuide getHalfHourIncrement:time];
     NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
     [formatter setDateFormat:@"MMM, d h:mm a"];
-    _overlayLabel.text = [NSString stringWithFormat:@"Loading guide for %@",
+    overlayLabel.text = [NSString stringWithFormat:@"Loading guide for %@",
                           [formatter stringFromDate:dt]];
 
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
-        [Guide refreshGuide:_channels sorted:_sortedChannels forTime:dt];
+        [dtvGuide refreshGuide:channels sorted:sortedChannels forTime:dt];
     });
 }
 
-- (void) sendGuideDataToUI:(NSMutableDictionary *) guide isFuture:(BOOL)future {
-    _guide = guide;
+- (void) sendGuideDataToUI:(NSMutableDictionary *) newGuide isFuture:(BOOL)future {
+    guide = newGuide;
     guideIsRefreshing = NO;
     
-    _channels = [Channels addChannelCategoriesFromGuide:_guide channels:_channels];
-    _sortedChannels = [Channels sortChannels:_channels sortBy:@"default"];
+    sortedChannels = [dtvChannels sortChannels:channels sortBy:@"default"];
     
     [[NSOperationQueue mainQueue] addOperationWithBlock:^{
         
         [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
         if (future) {
-            CGRect frm = _overlayProgress.frame;
+            CGRect frm = overlayProgress.frame;
             frm.size.width = [[UIScreen mainScreen] bounds].size.width;
-            _overlayProgress.frame = frm;
-            _overlayProgress.hidden = NO;
-            _overlayLabel.text = [_overlayLabel.text stringByReplacingOccurrencesOfString:@"Loading"
+            overlayProgress.frame = frm;
+            overlayProgress.hidden = NO;
+            overlayLabel.text = [overlayLabel.text stringByReplacingOccurrencesOfString:@"Loading"
                                                                                withString:@"Showing future"];
         } else {
-            _overlayProgress.hidden = YES;
+            overlayProgress.hidden = YES;
         }
-        [_mainTableView reloadData];
+        [mainTableView reloadData];
     }];
 }
 
@@ -1682,21 +1763,21 @@
     NSDateFormatter *dateFormat = [[NSDateFormatter alloc] init];
     [dateFormat setDateStyle:NSDateFormatterFullStyle];
     [dateFormat setTimeStyle:NSDateFormatterFullStyle];
-    _guideTime.text = [dateFormat stringFromDate:sender.date];
+    guideTime.text = [dateFormat stringFromDate:sender.date];
 }
 
 - (void) toggleOverlay:(NSString *)action {
     if ([action isEqualToString:@"show"]) {
         [UIView animateWithDuration:0.5
                          animations:^{
-                             _overlay.alpha = 0.8;
+                             overlay.alpha = 0.8;
                          }];
     } else {
         dispatch_time_t delay = dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC * 3);
         dispatch_after(delay, dispatch_get_main_queue(), ^(void){
             [UIView animateWithDuration:0.5
                              animations:^{
-                                 _overlay.alpha = 0.0;
+                                 overlay.alpha = 0.0;
                              }];
         });
     }

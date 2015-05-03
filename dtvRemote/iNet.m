@@ -8,6 +8,8 @@
 
 #import "iNet.h"
 #include "TargetConditionals.h"
+#import "Reachability.h"
+
 @import SystemConfiguration.CaptiveNetwork;
 
 @implementation iNet
@@ -63,6 +65,12 @@
     
 }
 
++ (BOOL) isOnWifi {
+    Reachability *reachability = [Reachability reachabilityForInternetConnection];
+    [reachability startNotifier];
+    NetworkStatus status = [reachability currentReachabilityStatus];
+    return (status == ReachableViaWiFi);
+}
 
 
 @end
