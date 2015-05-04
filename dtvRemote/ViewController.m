@@ -86,6 +86,7 @@
     id SideBarTableViewData;
     
     UIColor *textColor;
+    UIColor *lightTextColor;
     UIColor *backgroundColor;
     UIColor *tableBackgroundColor;
     UIColor *seperatorColor;
@@ -248,6 +249,8 @@
 - (void) createViews {
     
     textColor = [UIColor colorWithRed:193/255.0f green:193/255.0f blue:193/255.0f alpha:1.0f];
+    lightTextColor = [UIColor colorWithRed:125/255.0f green:125/255.0f blue:125/255.0f alpha:1.0f];
+    
     backgroundColor = [UIColor colorWithRed:30/255.0f green:30/255.0f blue:30/255.0f alpha:1.0f];
     boxBackgroundColor = [UIColor colorWithRed:28/255.0f green:28/255.0f blue:28/255.0f alpha:1.0f];
     navBGColor = [UIColor colorWithRed:23/255.0f green:23/255.0f blue:23/255.0f alpha:1.0f];
@@ -354,10 +357,10 @@
     
     navSubTitle = [[UILabel alloc] init];
     navSubTitle.translatesAutoresizingMaskIntoConstraints = YES;
-    navSubTitle.font = [UIFont fontWithName:@"Helvetica" size:15];
-    [navSubTitle setTextColor: textColor];
+    navSubTitle.font = [UIFont fontWithName:@"Helvetica" size:14];
+    [navSubTitle setTextColor: lightTextColor];
     navSubTitle.textAlignment = NSTextAlignmentCenter;
-    navSubTitle.frame = CGRectMake(0, 44, [[UIScreen mainScreen] bounds].size.width, 20);
+    navSubTitle.frame = CGRectMake(0, 42, [[UIScreen mainScreen] bounds].size.width, 20);
     [navSubTitle setFont:[UIFont systemFontOfSize:14]];
     
     [navbar addSubview:navTitle];
@@ -377,10 +380,17 @@
     navItem = [UINavigationItem alloc];
     navItem.title = @"";
     
-    UIBarButtonItem *leftButton = [[UIBarButtonItem alloc] initWithTitle:@"Devices" style:UIBarButtonItemStylePlain target:self action:@selector(toggleEditMode:)];
+    UIBarButtonItem *leftButton = [[UIBarButtonItem alloc]
+                                   initWithImage:[UIImage imageNamed:@"images.bundle/list"]
+                                   style:UIBarButtonItemStylePlain target:self action:@selector(showCommands:)];
+    
     navItem.leftBarButtonItem = leftButton;
     
-    rightButton = [[UIBarButtonItem alloc] initWithTitle:@"Edit" style:UIBarButtonItemStylePlain target:self action:@selector(toggleEditMode:)];
+    
+    rightButton = [[UIBarButtonItem alloc]
+                   initWithImage:[UIImage imageNamed:@"images.bundle/edit"]
+                   style:UIBarButtonItemStylePlain target:self action:@selector(toggleEditMode:)];
+                   
     navItem.rightBarButtonItem = rightButton;
     
     [navbar pushNavigationItem:navItem animated:false];
@@ -441,15 +451,16 @@
                                       initWithImage:[UIImage imageNamed:@"images.bundle/forward.png"]
                                       style:UIBarButtonItemStylePlain target:self action:@selector(forward:) ];
     
-    
+    /*
     UIBarButtonItem *recButton = [[UIBarButtonItem alloc]
                                      initWithImage:[UIImage imageNamed:@"images.bundle/rec"]
                                      style:UIBarButtonItemStylePlain target:self action:@selector(rewind:)];
     
-    recButton.tintColor = [UIColor colorWithRed:0.722 green:0.094 blue:0.094 alpha:0.5];
     
+    recButton.tintColor = [UIColor colorWithRed:0.722 green:0.094 blue:0.094 alpha:0.5];
+    */
     NSArray *buttons = [NSArray arrayWithObjects:
-                        flex, rewindButton, flex, flex, recButton, flex, playButton, flex, flex, forwardButton, flex, nil];
+                        flex, rewindButton, flex, flex, playButton, flex, flex, forwardButton, flex, nil];
     [playBar setItems: buttons animated:NO];
     
     
@@ -625,16 +636,14 @@
     
     UIBarButtonItem *flex = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:self action:nil ];
     
-    /*
+    
     UIBarButtonItem *clock = [[UIBarButtonItem alloc]
                                      initWithImage:[UIImage imageNamed:@"images.bundle/clock"]
                                      style:UIBarButtonItemStylePlain target:self action:@selector(selectGuideTime:) ];
-     */
-    
-     UIBarButtonItem *clock = [[UITabBarItem alloc] initWithTabBarSystemItem:UITabBarSystemItemDownloads tag:0];
+     
     
     UIBarButtonItem *numberPad = [[UIBarButtonItem alloc]
-                                  initWithImage:[UIImage imageNamed:@"images.bundle/numberpad.png"]
+                                  initWithImage:[UIImage imageNamed:@"images.bundle/numberpad"]
                                   style:UIBarButtonItemStylePlain target:self action:@selector(showNumberPad:) ];
     
     UIBarButtonItem *refresh = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRefresh
@@ -642,20 +651,20 @@
                                                                              action:@selector(refreshGuide:)];
     
     
-    UIBarButtonItem *commands = [[UIBarButtonItem alloc]
-                                 initWithImage:[UIImage imageNamed:@"images.bundle/commands.png"]
+    UIBarButtonItem *settings = [[UIBarButtonItem alloc]
+                                 initWithImage:[UIImage imageNamed:@"images.bundle/more"]
                                  style:UIBarButtonItemStylePlain target:self action:@selector(showCommands:) ];
     
     UIBarButtonItem *sort = [[UIBarButtonItem alloc]
-                             initWithImage:[UIImage imageNamed:@"images.bundle/sort.png"]
+                             initWithImage:[UIImage imageNamed:@"images.bundle/sort"]
                              style:UIBarButtonItemStylePlain target:self action:@selector(sortChannels:) ];
     
     
-    NSArray *buttons = [NSArray arrayWithObjects:  commands, flex , clock, flex, numberPad, flex, sort, flex, refresh, nil];
+    NSArray *buttons = [NSArray arrayWithObjects: clock, flex , numberPad, flex, sort, flex, settings, nil];
     [toolBar setItems:buttons animated:NO];
     
     [centerView addSubview:toolBar];
-    
+
     
     guideDatePicker = [[UIDatePicker alloc] init];
     guideTime = [[UITextField alloc] initWithFrame:CGRectMake(0,0,1,1)];
@@ -681,15 +690,21 @@
     
     UIToolbar *commandTextDone = [[UIToolbar alloc] initWithFrame:CGRectMake(0, 0, [[UIScreen mainScreen] bounds].size.width, 44)];
     [commandTextDone setBarStyle:UIBarStyleBlackTranslucent];
-    UIBarButtonItem *b1 = [[UIBarButtonItem alloc] initWithTitle:@"Last" style:UIBarButtonItemStylePlain
-                                                             target:nil action:@selector(closeCommands:)];
-    UIBarButtonItem *b2 = [[UIBarButtonItem alloc] initWithTitle:@"Last" style:UIBarButtonItemStylePlain
-                                                          target:nil action:@selector(closeCommands:)];
-    
-    UIBarButtonItem *done3 = [[UIBarButtonItem alloc] initWithTitle:@"Done" style:UIBarButtonItemStyleDone
+    UIBarButtonItem *b1 = [[UIBarButtonItem alloc] initWithTitle:@"Rec" style:UIBarButtonItemStylePlain
+                                                             target:nil action:@selector(sendCommand:)];
+    UIBarButtonItem *b2 = [[UIBarButtonItem alloc] initWithTitle:@"Prev" style:UIBarButtonItemStylePlain
+                                                          target:nil action:@selector(sendCommand:)];
+    UIBarButtonItem *b3 = [[UIBarButtonItem alloc] initWithTitle:@"Menu" style:UIBarButtonItemStylePlain
+                                                          target:nil action:@selector(sendCommand:)];
+    UIBarButtonItem *b4 = [[UIBarButtonItem alloc] initWithTitle:@"Guide" style:UIBarButtonItemStylePlain
+                                                          target:nil action:@selector(sendCommand:)];
+    UIBarButtonItem *b5 = [[UIBarButtonItem alloc] initWithTitle:@"List" style:UIBarButtonItemStylePlain
+                                                          target:nil action:@selector(sendCommand:)];
+    UIBarButtonItem *done3 = [[UIBarButtonItem alloc] initWithTitle:@"Close" style:UIBarButtonItemStyleDone
                                                             target:nil action:@selector(closeCommands:)];
+
     
-    [commandTextDone setItems: [NSArray arrayWithObjects:b2, flex, b1, flex, done3, nil]];
+    [commandTextDone setItems: [NSArray arrayWithObjects:b1, flex, b2, flex, b3, flex, b4, flex, b5, flex, done3, nil]];
     [commandText setInputAccessoryView:commandTextDone];
     commandText.keyboardType = UIKeyboardTypeNumberPad;
     [commandText setHidden:YES];
@@ -1167,7 +1182,7 @@
         //Going back to regular mode
         [dtvChannels saveBlockedChannels:blockedChannels];
         isEditing = NO;
-        rightButton.title = @"Edit";
+        rightButton.image = [UIImage imageNamed:@"images.bundle/edit"];
         channels = [dtvChannels load:NO];
         blockedChannels = [[NSMutableArray alloc] init];
         sortedChannels = [dtvChannels sortChannels:channels sortBy:@"default"];
@@ -1176,7 +1191,7 @@
     } else {
         //Going into edit mode
         isEditing = YES;
-        rightButton.title = @"Done";
+        rightButton.image = [UIImage imageNamed:@"images.bundle/done"];
         channels = [dtvChannels load:YES];
         blockedChannels = [dtvChannels loadBlockedChannels:channels];
         sortedChannels = [dtvChannels sortChannels:channels sortBy:@"default"];
@@ -1252,6 +1267,28 @@
 - (IBAction) showCommands:(id)sender {
      [self.sideBar show];
 }
+
+- (IBAction) sendCommand:(id)sender {
+    NSString *buttonTitle = [sender title];
+    
+    if([buttonTitle isEqualToString:@"Rec"]) {
+        [dtvCommands sendCommand:@"record" device:currentDevice];
+    }
+    else if([buttonTitle isEqualToString:@"Guide"]) {
+        [dtvCommands sendCommand:@"guide" device:currentDevice];
+    }
+    else if([buttonTitle isEqualToString:@"List"]) {
+        [dtvCommands sendCommand:@"list" device:currentDevice];
+    }
+    else if([buttonTitle isEqualToString:@"Menu"]) {
+        [dtvCommands sendCommand:@"menu" device:currentDevice];
+    }
+    else if([buttonTitle isEqualToString:@"Prev"]) {
+        [dtvCommands sendCommand:@"prev" device:currentDevice];
+    }
+
+}
+
 
 - (void)panSideBar:(UIPanGestureRecognizer *)recognizer
 {
