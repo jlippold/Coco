@@ -29,7 +29,7 @@
     }
     
     //Download data in channel chunks
-    NSUInteger chunkSize = 200;
+    NSUInteger chunkSize = 75;
     __block int completed = 0;
     __block int total = ceil((double)[[channels allKeys] count]/chunkSize);
     __block NSMutableDictionary *guide = [[NSMutableDictionary alloc] init];
@@ -58,6 +58,9 @@
         completed++;
         
         if (completed >= total) {
+            [[NSNotificationCenter defaultCenter] postNotificationName:@"messageUpdatedGuideProgress"
+                                                                object:[NSNumber numberWithDouble:1.0]];
+            
             [[NSNotificationCenter defaultCenter] postNotificationName:@"messageUpdatedGuide" object:guide];
             if (!refreshingFutureDate) {
                  [[NSNotificationCenter defaultCenter] postNotificationName:@"messageUpdatedGuide" object:guide];

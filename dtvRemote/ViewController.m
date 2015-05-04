@@ -94,6 +94,7 @@
     UIColor *boxBackgroundColor;
     UIColor *navBGColor;
     UIColor *tint;
+    UIColor *green;
     Reachability *reach;
     
     
@@ -257,6 +258,7 @@
     navBGColor = [UIColor colorWithRed:23/255.0f green:23/255.0f blue:23/255.0f alpha:1.0f];
     tint = [UIColor colorWithRed:30/255.0f green:147/255.0f blue:212/255.0f alpha:1.0f];
     seperatorColor = [UIColor colorWithRed:40/255.0f green:40/255.0f blue:40/255.0f alpha:1.0f];
+    green = [UIColor colorWithRed:30/255.0f green:104/255.0f blue:0/255.0f alpha:1.0f];
     
     [self.view setBackgroundColor:backgroundColor];
 
@@ -602,7 +604,6 @@
 - (void) createToolbar {
     
     double overlayHeight = 16;
-    double progressHeight = 2;
     
     
     overlay = [[UIView alloc] init];
@@ -613,14 +614,10 @@
                                [[UIScreen mainScreen] bounds].size.width, overlayHeight);
     
     overlayProgress = [[UIView alloc] init];
-    overlayProgress.frame = CGRectMake(0, overlayHeight - progressHeight,
-                                        0, progressHeight);
-    
+    overlayProgress.frame = [[UIApplication sharedApplication] statusBarFrame];
     overlayProgress.opaque = YES;
     overlayProgress.alpha = 0.8;
-    overlayProgress.backgroundColor = [UIColor redColor];
-    
-
+    overlayProgress.backgroundColor = green;
     
     overlayLabel = [[UILabel alloc] init];
     overlayLabel.textColor = textColor;
@@ -629,7 +626,7 @@
     overlayLabel.font = [UIFont fontWithName:@"Helvetica" size:12];
     overlayLabel.textAlignment = NSTextAlignmentCenter;
 
-    [overlay addSubview:overlayProgress];
+    [self.view addSubview:overlayProgress];
     [overlay addSubview:overlayLabel];
     [centerView addSubview:overlay];
     
@@ -1437,8 +1434,12 @@
         [UIView animateWithDuration:0.25
                          animations:^{
                              overlayProgress.frame = frm;
+                         }
+                         completion:^(BOOL finished) {
+                             if (finished && percent == 1) {
+                                 overlayProgress.hidden = YES;
+                             }
                          }];
-        
     }];
 }
 
@@ -1752,8 +1753,6 @@
             overlayProgress.hidden = NO;
             overlayLabel.text = [overlayLabel.text stringByReplacingOccurrencesOfString:@"Loading"
                                                                                withString:@"Showing future"];
-        } else {
-            overlayProgress.hidden = YES;
         }
         [mainTableView reloadData];
     }];
