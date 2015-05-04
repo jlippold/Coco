@@ -184,6 +184,8 @@
                                             userInfo:nil
                                              repeats:YES];
     
+    [UIApplication sharedApplication].statusBarHidden = NO;
+    [UIApplication sharedApplication].statusBarStyle = UIStatusBarStyleLightContent;
 
 }
 
@@ -193,6 +195,10 @@
     if ([[NSDate date] timeIntervalSinceDate:nextRefresh] >= 0) {
         [self refreshGuide:nil];
     }
+}
+
+- (BOOL)prefersStatusBarHidden {
+    return YES;
 }
 
 - (void) registerForNotifications {
@@ -603,15 +609,12 @@
 
 - (void) createToolbar {
     
-    double overlayHeight = 16;
-    
-    
+
     overlay = [[UIView alloc] init];
     overlay.opaque = YES;
     overlay.alpha = 0;
-    overlay.backgroundColor = [UIColor blackColor];
-    overlay.frame = CGRectMake(0, [[UIScreen mainScreen] bounds].size.height - (toolbarHeight + overlayHeight),
-                               [[UIScreen mainScreen] bounds].size.width, overlayHeight);
+    overlay.backgroundColor = [UIColor clearColor];
+    overlay.frame = [[UIApplication sharedApplication] statusBarFrame];
     
     overlayProgress = [[UIView alloc] init];
     overlayProgress.frame = [[UIApplication sharedApplication] statusBarFrame];
@@ -620,15 +623,15 @@
     overlayProgress.backgroundColor = green;
     
     overlayLabel = [[UILabel alloc] init];
-    overlayLabel.textColor = textColor;
-    overlayLabel.frame = CGRectMake(0, 0,[[UIScreen mainScreen] bounds].size.width, overlayHeight);
+    overlayLabel.textColor = [UIColor whiteColor];
+    overlayLabel.frame = [[UIApplication sharedApplication] statusBarFrame];
     overlayLabel.text = @"";
     overlayLabel.font = [UIFont fontWithName:@"Helvetica" size:12];
     overlayLabel.textAlignment = NSTextAlignmentCenter;
 
     [self.view addSubview:overlayProgress];
     [overlay addSubview:overlayLabel];
-    [centerView addSubview:overlay];
+    [self.view addSubview:overlay];
     
     toolBar = [[UIToolbar alloc] init];
     toolBar.clipsToBounds = YES;
@@ -1384,7 +1387,6 @@
     devices = notification.object;
     
     if ([devices count] == 0) {
-        [MBProgressHUD hideHUDForView:self.view animated:YES];
         UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"No Devices Found"
                                                                        message:@"No devices found on this wifi network." preferredStyle:UIAlertControllerStyleAlert];
         UIAlertAction* accept = [UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil];
@@ -1393,15 +1395,30 @@
         return;
     } else {
         [sideBarTable reloadData];
-        [MBProgressHUD hideHUDForView:self.view animated:YES];
     }
 }
 
 - (void) messageUpdatedDevicesProgress:(NSNotification *)notification {
     [[NSOperationQueue mainQueue] addOperationWithBlock:^{
-        MBProgressHUD *hud = [MBProgressHUD HUDForView:self.view];
-        hud.mode = MBProgressHUDModeAnnularDeterminate;
-        hud.progress = [[notification object] floatValue];
+        
+        float percent = [[notification object] floatValue];
+        CGRect frm = overlayProgress.frame;
+        frm.size.width = [[UIScreen mainScreen] bounds].size.width * percent;
+        overlayProgress.hidden = NO;
+
+        [UIView animateWithDuration:0.25
+                         animations:^{
+                             overlayProgress.frame = frm;
+                         }
+                         completion:^(BOOL finished) {
+                             if (finished && percent == 1) {
+                                 overlayProgress.hidden = YES;
+                                 overlayLabel.text = @"Scanning completed!";
+                                 [self toggleOverlay:@"hide"];
+                                 [self.sideBar show];
+                             }
+                         }];
+        
     }];
 }
 
@@ -1498,9 +1515,11 @@
 
 - (IBAction)refreshDevices:(id)sender {
     [refreshControl endRefreshing];
-    MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
-    hud.mode = MBProgressHUDModeAnnularDeterminate;
-    hud.labelText = @"Scanning wifi network for devices...";
+    [self.sideBar dismiss];
+    [self toggleOverlay:@"show"];
+    overlayLabel.text = @"Scanning wifi network for devices...";
+    [UIApplication sharedApplication].statusBarHidden = YES;
+    
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
         [dtvDevices refreshDevicesForNetworks];
     });
@@ -1770,6 +1789,11 @@
         [UIView animateWithDuration:0.5
                          animations:^{
                              overlay.alpha = 0.8;
+                         }
+                         completion:^(BOOL finished) {
+                             if (finished) {
+                                 [UIApplication sharedApplication].statusBarHidden = YES;
+                             }
                          }];
     } else {
         dispatch_time_t delay = dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC * 3);
@@ -1777,6 +1801,11 @@
             [UIView animateWithDuration:0.5
                              animations:^{
                                  overlay.alpha = 0.0;
+                             }
+                             completion:^(BOOL finished) {
+                                 if (finished) {
+                                     [UIApplication sharedApplication].statusBarHidden = NO;
+                                 }
                              }];
         });
     }

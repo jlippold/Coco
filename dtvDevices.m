@@ -96,6 +96,8 @@
                  if (completed == total){
                      [self saveNetworksToDisk:networks];
                      [self sendMessageOfUpdatedDevices:networks[ssid]];
+                     [[NSNotificationCenter defaultCenter] postNotificationName:@"messageUpdatedDevicesProgress"
+                                                                         object:[NSNumber numberWithDouble:1]];
                  } else {
                      long double progress =(completed*1.0/total*1.0);
                      NSNumber *nsprogress = [NSNumber numberWithDouble:progress];
