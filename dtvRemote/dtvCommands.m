@@ -92,15 +92,8 @@
 
 + (BOOL) sendCommand:(NSString *)command device:(dtvDevice *)device {
 
-    if (device) {
+    if (!device) {
         NSLog(@"You must choose a device, llamah");
-        return NO;
-    }
-    
-    NSArray *commands = [self getArrayOfCommands];
-
-    if (![commands containsObject:command]) {
-        NSLog(@"Unknown Command: %@", command);
         return NO;
     }
     

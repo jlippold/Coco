@@ -47,6 +47,11 @@
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageUpdatedStatusOfDevices:)
                                                  name:@"messageUpdatedStatusOfDevices" object:nil];
     
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageUpdatedCurrentDevice:)
+                                                 name:@"messageUpdatedCurrentDevice" object:nil];
+    
+    
+    
     return self;
 }
 
@@ -105,9 +110,14 @@
     if (cell == nil) {
         cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"CellPicker"];
     }
-
+    
+    [cell setAccessoryType:UITableViewCellAccessoryNone];
+    cell.userInteractionEnabled = YES;
+    cell.detailTextLabel.enabled = YES;
+    
     if (indexPath.section == 0) {
-        NSArray *keys = [devices allKeys];
+        NSArray *keys = [[devices allKeys] sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
+        
         NSString *key = [keys objectAtIndex:indexPath.row];
         dtvDevice *thisDevice = devices[key];
         
@@ -143,9 +153,32 @@
     return 2;
 }
 
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+    
+    [tableView deselectRowAtIndexPath:indexPath animated:YES];
+    
+    if (indexPath.section == 0) {
+        NSArray *keys = [[devices allKeys] sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
+        NSString *deviceId = keys[indexPath.row];
+        dtvDevice *device = [devices objectForKey:deviceId];
+        if (device.online) {
+            [dtvDevices setCurrentDevice:device];
+        }
+        
+    }
+    if (indexPath.section == 1) {
+        dtvCommand *c = [commands objectAtIndex:indexPath.row];
+        [dtvCommands sendCommand:c.action device:currentDevice];
+    }
+    
+    
+}
+
 - (void) messageUpdatedStatusOfDevices:(NSNotification *)notification {
     devices = notification.object;
 }
-
+- (void) messageUpdatedCurrentDevice:(NSNotification *)notification {
+    currentDevice = notification.object;
+}
 
 @end

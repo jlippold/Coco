@@ -15,6 +15,7 @@
 + (void) checkStatusOfDevices:(NSMutableDictionary *) devices;
 
 + (dtvDevice *) getCurrentDevice;
++ (void) setCurrentDevice:(dtvDevice *) device;
 + (NSMutableDictionary *) getSavedDevicesForActiveNetwork;
 
 + (void) saveCurrentDeviceId:(NSString *) deviceId;

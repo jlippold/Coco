@@ -203,6 +203,12 @@
 }
 
 
++ (void) setCurrentDevice:(dtvDevice *) device {
+    [self saveCurrentDeviceId:device.identifier];
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"messageUpdatedCurrentDevice"
+                                                        object:device];
+}
+
 + (dtvDevice *) getCurrentDevice {
     NSMutableDictionary *devices = [self getSavedDevicesForActiveNetwork];
     NSString *deviceId = [self getLastUsedDeviceById];

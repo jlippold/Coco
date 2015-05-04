@@ -235,7 +235,9 @@
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageRefreshSideBarDevices:)
                                                  name:@"messageRefreshSideBarDevices" object:nil];
-    
+
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageUpdatedCurrentDevice:)
+                                                 name:@"messageUpdatedCurrentDevice" object:nil];
     
     
 }
@@ -623,9 +625,13 @@
     
     UIBarButtonItem *flex = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:self action:nil ];
     
+    /*
     UIBarButtonItem *clock = [[UIBarButtonItem alloc]
                                      initWithImage:[UIImage imageNamed:@"images.bundle/clock"]
                                      style:UIBarButtonItemStylePlain target:self action:@selector(selectGuideTime:) ];
+     */
+    
+     UIBarButtonItem *clock = [[UITabBarItem alloc] initWithTabBarSystemItem:UITabBarSystemItemDownloads tag:0];
     
     UIBarButtonItem *numberPad = [[UIBarButtonItem alloc]
                                   initWithImage:[UIImage imageNamed:@"images.bundle/numberpad.png"]
@@ -634,6 +640,7 @@
     UIBarButtonItem *refresh = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRefresh
                                                                              target:self
                                                                              action:@selector(refreshGuide:)];
+    
     
     UIBarButtonItem *commands = [[UIBarButtonItem alloc]
                                  initWithImage:[UIImage imageNamed:@"images.bundle/commands.png"]
@@ -1266,7 +1273,7 @@
 
 
 - (void)sideBar:(CDRTranslucentSideBar *)sideBar didAppear:(BOOL)animated {
-    NSLog(@"didAppear");
+    
 }
 - (void)sideBar:(CDRTranslucentSideBar *)sideBar willAppear:(BOOL)animated {
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
@@ -1274,10 +1281,10 @@
     });
 }
 - (void)sideBar:(CDRTranslucentSideBar *)sideBar didDisappear:(BOOL)animated {
-     NSLog(@"didDisappear");
+
 }
 - (void)sideBar:(CDRTranslucentSideBar *)sideBar willDisappear:(BOOL)animated {
-     NSLog(@"willDisappear");
+
 }
 
 
@@ -1419,6 +1426,20 @@
         [sideBarTable reloadData];
     }];
 }
+
+- (void) messageUpdatedCurrentDevice:(NSNotification *)notification {
+    currentDevice = notification.object;
+    [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+        [self clearNowPlaying];
+        [self displayDevice];
+        [sideBarTable reloadData];
+        dispatch_time_t delay = dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC * 0.3);
+        dispatch_after(delay, dispatch_get_main_queue(), ^(void){
+            [self.sideBar dismiss];
+        });
+    }];
+}
+
 
 
 
