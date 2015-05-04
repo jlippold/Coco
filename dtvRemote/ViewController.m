@@ -54,6 +54,7 @@
     UILabel *overlayLabel;
     UIView *overlayProgress;
     UIRefreshControl *refreshControl;
+    UIRefreshControl *mainRefreshControl;
 
     IBOutlet UIBarButtonItem *playButton;
 
@@ -589,6 +590,10 @@
     mainTableView.separatorColor = seperatorColor;
     mainTableView.backgroundColor = backgroundColor;
     
+     mainRefreshControl = [[UIRefreshControl alloc] init];
+    [mainRefreshControl addTarget:self action:@selector(refreshGuide:) forControlEvents:UIControlEventValueChanged];
+    [mainTableView addSubview:mainRefreshControl];
+    
     [centerView addSubview:mainTableView];
     
 }
@@ -645,10 +650,6 @@
     UIBarButtonItem *numberPad = [[UIBarButtonItem alloc]
                                   initWithImage:[UIImage imageNamed:@"images.bundle/numberpad"]
                                   style:UIBarButtonItemStylePlain target:self action:@selector(showNumberPad:) ];
-    
-    UIBarButtonItem *refresh = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRefresh
-                                                                             target:self
-                                                                             action:@selector(refreshGuide:)];
     
     
     UIBarButtonItem *settings = [[UIBarButtonItem alloc]
@@ -1115,6 +1116,7 @@
 }
 
 - (IBAction) refreshGuide:(id)sender {
+    [mainRefreshControl endRefreshing];
     if (!guideIsRefreshing) {
         guideIsRefreshing = YES;
         [self refreshGuideForTime:[NSDate date]];
