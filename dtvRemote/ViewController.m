@@ -359,6 +359,8 @@
     [sideBarView addSubview:bar];
     
     self.sideBar = [[CDRTranslucentSideBar alloc] init];
+
+    
     self.sideBar.delegate = self;
     self.sideBar.tag = 55;
     self.sideBar.sideBarWidth = [[UIScreen mainScreen] bounds].size.width * 0.75;

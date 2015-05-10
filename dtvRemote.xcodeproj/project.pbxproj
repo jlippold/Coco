@@ -7,14 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		850760371AFF94880061DFEA /* dtvDevice.m in Sources */ = {isa = PBXBuildFile; fileRef = 850760341AFF94880061DFEA /* dtvDevice.m */; };
+		850760381AFF94880061DFEA /* dtvDevices.m in Sources */ = {isa = PBXBuildFile; fileRef = 850760361AFF94880061DFEA /* dtvDevices.m */; };
 		8523C75C1AD4B58D00F395B2 /* SideBarTableView.m in Sources */ = {isa = PBXBuildFile; fileRef = 8523C75B1AD4B58D00F395B2 /* SideBarTableView.m */; };
 		85428D5E1AA5368600134A23 /* dtvGuide.m in Sources */ = {isa = PBXBuildFile; fileRef = 85428D5D1AA5368600134A23 /* dtvGuide.m */; };
 		85428D611AA5379700134A23 /* dtvCommands.m in Sources */ = {isa = PBXBuildFile; fileRef = 85428D601AA5379700134A23 /* dtvCommands.m */; };
 		855E08091AF2D2AF0072B8AA /* dtvCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = 855E08081AF2D2AF0072B8AA /* dtvCommand.m */; };
 		855E080C1AF2DD780072B8AA /* dtvChannel.m in Sources */ = {isa = PBXBuildFile; fileRef = 855E080B1AF2DD780072B8AA /* dtvChannel.m */; };
 		855E080F1AF3C2A00072B8AA /* dtvGuideItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 855E080E1AF3C2A00072B8AA /* dtvGuideItem.m */; };
-		855E08121AF446560072B8AA /* dtvDevices.m in Sources */ = {isa = PBXBuildFile; fileRef = 855E08111AF446560072B8AA /* dtvDevices.m */; };
-		855E08151AF446630072B8AA /* dtvDevice.m in Sources */ = {isa = PBXBuildFile; fileRef = 855E08141AF446630072B8AA /* dtvDevice.m */; };
 		8564F7DC1AD06F520090F308 /* MBProgressHUD.m in Sources */ = {isa = PBXBuildFile; fileRef = 8564F7DB1AD06F520090F308 /* MBProgressHUD.m */; };
 		857CAAFC1AF51C9C004F8058 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 857CAAFB1AF51C9C004F8058 /* SystemConfiguration.framework */; };
 		857CAAFF1AF51E7F004F8058 /* Reachability.m in Sources */ = {isa = PBXBuildFile; fileRef = 857CAAFE1AF51E7F004F8058 /* Reachability.m */; };
@@ -34,6 +34,10 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		850760331AFF94880061DFEA /* dtvDevice.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = dtvDevice.h; sourceTree = "<group>"; };
+		850760341AFF94880061DFEA /* dtvDevice.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = dtvDevice.m; sourceTree = "<group>"; };
+		850760351AFF94880061DFEA /* dtvDevices.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = dtvDevices.h; sourceTree = "<group>"; };
+		850760361AFF94880061DFEA /* dtvDevices.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = dtvDevices.m; sourceTree = "<group>"; };
 		8523C75A1AD4B58D00F395B2 /* SideBarTableView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SideBarTableView.h; sourceTree = "<group>"; };
 		8523C75B1AD4B58D00F395B2 /* SideBarTableView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SideBarTableView.m; sourceTree = "<group>"; };
 		85428D5C1AA5368600134A23 /* dtvGuide.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = dtvGuide.h; sourceTree = "<group>"; };
@@ -46,10 +50,6 @@
 		855E080B1AF2DD780072B8AA /* dtvChannel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = dtvChannel.m; sourceTree = "<group>"; };
 		855E080D1AF3C2A00072B8AA /* dtvGuideItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = dtvGuideItem.h; sourceTree = "<group>"; };
 		855E080E1AF3C2A00072B8AA /* dtvGuideItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = dtvGuideItem.m; sourceTree = "<group>"; };
-		855E08101AF446560072B8AA /* dtvDevices.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = dtvDevices.h; path = ../dtvDevices.h; sourceTree = "<group>"; };
-		855E08111AF446560072B8AA /* dtvDevices.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = dtvDevices.m; path = ../dtvDevices.m; sourceTree = "<group>"; };
-		855E08131AF446630072B8AA /* dtvDevice.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = dtvDevice.h; path = ../dtvDevice.h; sourceTree = "<group>"; };
-		855E08141AF446630072B8AA /* dtvDevice.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = dtvDevice.m; path = ../dtvDevice.m; sourceTree = "<group>"; };
 		8564F7DA1AD06F520090F308 /* MBProgressHUD.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MBProgressHUD.h; sourceTree = "<group>"; };
 		8564F7DB1AD06F520090F308 /* MBProgressHUD.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MBProgressHUD.m; sourceTree = "<group>"; };
 		857CAAFB1AF51C9C004F8058 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
@@ -126,10 +126,10 @@
 				855E08081AF2D2AF0072B8AA /* dtvCommand.m */,
 				85428D5F1AA5379700134A23 /* dtvCommands.h */,
 				85428D601AA5379700134A23 /* dtvCommands.m */,
-				855E08131AF446630072B8AA /* dtvDevice.h */,
-				855E08141AF446630072B8AA /* dtvDevice.m */,
-				855E08101AF446560072B8AA /* dtvDevices.h */,
-				855E08111AF446560072B8AA /* dtvDevices.m */,
+				850760331AFF94880061DFEA /* dtvDevice.h */,
+				850760341AFF94880061DFEA /* dtvDevice.m */,
+				850760351AFF94880061DFEA /* dtvDevices.h */,
+				850760361AFF94880061DFEA /* dtvDevices.m */,
 				85428D5C1AA5368600134A23 /* dtvGuide.h */,
 				85428D5D1AA5368600134A23 /* dtvGuide.m */,
 				855E080D1AF3C2A00072B8AA /* dtvGuideItem.h */,
@@ -239,7 +239,6 @@
 				85428D5E1AA5368600134A23 /* dtvGuide.m in Sources */,
 				859D6DB31A9AA3F60024FBA4 /* iNet.m in Sources */,
 				85BF98081AF649EE00D0A189 /* CDRTranslucentSideBar.m in Sources */,
-				855E08151AF446630072B8AA /* dtvDevice.m in Sources */,
 				859D6D8D1A9926CA0024FBA4 /* dtvRemote.xcdatamodeld in Sources */,
 				859D6D8A1A9926CA0024FBA4 /* AppDelegate.m in Sources */,
 				859D6D901A9926CA0024FBA4 /* ViewController.m in Sources */,
@@ -248,10 +247,11 @@
 				8564F7DC1AD06F520090F308 /* MBProgressHUD.m in Sources */,
 				857CAAFF1AF51E7F004F8058 /* Reachability.m in Sources */,
 				855E080F1AF3C2A00072B8AA /* dtvGuideItem.m in Sources */,
+				850760381AFF94880061DFEA /* dtvDevices.m in Sources */,
 				858975011AFEA9D1004D5D64 /* Colors.m in Sources */,
 				859D6D871A9926CA0024FBA4 /* main.m in Sources */,
-				855E08121AF446560072B8AA /* dtvDevices.m in Sources */,
 				85428D611AA5379700134A23 /* dtvCommands.m in Sources */,
+				850760371AFF94880061DFEA /* dtvDevice.m in Sources */,
 				8523C75C1AD4B58D00F395B2 /* SideBarTableView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
