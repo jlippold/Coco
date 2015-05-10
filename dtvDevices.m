@@ -32,7 +32,7 @@
         
         NSOperationQueue *portScanQueue = [[NSOperationQueue alloc] init];
         portScanQueue.name = @"Scanner";
-        //portScanQueue.maxConcurrentOperationCount = 20;
+        portScanQueue.maxConcurrentOperationCount = 20;
         [portScanQueue cancelAllOperations];
         
         for (NSUInteger i = 0; i < [prospectiveDevices count]; i++) {

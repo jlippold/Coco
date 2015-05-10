@@ -19,6 +19,7 @@
 		857CAAFC1AF51C9C004F8058 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 857CAAFB1AF51C9C004F8058 /* SystemConfiguration.framework */; };
 		857CAAFF1AF51E7F004F8058 /* Reachability.m in Sources */ = {isa = PBXBuildFile; fileRef = 857CAAFE1AF51E7F004F8058 /* Reachability.m */; };
 		8580653E1AC89A36005672E8 /* categories.plist in Resources */ = {isa = PBXBuildFile; fileRef = 8580653D1AC89A36005672E8 /* categories.plist */; };
+		858975011AFEA9D1004D5D64 /* Colors.m in Sources */ = {isa = PBXBuildFile; fileRef = 858975001AFEA9D1004D5D64 /* Colors.m */; };
 		858A4F651AA5FC5600B6226E /* images.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 858A4F641AA5FC5600B6226E /* images.bundle */; };
 		859D6D871A9926CA0024FBA4 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 859D6D861A9926CA0024FBA4 /* main.m */; };
 		859D6D8A1A9926CA0024FBA4 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 859D6D891A9926CA0024FBA4 /* AppDelegate.m */; };
@@ -55,6 +56,8 @@
 		857CAAFD1AF51E7F004F8058 /* Reachability.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Reachability.h; sourceTree = "<group>"; };
 		857CAAFE1AF51E7F004F8058 /* Reachability.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Reachability.m; sourceTree = "<group>"; };
 		8580653D1AC89A36005672E8 /* categories.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = categories.plist; sourceTree = "<group>"; };
+		858974FF1AFEA9D1004D5D64 /* Colors.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Colors.h; sourceTree = "<group>"; };
+		858975001AFEA9D1004D5D64 /* Colors.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Colors.m; sourceTree = "<group>"; };
 		858A4F641AA5FC5600B6226E /* images.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = images.bundle; sourceTree = "<group>"; };
 		859D6D811A9926CA0024FBA4 /* dtvRemote.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = dtvRemote.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		859D6D851A9926CA0024FBA4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -131,6 +134,8 @@
 				85428D5D1AA5368600134A23 /* dtvGuide.m */,
 				855E080D1AF3C2A00072B8AA /* dtvGuideItem.h */,
 				855E080E1AF3C2A00072B8AA /* dtvGuideItem.m */,
+				858974FF1AFEA9D1004D5D64 /* Colors.h */,
+				858975001AFEA9D1004D5D64 /* Colors.m */,
 				8564F7DA1AD06F520090F308 /* MBProgressHUD.h */,
 				8564F7DB1AD06F520090F308 /* MBProgressHUD.m */,
 				857CAAFD1AF51E7F004F8058 /* Reachability.h */,
@@ -243,6 +248,7 @@
 				8564F7DC1AD06F520090F308 /* MBProgressHUD.m in Sources */,
 				857CAAFF1AF51E7F004F8058 /* Reachability.m in Sources */,
 				855E080F1AF3C2A00072B8AA /* dtvGuideItem.m in Sources */,
+				858975011AFEA9D1004D5D64 /* Colors.m in Sources */,
 				859D6D871A9926CA0024FBA4 /* main.m in Sources */,
 				855E08121AF446560072B8AA /* dtvDevices.m in Sources */,
 				85428D611AA5379700134A23 /* dtvCommands.m in Sources */,

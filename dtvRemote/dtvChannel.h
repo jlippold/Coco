@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
 
 @interface dtvChannel : NSObject
 
@@ -19,7 +20,7 @@
 @property BOOL hd;
 @property BOOL adult;
 
-
--(id) initWithProperties:(NSDictionary *) properties;
++ (UIImage *)getImageForChannel:(dtvChannel *)channel;
+- (id) initWithProperties:(NSDictionary *) properties;
 
 @end

@@ -7,6 +7,7 @@
 //
 
 #import "dtvChannel.h"
+#import <UIKit/UIKit.h>
 
 @implementation dtvChannel
 
@@ -62,5 +63,17 @@
     return self;
 }
 
++ (UIImage *) getImageForChannel:(dtvChannel *)channel {
+    
+    UIImage *image = [UIImage new];
+    NSString *cacheDirectory = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) lastObject];
+    NSString *imagePath =[cacheDirectory stringByAppendingPathComponent:
+                          [NSString stringWithFormat:@"%d.png", channel.identifier]];
+    
+    if ([[NSFileManager defaultManager] fileExistsAtPath:imagePath]) {
+        image = [UIImage imageWithContentsOfFile:imagePath];
+    }
+    return image;
+}
 
 @end
