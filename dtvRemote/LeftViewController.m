@@ -27,10 +27,7 @@
 }
 
 - (void)viewWillAppear:(BOOL)animated {
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
-        ssid = [iNet fetchSSID];
-        [dtvDevices checkStatusOfDevices:devices];
-    });
+    [self refreshDevicesStatus];
 }
 
 - (void)viewDidLoad {
@@ -49,6 +46,7 @@
     currentDevice = [dtvDevices getCurrentDevice];
     
     sideBarView = [[UIView alloc] initWithFrame:[UIScreen mainScreen].bounds];
+    sideBarView.backgroundColor = [Colors backgroundColor];
     
     CGRect navBarFrame = CGRectMake(0, 0, [[UIScreen mainScreen] bounds].size.width * 0.75, 64.0);
     [[UINavigationBar appearance] setShadowImage:[[UIImage alloc] init]];
@@ -65,7 +63,7 @@
     [sideBarView addSubview:bar];
     
     CGRect tableFrame = [[UIScreen mainScreen] bounds];
-    tableFrame.size.width = tableFrame.size.width;
+    tableFrame.size.width = tableFrame.size.width * 0.75;
     tableFrame.size.height = tableFrame.size.height - 64;
     tableFrame.origin.x = 0;
     tableFrame.origin.y = 64;
@@ -107,18 +105,16 @@
     
     if (indexPath.section == 0) {
         [cell.textLabel setTextColor: [Colors textColor]];
-        [cell.detailTextLabel setTextColor:[Colors textColor]];
     } else {
         [cell.textLabel setTextColor: [Colors blueColor]];
-        [cell.detailTextLabel setTextColor:[Colors textColor]];
     }
 
 }
 
 - (void)tableView:(UITableView *)tableView willDisplayHeaderView:(UIView *)view forSection:(NSInteger)section {
     UITableViewHeaderFooterView *v = (UITableViewHeaderFooterView *)view;
-    v.backgroundView.backgroundColor = [UIColor blackColor];
-    v.backgroundView.alpha = 0.9;
+    v.backgroundView.backgroundColor = [Colors backgroundColor];
+//    v.backgroundView.alpha = 0.9;
     v.backgroundView.tintColor = [Colors tintColor];
     
     UITableViewHeaderFooterView *header = (UITableViewHeaderFooterView *)view;
@@ -136,8 +132,8 @@
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
     if (section == 0) { //Devices
         return [devices count];
-    } else {    //Commands
-        return 3;
+    } else {    //Config
+        return 5;
     }
 }
 
@@ -160,8 +156,12 @@
         dtvDevice *thisDevice = devices[key];
         
         cell.textLabel.text = thisDevice.name;
-        if (thisDevice.online) {
+        if (thisDevice.lastChecked == nil) {
+            cell.detailTextLabel.text = @"Checking...";
+            [cell.detailTextLabel setTextColor:[Colors lightTextColor]];
+        } else if (thisDevice.online) {
             cell.detailTextLabel.text = @"Online";
+            [cell.detailTextLabel setTextColor:[Colors greenColor]];
         } else {
             cell.detailTextLabel.text = @"Offline";
             [cell.detailTextLabel setTextColor:[Colors redColor]];
@@ -175,13 +175,20 @@
     if (indexPath.section == 1) {
         switch (indexPath.row) {
             case 0:
-                cell.textLabel.text = @"Check devices status";
+                cell.textLabel.text = @"Refresh devices status";
                 break;
             case 1:
                 cell.textLabel.text = @"Scan network for new devices";
                 break;
             case 2:
-                cell.textLabel.text = @"Forget these devices";
+                cell.textLabel.text = @"Clear these devices";
+                break;
+            case 3:
+                cell.textLabel.text = [NSString stringWithFormat:@"Change location: %@",
+                                       [[NSUserDefaults standardUserDefaults] stringForKey:@"zip"]];
+                break;
+            case 4:
+                cell.textLabel.text = @"Refresh channel list";
                 break;
         }
     }
@@ -213,7 +220,24 @@
         
     }
     if (indexPath.section == 1) {
-
+        switch (indexPath.row) {
+            case 0:
+                [self refreshDevicesStatus];
+                break;
+            case 1:
+                //cell.textLabel.text = @"Scan network for new devices";
+                break;
+            case 2:
+                //cell.textLabel.text = @"Clear these devices";
+                break;
+            case 3:
+                //cell.textLabel.text = [NSString stringWithFormat:@"Change location: %@",
+                //                       [[NSUserDefaults standardUserDefaults] stringForKey:@"zip"]];
+                break;
+            case 4:
+                //cell.textLabel.text = @"Refresh channel list";
+                break;
+        }
     }
 }
 
@@ -225,6 +249,8 @@
     //[self.sideBar dismiss];
     //[self toggleOverlay:@"show"];
     //overlayLabel.text = @"Scanning wifi network for devices...";
+    
+    
     [UIApplication sharedApplication].statusBarHidden = YES;
     
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
@@ -232,12 +258,28 @@
     });
 }
 
+- (void) refreshDevicesStatus {
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
+        ssid = [iNet fetchSSID];
+        devices = [dtvDevices getSavedDevicesForActiveNetwork];
+        currentDevice = [dtvDevices getCurrentDevice];
+        [self reloadTable];
+        [dtvDevices checkStatusOfDevices:devices];
+    });
+}
 - (void) messageUpdatedStatusOfDevices:(NSNotification *)notification {
     devices = notification.object;
-    [sideBarTable reloadData];
+    [self reloadTable];
 }
 - (void) messageUpdatedCurrentDevice:(NSNotification *)notification {
     currentDevice = notification.object;
+    [self reloadTable];
+}
+
+- (void) reloadTable {
+    [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+        [sideBarTable reloadData];
+    }];
 }
 
 @end

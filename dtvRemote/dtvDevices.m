@@ -159,6 +159,7 @@
                      device.online = YES;
                  }
              }
+             device.lastChecked = [NSDate new];
              devices[deviceId] = device;
              completed++;
              if (completed == total){

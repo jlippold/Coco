@@ -20,6 +20,7 @@
         _name = properties[@"name"];
         _appendage = properties[@"appendage"];
         _online = NO;
+        _lastChecked = nil;
     }
     
     return self;
@@ -33,7 +34,6 @@
     [coder encodeObject:_url forKey:@"url"];
     [coder encodeObject:_name forKey:@"name"];
     [coder encodeObject:_appendage forKey:@"appendage"];
-
 }
 
 - (id)initWithCoder:(NSCoder *)decoder {
@@ -44,6 +44,7 @@
         _name = [decoder decodeObjectForKey:@"name"];
         _appendage = [decoder decodeObjectForKey:@"appendage"];
         _online = NO;
+        _lastChecked = nil;
     }
     return self;
 }

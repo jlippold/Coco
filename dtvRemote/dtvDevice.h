@@ -15,6 +15,7 @@
 @property (nonatomic, strong) NSString *url;
 @property (nonatomic, strong) NSString *name;
 @property (nonatomic, strong) NSString *appendage;
+@property (nonatomic, strong) NSDate *lastChecked;
 @property BOOL online;
 
 -(id) initWithProperties:(NSDictionary *)properties;

@@ -49,7 +49,7 @@
     [sideBarView addSubview:bar];
     
     CGRect tableFrame = [[UIScreen mainScreen] bounds];
-    tableFrame.size.width = tableFrame.size.width;
+    tableFrame.size.width = tableFrame.size.width * 0.75;
     tableFrame.size.height = tableFrame.size.height - 64;
     tableFrame.origin.x = 0;
     tableFrame.origin.y = 64;
