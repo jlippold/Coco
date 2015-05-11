@@ -22,6 +22,7 @@
 + (UIColor *) navClearColor;
 + (UIColor *) tintColor;
 + (UIColor *) seperatorColor;
++ (UIColor *) blueColor;
 + (UIColor *) greenColor;
 + (UIColor *) redColor;
 + (UIColor *) transparentColor;

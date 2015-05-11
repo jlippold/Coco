@@ -44,9 +44,10 @@
             _imageUrl = json[@"primaryImageUrl"];
         }
         
-        _hd = NO;
         if ([[json[@"hd"] stringValue] isEqualToString:@"1"]) {
             _hd = YES;
+        } else {
+            _hd = NO;
         }
         
         if (json[@"rating"]) {

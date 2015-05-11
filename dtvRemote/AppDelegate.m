@@ -7,24 +7,35 @@
 //
 
 #import "AppDelegate.h"
-#import "ViewController.h"
+#import "MMDrawerController.h"
+#import "CenterViewController.h"
+#import "LeftViewController.h"
+#import "RightViewController.h"
 
 @interface AppDelegate ()
-
+@property (nonatomic,strong) MMDrawerController * drawerController;
 @end
 
 @implementation AppDelegate
 
-
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     
+
+    CenterViewController *center = [[CenterViewController alloc] init];
+    LeftViewController *left = [[LeftViewController alloc] init];
+    RightViewController *right = [[RightViewController alloc] init];
     
-    ViewController *main = [[ViewController alloc] init];
+    self.drawerController = [[MMDrawerController alloc] initWithCenterViewController:center
+                                                            leftDrawerViewController:left
+                                                           rightDrawerViewController:right];
+    
+    [self.drawerController setOpenDrawerGestureModeMask:MMOpenDrawerGestureModeAll];
+    [self.drawerController setCloseDrawerGestureModeMask:MMCloseDrawerGestureModeAll];
     
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
-    self.window.rootViewController = main;
+
+    [self.window setRootViewController:self.drawerController];
     [self.window makeKeyAndVisible];
-    
     
     return YES;
 }

@@ -6,26 +6,23 @@
 //  Copyright (c) 2015 jed. All rights reserved.
 //
 
-#import "ViewController.h"
+#import "CenterViewController.h"
 #import <QuartzCore/QuartzCore.h>
 
+#import "MMDrawerBarButtonItem.h"
+#import "UIViewController+MMDrawerController.h"
 #import "dtvChannels.h"
 #import "dtvChannel.h"
 #import "dtvGuide.h"
 #import "dtvCommands.h"
 #import "dtvDevices.h"
 #import "dtvDevice.h"
-#import "SideBarTableView.h"
+
 #import "MBProgressHUD.h"
 #import "Reachability.h"
-#import "CDRTranslucentSideBar.h"
 #import "Colors.h"
 
-@interface ViewController () <CDRTranslucentSideBarDelegate>
-    @property (nonatomic, strong) CDRTranslucentSideBar *sideBar;
-@end
-
-@implementation ViewController {
+@implementation CenterViewController {
 
     NSMutableDictionary *channels;
     NSMutableDictionary *allChannels;
@@ -34,18 +31,16 @@
     NSMutableDictionary *guide;
     NSMutableDictionary *devices;
     dtvDevice *currentDevice;
-    
+   
     UIImageView *backgroundView;
     UIVisualEffectView *bluredEffectView;
     UIView *centerView;
-    UIView *sideBarView;
-    UITableView *sideBarTable;
     UITableView *mainTableView;
     IBOutlet UINavigationBar *navbar;
     IBOutlet UILabel *navTitle;
     IBOutlet UILabel *navSubTitle;
     IBOutlet UINavigationItem *navItem;
-    IBOutlet UIBarButtonItem *rightButton;
+    IBOutlet UIBarButtonItem *editButton;
     UISearchController *searchController;
     UISearchBar *searchBar;
     UIImageView *boxCover;
@@ -235,9 +230,6 @@
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageAPIDown:)
                                                  name:@"messageAPIDown" object:nil];
     
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageRefreshSideBarDevices:)
-                                                 name:@"messageRefreshSideBarDevices" object:nil];
-
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageUpdatedCurrentDevice:)
                                                  name:@"messageUpdatedCurrentDevice" object:nil];
     
@@ -259,12 +251,9 @@
     
     frm.size.width = frm.size.width * 0.75;
     frm.origin.x = 0;
-    sideBarView = [[UIView alloc] initWithFrame:frm];
 
     [self.view addSubview:centerView];
-    
     [self createBackgroundView];
-    [self createSideBar];
     [self createTitleBar];
     [self createTopSection];
     [self createTableView];
@@ -278,7 +267,8 @@
     
     backgroundView = [[UIImageView alloc] initWithImage:[Colors imageWithColor:[Colors backgroundColor]]];
     backgroundView.frame = [[UIScreen mainScreen] bounds];
-    backgroundView.contentMode = UIViewContentModeScaleAspectFill;
+    //backgroundView.contentMode = UIViewContentModeScaleAspectFill;
+    backgroundView.contentMode = UIViewContentModeScaleToFill;
     backgroundView.alpha = 1.0;
     
     UIBlurEffect *blurEffect = [UIBlurEffect effectWithStyle:UIBlurEffectStyleDark];
@@ -320,58 +310,6 @@
 
 }
 
-- (void) createSideBar {
-
-    sideBarTable = [[UITableView alloc] init];
-    CGRect tableFrame = [[UIScreen mainScreen] bounds];
-    tableFrame.size.width = tableFrame.size.width * 0.75;
-    tableFrame.size.height = tableFrame.size.height - 64;
-    tableFrame.origin.x = 0;
-    tableFrame.origin.y = 64;
-    sideBarTable.frame = tableFrame;
-    
-    SideBarTableViewData = [[SideBarTableView alloc] init];
-    
-    sideBarTable.dataSource = SideBarTableViewData;
-    sideBarTable.delegate = SideBarTableViewData;
-    sideBarTable.separatorColor = [Colors seperatorColor];
-    sideBarTable.backgroundColor = [UIColor clearColor];
-    
-
-    refreshControl = [[UIRefreshControl alloc] init];
-    [refreshControl addTarget:self action:@selector(refreshDevices:) forControlEvents:UIControlEventValueChanged];
-    [sideBarTable addSubview:refreshControl];
-    
-    [sideBarView addSubview:sideBarTable];
-    
-    CGRect navBarFrame = CGRectMake(0, 0, [[UIScreen mainScreen] bounds].size.width * 0.75, 64.0);
-    [[UINavigationBar appearance] setShadowImage:[[UIImage alloc] init]];
-    UINavigationBar *bar = [[UINavigationBar alloc] initWithFrame:navBarFrame];
-    bar.translucent = NO;
-    bar.tintColor = [Colors tintColor];
-    bar.barTintColor = [Colors navBGColor];
-    bar.titleTextAttributes = @{NSForegroundColorAttributeName : [Colors textColor]};
-
-    UINavigationItem *sideBarNavItem = [UINavigationItem alloc];
-    sideBarNavItem.title = @"Settings";
-    [bar pushNavigationItem:sideBarNavItem animated:false];
-    
-    [sideBarView addSubview:bar];
-    
-    self.sideBar = [[CDRTranslucentSideBar alloc] init];
-
-    
-    self.sideBar.delegate = self;
-    self.sideBar.tag = 55;
-    self.sideBar.sideBarWidth = [[UIScreen mainScreen] bounds].size.width * 0.75;
-    self.sideBar.translucentStyle = UIBarStyleBlack;
-    [self.sideBar setContentViewInSideBar:sideBarView];
-    
-    UIPanGestureRecognizer *panGestureRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(panSideBar:)];
-    
-    [self.view addGestureRecognizer:panGestureRecognizer];
-    
-}
 
 - (void) createTitleBar {
     
@@ -415,18 +353,17 @@
     navItem = [UINavigationItem alloc];
     navItem.title = @"";
     
-    UIBarButtonItem *leftButton = [[UIBarButtonItem alloc]
-                                   initWithImage:[UIImage imageNamed:@"images.bundle/list"]
-                                   style:UIBarButtonItemStylePlain target:self action:@selector(showCommands:)];
+  
     
-    navItem.leftBarButtonItem = leftButton;
+    MMDrawerBarButtonItem *leftDrawerButton = [[MMDrawerBarButtonItem alloc] initWithTarget:self
+                                                                                     action:@selector(showLeftView:)];
+    navItem.leftBarButtonItem = leftDrawerButton;
     
+
+    MMDrawerBarButtonItem *rightDrawerButton = [[MMDrawerBarButtonItem alloc] initWithTarget:self
+                                                                                      action:@selector(showRightView:)];
     
-    rightButton = [[UIBarButtonItem alloc]
-                   initWithImage:[UIImage imageNamed:@"images.bundle/edit"]
-                   style:UIBarButtonItemStylePlain target:self action:@selector(toggleEditMode:)];
-                   
-    navItem.rightBarButtonItem = rightButton;
+    navItem.rightBarButtonItem = rightDrawerButton;
     
     [navbar pushNavigationItem:navItem animated:false];
     [centerView addSubview:navbar];
@@ -550,6 +487,8 @@
 
     [topContainer addSubview:boxDescription];
     
+    [[UITextField appearanceWhenContainedIn:[UISearchBar class], nil] setDefaultTextAttributes:@{NSForegroundColorAttributeName:[Colors textColor]}];
+    
     searchBar = [[UISearchBar alloc] initWithFrame:CGRectMake(xOffset - 10,
                                                                (topContainer.frame.size.height - 42),
                                                                searchBarMinWidth, 44)];
@@ -557,8 +496,9 @@
     searchBar.translucent = YES;
     searchBar.tintColor = [UIColor whiteColor];
     searchBar.backgroundColor = [UIColor clearColor];
+    searchBar.alpha = 0.8;
     
-    searchBar.barStyle = UIBarStyleBlackOpaque;
+    searchBar.barStyle = UIBarStyleDefault;
     searchBar.delegate = self;
     
     searchController = [[UISearchController alloc] initWithSearchResultsController:nil];
@@ -570,7 +510,7 @@
     [topContainer addSubview:searchBar];
     
     hdImage = [[UIImageView alloc] init];
-    hdImage.image = [UIImage imageNamed:@"images.bundle/hd"];
+    hdImage.image = [UIImage imageNamed:@"images.bundle/hd.png"];
     hdImage.contentMode = UIViewContentModeScaleAspectFit;
     hdImage.frame = CGRectMake(xOffset,
                                         (seekBar.frame.size.height + seekBar.frame.origin.y) + 46 + 64,
@@ -682,16 +622,21 @@
                                   style:UIBarButtonItemStylePlain target:self action:@selector(showNumberPad:) ];
     
     
-    UIBarButtonItem *settings = [[UIBarButtonItem alloc]
-                                 initWithImage:[UIImage imageNamed:@"images.bundle/more"]
-                                 style:UIBarButtonItemStylePlain target:self action:@selector(showCommands:) ];
-    
     UIBarButtonItem *sort = [[UIBarButtonItem alloc]
                              initWithImage:[UIImage imageNamed:@"images.bundle/sort"]
                              style:UIBarButtonItemStylePlain target:self action:@selector(sortChannels:) ];
     
+    editButton = [[UIBarButtonItem alloc]
+                   initWithImage:[UIImage imageNamed:@"images.bundle/edit"]
+                   style:UIBarButtonItemStylePlain target:self action:@selector(toggleEditMode:)];
     
-    NSArray *buttons = [NSArray arrayWithObjects: clock, flex , numberPad, flex, sort, flex, settings, nil];
+    UIBarButtonItem *refresh = [[UIBarButtonItem alloc]
+                               initWithBarButtonSystemItem:UIBarButtonSystemItemRefresh
+                               target:self
+                               action:@selector(refreshGuide:)];
+    
+    
+    NSArray *buttons = [NSArray arrayWithObjects: clock, flex , sort, flex, numberPad, flex, editButton, flex, refresh, nil];
     [toolBar setItems:buttons animated:NO];
     
     [centerView addSubview:toolBar];
@@ -1217,7 +1162,7 @@
         //Going back to regular mode
         [dtvChannels saveBlockedChannels:blockedChannels];
         isEditing = NO;
-        rightButton.image = [UIImage imageNamed:@"images.bundle/edit"];
+        editButton.image = [UIImage imageNamed:@"images.bundle/edit"];
         channels = [dtvChannels load:NO];
         blockedChannels = [[NSMutableArray alloc] init];
         sortedChannels = [dtvChannels sortChannels:channels sortBy:@"default"];
@@ -1226,7 +1171,7 @@
     } else {
         //Going into edit mode
         isEditing = YES;
-        rightButton.image = [UIImage imageNamed:@"images.bundle/done"];
+        editButton.image = [UIImage imageNamed:@"images.bundle/done"];
         channels = [dtvChannels load:YES];
         blockedChannels = [dtvChannels loadBlockedChannels:channels];
         sortedChannels = [dtvChannels sortChannels:channels sortBy:@"default"];
@@ -1300,8 +1245,17 @@
 }
 
 - (IBAction) showCommands:(id)sender {
-     [self.sideBar show];
+     //[self.sideBar show];
 }
+
+- (IBAction) showLeftView:(id)sender {
+    [self.mm_drawerController toggleDrawerSide:MMDrawerSideLeft animated:YES completion:nil];
+}
+
+- (IBAction) showRightView:(id)sender {
+    [self.mm_drawerController toggleDrawerSide:MMDrawerSideRight animated:YES completion:nil];
+}
+
 
 - (IBAction) sendCommand:(id)sender {
     NSString *buttonTitle = [sender title];
@@ -1325,13 +1279,6 @@
 }
 
 
-- (void)panSideBar:(UIPanGestureRecognizer *)recognizer
-{
-    self.sideBar.isCurrentPanGestureTarget = YES;
-    [self.sideBar handlePanGestureToShow:recognizer inView:self.view];
-}
-
-
 - (void) commandSend:(id)sender {
     // there was a text change in some control
     NSString *command = commandText.text;
@@ -1341,23 +1288,6 @@
     commandText.text = @"";
 }
 
-#pragma mark - Sidebar events
-
-
-- (void)sideBar:(CDRTranslucentSideBar *)sideBar didAppear:(BOOL)animated {
-    
-}
-- (void)sideBar:(CDRTranslucentSideBar *)sideBar willAppear:(BOOL)animated {
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
-        [dtvDevices checkStatusOfDevices:devices];
-    });
-}
-- (void)sideBar:(CDRTranslucentSideBar *)sideBar didDisappear:(BOOL)animated {
-
-}
-- (void)sideBar:(CDRTranslucentSideBar *)sideBar willDisappear:(BOOL)animated {
-
-}
 
 
 #pragma mark - Messages / Events
@@ -1427,8 +1357,8 @@
         [self presentViewController:alert animated:YES completion:nil];
         return;
     } else {
-        [sideBarTable reloadData];
-        [self.sideBar show];
+        //[sideBarTable reloadData];
+        //[self.sideBar show];
     }
 }
 
@@ -1513,7 +1443,7 @@
 
 - (void) messageRefreshSideBarDevices:(NSNotification *)notification {
     [[NSOperationQueue mainQueue] addOperationWithBlock:^{
-        [sideBarTable reloadData];
+        //[sideBarTable reloadData];
     }];
 }
 
@@ -1522,10 +1452,10 @@
     [[NSOperationQueue mainQueue] addOperationWithBlock:^{
         [self clearNowPlaying];
         [self displayDevice];
-        [sideBarTable reloadData];
+        //[sideBarTable reloadData];
         dispatch_time_t delay = dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC * 0.3);
         dispatch_after(delay, dispatch_get_main_queue(), ^(void){
-            [self.sideBar dismiss];
+            //[self.sideBar dismiss];
         });
     }];
 }
@@ -1548,7 +1478,7 @@
 
 - (IBAction)refreshDevices:(id)sender {
     [refreshControl endRefreshing];
-    [self.sideBar dismiss];
+    //[self.sideBar dismiss];
     [self toggleOverlay:@"show"];
     overlayLabel.text = @"Scanning wifi network for devices...";
     [UIApplication sharedApplication].statusBarHidden = YES;
@@ -1610,7 +1540,8 @@
         if ([[guideData allKeys] count] == 0) {
             return;
         }
-        dtvGuideItem *guideItem = [guide objectForKey:[guideData allKeys][0]];
+        NSString *key = [guideData allKeys][0];
+        dtvGuideItem *guideItem = guideData[key];
         NSDictionary *duration = [dtvGuide getDurationForChannel:guideItem];
         
         dispatch_async(dispatch_get_main_queue(), ^{
@@ -1631,7 +1562,7 @@
     
     [self hideTopContainer:YES];
     currentProgramId = guideItem.programID;
-    
+        
     if (guideItem.hd) {
         [hdImage setHidden:NO];
     } else {

@@ -164,8 +164,6 @@
              if (completed == total){
                  [[NSNotificationCenter defaultCenter] postNotificationName:@"messageUpdatedStatusOfDevices"
                                                                      object:devices];
-                 [[NSNotificationCenter defaultCenter] postNotificationName:@"messageRefreshSideBarDevices"
-                                                                     object:nil];
              }
              
          }];

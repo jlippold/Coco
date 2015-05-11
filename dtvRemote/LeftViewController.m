@@ -1,31 +1,42 @@
 //
-//  SideBar.m
+//  LeftViewController.m
 //  dtvRemote
 //
-//  Created by Jed Lippold on 4/7/15.
+//  Created by Jed Lippold on 5/10/15.
 //  Copyright (c) 2015 jed. All rights reserved.
 //
 
-#import "SideBarTableView.h"
+#import "LeftViewController.h"
 #import "dtvDevices.h"
 #import "dtvDevice.h"
-#import "dtvCommands.h"
-#import "dtvCommand.h"
 #import "Colors.h"
+#import "iNet.h"
 
-@implementation SideBarTableView {
-    NSArray *commands;
+
+@interface LeftViewController ()
+
+@end
+
+@implementation LeftViewController {
+    UIView *sideBarView;
+    UITableView *sideBarTable;
+    UIRefreshControl *refreshControl;
     NSMutableDictionary *devices;
     dtvDevice *currentDevice;
+    NSString *ssid;
 }
 
--(id) init {
-    self = [super init];
+- (void)viewWillAppear:(BOOL)animated {
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
+        ssid = [iNet fetchSSID];
+        [dtvDevices checkStatusOfDevices:devices];
+    });
+}
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
     
-    devices = [dtvDevices getSavedDevicesForActiveNetwork];
-    currentDevice = [dtvDevices getCurrentDevice];
-    
-    commands = [dtvCommands getArrayOfCommands];
+    ssid = [iNet fetchSSID];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageUpdatedStatusOfDevices:)
                                                  name:@"messageUpdatedStatusOfDevices" object:nil];
@@ -34,30 +45,74 @@
                                                  name:@"messageUpdatedCurrentDevice" object:nil];
     
     
+    devices = [dtvDevices getSavedDevicesForActiveNetwork];
+    currentDevice = [dtvDevices getCurrentDevice];
     
-    return self;
+    sideBarView = [[UIView alloc] initWithFrame:[UIScreen mainScreen].bounds];
+    
+    CGRect navBarFrame = CGRectMake(0, 0, [[UIScreen mainScreen] bounds].size.width * 0.75, 64.0);
+    [[UINavigationBar appearance] setShadowImage:[[UIImage alloc] init]];
+    UINavigationBar *bar = [[UINavigationBar alloc] initWithFrame:navBarFrame];
+    bar.translucent = NO;
+    bar.tintColor = [Colors tintColor];
+    bar.barTintColor = [Colors navBGColor];
+    bar.titleTextAttributes = @{NSForegroundColorAttributeName : [Colors textColor]};
+    
+    UINavigationItem *sideBarNavItem = [UINavigationItem alloc];
+    sideBarNavItem.title = @"Device Settings";
+    [bar pushNavigationItem:sideBarNavItem animated:false];
+    
+    [sideBarView addSubview:bar];
+    
+    CGRect tableFrame = [[UIScreen mainScreen] bounds];
+    tableFrame.size.width = tableFrame.size.width;
+    tableFrame.size.height = tableFrame.size.height - 64;
+    tableFrame.origin.x = 0;
+    tableFrame.origin.y = 64;
+    sideBarTable = [[UITableView alloc] initWithFrame:tableFrame style:UITableViewStyleGrouped];
+    sideBarTable.frame = tableFrame;
+    
+    sideBarTable.dataSource = self;
+    sideBarTable.delegate = self;
+    sideBarTable.separatorColor = [Colors seperatorColor];
+    sideBarTable.backgroundColor = [UIColor clearColor];
+    
+    refreshControl = [[UIRefreshControl alloc] init];
+    [refreshControl addTarget:self action:@selector(refreshDevices:) forControlEvents:UIControlEventValueChanged];
+    
+    [sideBarTable addSubview:refreshControl];
+    [sideBarView addSubview:sideBarTable];
+    
+    [self.view addSubview:sideBarView];
+    
+    
 }
 
-- (void)refresh:(UIRefreshControl *)refreshControl {
-    [refreshControl endRefreshing];
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
 }
+
+
+#pragma mark - TableView Management
 
 - (void) tableView:(UITableView *)tableView willDisplayCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath
 {
     
     cell.indentationLevel = 1;
     cell.indentationWidth = 2;
-    //cell.accessoryType = UITableViewCellAccessoryNone;
     cell.backgroundColor = [Colors backgroundColor];
-    [cell.textLabel setTextColor: [Colors textColor]];
-    [cell.detailTextLabel setTextColor:[Colors textColor]];
-    
     cell.userInteractionEnabled = YES;
     [cell setTintColor:[Colors tintColor]];
-}
+    
+    if (indexPath.section == 0) {
+        [cell.textLabel setTextColor: [Colors textColor]];
+        [cell.detailTextLabel setTextColor:[Colors textColor]];
+    } else {
+        [cell.textLabel setTextColor: [Colors blueColor]];
+        [cell.detailTextLabel setTextColor:[Colors textColor]];
+    }
 
--(CGFloat) tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section {
-    return  18.0;
 }
 
 - (void)tableView:(UITableView *)tableView willDisplayHeaderView:(UIView *)view forSection:(NSInteger)section {
@@ -72,9 +127,9 @@
 
 - (NSString*) tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section {
     if (section == 0) { //Devices
-        return @"Devices";
+        return ssid;
     } else {    //Commands
-        return @"Commands";
+        return @"Actions";
     }
 }
 
@@ -82,7 +137,7 @@
     if (section == 0) { //Devices
         return [devices count];
     } else {    //Commands
-        return [commands count];
+        return 3;
     }
 }
 
@@ -109,20 +164,28 @@
             cell.detailTextLabel.text = @"Online";
         } else {
             cell.detailTextLabel.text = @"Offline";
-            cell.detailTextLabel.textColor = [UIColor redColor];
+            [cell.detailTextLabel setTextColor:[Colors redColor]];
         }
-
+        
         if ([thisDevice.identifier isEqualToString:currentDevice.identifier]) {
             [cell setAccessoryType:UITableViewCellAccessoryCheckmark];
         }
     }
     
     if (indexPath.section == 1) {
-        dtvCommand *c = [commands objectAtIndex:indexPath.row];
-        cell.textLabel.text = c.description;
-        cell.detailTextLabel.text = c.action;
+        switch (indexPath.row) {
+            case 0:
+                cell.textLabel.text = @"Check devices status";
+                break;
+            case 1:
+                cell.textLabel.text = @"Scan network for new devices";
+                break;
+            case 2:
+                cell.textLabel.text = @"Forget these devices";
+                break;
+        }
     }
-
+    
     return cell;
 }
 
@@ -150,15 +213,28 @@
         
     }
     if (indexPath.section == 1) {
-        dtvCommand *c = [commands objectAtIndex:indexPath.row];
-        [dtvCommands sendCommand:c.action device:currentDevice];
+
     }
+}
+
+
+#pragma mark - Actions
+
+- (IBAction)refreshDevices:(id)sender {
+    [refreshControl endRefreshing];
+    //[self.sideBar dismiss];
+    //[self toggleOverlay:@"show"];
+    //overlayLabel.text = @"Scanning wifi network for devices...";
+    [UIApplication sharedApplication].statusBarHidden = YES;
     
-    
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
+        [dtvDevices refreshDevicesForNetworks];
+    });
 }
 
 - (void) messageUpdatedStatusOfDevices:(NSNotification *)notification {
     devices = notification.object;
+    [sideBarTable reloadData];
 }
 - (void) messageUpdatedCurrentDevice:(NSNotification *)notification {
     currentDevice = notification.object;

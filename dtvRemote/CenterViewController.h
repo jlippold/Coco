@@ -1,5 +1,5 @@
 //
-//  ViewController.h
+//  CenterViewController.h
 //  dtvRemote
 //
 //  Created by Jed Lippold on 2/21/15.
@@ -8,11 +8,8 @@
 
 #import <UIKit/UIKit.h>
 
-@interface ViewController : UIViewController <UITableViewDataSource,UITableViewDelegate,UISearchBarDelegate> {
-
-    
-}
-
+ 
+@interface CenterViewController : UIViewController <UITableViewDataSource,UITableViewDelegate,UISearchBarDelegate>
 
 @end
 

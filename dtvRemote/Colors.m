@@ -80,6 +80,9 @@
 + (UIColor *) redColor {
     return [UIColor colorWithRed:0.722 green:0.094 blue:0.094 alpha:0.5];
 }
++ (UIColor *) blueColor {
+    return [UIColor colorWithRed:0.204 green:0.459 blue:1.000 alpha:1.0];
+}
 + (UIColor *) transparentColor {
     return [UIColor clearColor];
 }

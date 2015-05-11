@@ -9,7 +9,12 @@
 /* Begin PBXBuildFile section */
 		850760371AFF94880061DFEA /* dtvDevice.m in Sources */ = {isa = PBXBuildFile; fileRef = 850760341AFF94880061DFEA /* dtvDevice.m */; };
 		850760381AFF94880061DFEA /* dtvDevices.m in Sources */ = {isa = PBXBuildFile; fileRef = 850760361AFF94880061DFEA /* dtvDevices.m */; };
-		8523C75C1AD4B58D00F395B2 /* SideBarTableView.m in Sources */ = {isa = PBXBuildFile; fileRef = 8523C75B1AD4B58D00F395B2 /* SideBarTableView.m */; };
+		850760461AFF9D740061DFEA /* MMDrawerBarButtonItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 8507603E1AFF9D740061DFEA /* MMDrawerBarButtonItem.m */; };
+		850760471AFF9D740061DFEA /* MMDrawerController.m in Sources */ = {isa = PBXBuildFile; fileRef = 850760401AFF9D740061DFEA /* MMDrawerController.m */; };
+		850760481AFF9D740061DFEA /* MMDrawerVisualState.m in Sources */ = {isa = PBXBuildFile; fileRef = 850760431AFF9D740061DFEA /* MMDrawerVisualState.m */; };
+		850760491AFF9D740061DFEA /* UIViewController+MMDrawerController.m in Sources */ = {isa = PBXBuildFile; fileRef = 850760451AFF9D740061DFEA /* UIViewController+MMDrawerController.m */; };
+		8507604C1AFFE3A10061DFEA /* LeftViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 8507604B1AFFE3A10061DFEA /* LeftViewController.m */; };
+		8507604F1AFFEC2F0061DFEA /* RightViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 8507604E1AFFEC2F0061DFEA /* RightViewController.m */; };
 		85428D5E1AA5368600134A23 /* dtvGuide.m in Sources */ = {isa = PBXBuildFile; fileRef = 85428D5D1AA5368600134A23 /* dtvGuide.m */; };
 		85428D611AA5379700134A23 /* dtvCommands.m in Sources */ = {isa = PBXBuildFile; fileRef = 85428D601AA5379700134A23 /* dtvCommands.m */; };
 		855E08091AF2D2AF0072B8AA /* dtvCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = 855E08081AF2D2AF0072B8AA /* dtvCommand.m */; };
@@ -24,12 +29,11 @@
 		859D6D871A9926CA0024FBA4 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 859D6D861A9926CA0024FBA4 /* main.m */; };
 		859D6D8A1A9926CA0024FBA4 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 859D6D891A9926CA0024FBA4 /* AppDelegate.m */; };
 		859D6D8D1A9926CA0024FBA4 /* dtvRemote.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 859D6D8B1A9926CA0024FBA4 /* dtvRemote.xcdatamodeld */; };
-		859D6D901A9926CA0024FBA4 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 859D6D8F1A9926CA0024FBA4 /* ViewController.m */; };
+		859D6D901A9926CA0024FBA4 /* CenterViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 859D6D8F1A9926CA0024FBA4 /* CenterViewController.m */; };
 		859D6D951A9926CA0024FBA4 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 859D6D941A9926CA0024FBA4 /* Images.xcassets */; };
 		859D6DB11A9A8F5E0024FBA4 /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 859D6DB01A9A8F5E0024FBA4 /* CFNetwork.framework */; };
 		859D6DB31A9AA3F60024FBA4 /* iNet.m in Sources */ = {isa = PBXBuildFile; fileRef = 859D6DB21A9AA3F60024FBA4 /* iNet.m */; };
 		85AFB3D61AA35B4A000AEEB4 /* dtvChannels.m in Sources */ = {isa = PBXBuildFile; fileRef = 85AFB3D51AA35B4A000AEEB4 /* dtvChannels.m */; };
-		85BF98081AF649EE00D0A189 /* CDRTranslucentSideBar.m in Sources */ = {isa = PBXBuildFile; fileRef = 85BF98071AF649EE00D0A189 /* CDRTranslucentSideBar.m */; };
 		85D9B78C1AD195E100958450 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 85D9B78B1AD195E100958450 /* LaunchScreen.xib */; };
 /* End PBXBuildFile section */
 
@@ -38,8 +42,19 @@
 		850760341AFF94880061DFEA /* dtvDevice.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = dtvDevice.m; sourceTree = "<group>"; };
 		850760351AFF94880061DFEA /* dtvDevices.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = dtvDevices.h; sourceTree = "<group>"; };
 		850760361AFF94880061DFEA /* dtvDevices.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = dtvDevices.m; sourceTree = "<group>"; };
-		8523C75A1AD4B58D00F395B2 /* SideBarTableView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SideBarTableView.h; sourceTree = "<group>"; };
-		8523C75B1AD4B58D00F395B2 /* SideBarTableView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SideBarTableView.m; sourceTree = "<group>"; };
+		8507603D1AFF9D740061DFEA /* MMDrawerBarButtonItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MMDrawerBarButtonItem.h; path = MMDrawerController/MMDrawerBarButtonItem.h; sourceTree = "<group>"; };
+		8507603E1AFF9D740061DFEA /* MMDrawerBarButtonItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MMDrawerBarButtonItem.m; path = MMDrawerController/MMDrawerBarButtonItem.m; sourceTree = "<group>"; };
+		8507603F1AFF9D740061DFEA /* MMDrawerController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MMDrawerController.h; path = MMDrawerController/MMDrawerController.h; sourceTree = "<group>"; };
+		850760401AFF9D740061DFEA /* MMDrawerController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MMDrawerController.m; path = MMDrawerController/MMDrawerController.m; sourceTree = "<group>"; };
+		850760411AFF9D740061DFEA /* MMDrawerController+Subclass.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "MMDrawerController+Subclass.h"; path = "MMDrawerController/MMDrawerController+Subclass.h"; sourceTree = "<group>"; };
+		850760421AFF9D740061DFEA /* MMDrawerVisualState.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MMDrawerVisualState.h; path = MMDrawerController/MMDrawerVisualState.h; sourceTree = "<group>"; };
+		850760431AFF9D740061DFEA /* MMDrawerVisualState.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MMDrawerVisualState.m; path = MMDrawerController/MMDrawerVisualState.m; sourceTree = "<group>"; };
+		850760441AFF9D740061DFEA /* UIViewController+MMDrawerController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "UIViewController+MMDrawerController.h"; path = "MMDrawerController/UIViewController+MMDrawerController.h"; sourceTree = "<group>"; };
+		850760451AFF9D740061DFEA /* UIViewController+MMDrawerController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "UIViewController+MMDrawerController.m"; path = "MMDrawerController/UIViewController+MMDrawerController.m"; sourceTree = "<group>"; };
+		8507604A1AFFE3A10061DFEA /* LeftViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LeftViewController.h; sourceTree = "<group>"; };
+		8507604B1AFFE3A10061DFEA /* LeftViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LeftViewController.m; sourceTree = "<group>"; };
+		8507604D1AFFEC2F0061DFEA /* RightViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RightViewController.h; sourceTree = "<group>"; };
+		8507604E1AFFEC2F0061DFEA /* RightViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RightViewController.m; sourceTree = "<group>"; };
 		85428D5C1AA5368600134A23 /* dtvGuide.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = dtvGuide.h; sourceTree = "<group>"; };
 		85428D5D1AA5368600134A23 /* dtvGuide.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = dtvGuide.m; sourceTree = "<group>"; };
 		85428D5F1AA5379700134A23 /* dtvCommands.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = dtvCommands.h; sourceTree = "<group>"; };
@@ -65,16 +80,14 @@
 		859D6D881A9926CA0024FBA4 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		859D6D891A9926CA0024FBA4 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		859D6D8C1A9926CA0024FBA4 /* dtvRemote.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = dtvRemote.xcdatamodel; sourceTree = "<group>"; };
-		859D6D8E1A9926CA0024FBA4 /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
-		859D6D8F1A9926CA0024FBA4 /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
+		859D6D8E1A9926CA0024FBA4 /* CenterViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CenterViewController.h; sourceTree = "<group>"; };
+		859D6D8F1A9926CA0024FBA4 /* CenterViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CenterViewController.m; sourceTree = "<group>"; };
 		859D6D941A9926CA0024FBA4 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		859D6DB01A9A8F5E0024FBA4 /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = System/Library/Frameworks/CFNetwork.framework; sourceTree = SDKROOT; };
 		859D6DB21A9AA3F60024FBA4 /* iNet.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = iNet.m; sourceTree = "<group>"; };
 		859D6DB41A9AA4040024FBA4 /* iNet.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = iNet.h; sourceTree = "<group>"; };
 		85AFB3D41AA35B38000AEEB4 /* dtvChannels.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = dtvChannels.h; sourceTree = "<group>"; };
 		85AFB3D51AA35B4A000AEEB4 /* dtvChannels.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = dtvChannels.m; sourceTree = "<group>"; };
-		85BF98061AF649EE00D0A189 /* CDRTranslucentSideBar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CDRTranslucentSideBar.h; sourceTree = "<group>"; };
-		85BF98071AF649EE00D0A189 /* CDRTranslucentSideBar.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CDRTranslucentSideBar.m; sourceTree = "<group>"; };
 		85D9B78B1AD195E100958450 /* LaunchScreen.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = LaunchScreen.xib; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -91,6 +104,61 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		8507603C1AFF9D5B0061DFEA /* MMDrawerController */ = {
+			isa = PBXGroup;
+			children = (
+				8507603D1AFF9D740061DFEA /* MMDrawerBarButtonItem.h */,
+				8507603E1AFF9D740061DFEA /* MMDrawerBarButtonItem.m */,
+				8507603F1AFF9D740061DFEA /* MMDrawerController.h */,
+				850760401AFF9D740061DFEA /* MMDrawerController.m */,
+				850760411AFF9D740061DFEA /* MMDrawerController+Subclass.h */,
+				850760421AFF9D740061DFEA /* MMDrawerVisualState.h */,
+				850760431AFF9D740061DFEA /* MMDrawerVisualState.m */,
+				850760441AFF9D740061DFEA /* UIViewController+MMDrawerController.h */,
+				850760451AFF9D740061DFEA /* UIViewController+MMDrawerController.m */,
+			);
+			name = MMDrawerController;
+			sourceTree = "<group>";
+		};
+		850760501AFFEC870061DFEA /* Classes */ = {
+			isa = PBXGroup;
+			children = (
+				855E080A1AF2DD780072B8AA /* dtvChannel.h */,
+				855E080B1AF2DD780072B8AA /* dtvChannel.m */,
+				85AFB3D41AA35B38000AEEB4 /* dtvChannels.h */,
+				85AFB3D51AA35B4A000AEEB4 /* dtvChannels.m */,
+				855E08071AF2D2AF0072B8AA /* dtvCommand.h */,
+				855E08081AF2D2AF0072B8AA /* dtvCommand.m */,
+				85428D5F1AA5379700134A23 /* dtvCommands.h */,
+				85428D601AA5379700134A23 /* dtvCommands.m */,
+				850760331AFF94880061DFEA /* dtvDevice.h */,
+				850760341AFF94880061DFEA /* dtvDevice.m */,
+				850760351AFF94880061DFEA /* dtvDevices.h */,
+				850760361AFF94880061DFEA /* dtvDevices.m */,
+				85428D5C1AA5368600134A23 /* dtvGuide.h */,
+				85428D5D1AA5368600134A23 /* dtvGuide.m */,
+				855E080D1AF3C2A00072B8AA /* dtvGuideItem.h */,
+				855E080E1AF3C2A00072B8AA /* dtvGuideItem.m */,
+				858974FF1AFEA9D1004D5D64 /* Colors.h */,
+				858975001AFEA9D1004D5D64 /* Colors.m */,
+				859D6DB41A9AA4040024FBA4 /* iNet.h */,
+				859D6DB21A9AA3F60024FBA4 /* iNet.m */,
+			);
+			name = Classes;
+			sourceTree = "<group>";
+		};
+		850760511AFFEC9D0061DFEA /* Vendor */ = {
+			isa = PBXGroup;
+			children = (
+				8507603C1AFF9D5B0061DFEA /* MMDrawerController */,
+				8564F7DA1AD06F520090F308 /* MBProgressHUD.h */,
+				8564F7DB1AD06F520090F308 /* MBProgressHUD.m */,
+				857CAAFD1AF51E7F004F8058 /* Reachability.h */,
+				857CAAFE1AF51E7F004F8058 /* Reachability.m */,
+			);
+			name = Vendor;
+			sourceTree = "<group>";
+		};
 		859D6D781A9926CA0024FBA4 = {
 			isa = PBXGroup;
 			children = (
@@ -112,38 +180,16 @@
 		859D6D831A9926CA0024FBA4 /* dtvRemote */ = {
 			isa = PBXGroup;
 			children = (
+				850760511AFFEC9D0061DFEA /* Vendor */,
+				850760501AFFEC870061DFEA /* Classes */,
 				859D6D881A9926CA0024FBA4 /* AppDelegate.h */,
 				859D6D891A9926CA0024FBA4 /* AppDelegate.m */,
-				859D6D8E1A9926CA0024FBA4 /* ViewController.h */,
-				859D6D8F1A9926CA0024FBA4 /* ViewController.m */,
-				8523C75A1AD4B58D00F395B2 /* SideBarTableView.h */,
-				8523C75B1AD4B58D00F395B2 /* SideBarTableView.m */,
-				855E080A1AF2DD780072B8AA /* dtvChannel.h */,
-				855E080B1AF2DD780072B8AA /* dtvChannel.m */,
-				85AFB3D41AA35B38000AEEB4 /* dtvChannels.h */,
-				85AFB3D51AA35B4A000AEEB4 /* dtvChannels.m */,
-				855E08071AF2D2AF0072B8AA /* dtvCommand.h */,
-				855E08081AF2D2AF0072B8AA /* dtvCommand.m */,
-				85428D5F1AA5379700134A23 /* dtvCommands.h */,
-				85428D601AA5379700134A23 /* dtvCommands.m */,
-				850760331AFF94880061DFEA /* dtvDevice.h */,
-				850760341AFF94880061DFEA /* dtvDevice.m */,
-				850760351AFF94880061DFEA /* dtvDevices.h */,
-				850760361AFF94880061DFEA /* dtvDevices.m */,
-				85428D5C1AA5368600134A23 /* dtvGuide.h */,
-				85428D5D1AA5368600134A23 /* dtvGuide.m */,
-				855E080D1AF3C2A00072B8AA /* dtvGuideItem.h */,
-				855E080E1AF3C2A00072B8AA /* dtvGuideItem.m */,
-				858974FF1AFEA9D1004D5D64 /* Colors.h */,
-				858975001AFEA9D1004D5D64 /* Colors.m */,
-				8564F7DA1AD06F520090F308 /* MBProgressHUD.h */,
-				8564F7DB1AD06F520090F308 /* MBProgressHUD.m */,
-				857CAAFD1AF51E7F004F8058 /* Reachability.h */,
-				857CAAFE1AF51E7F004F8058 /* Reachability.m */,
-				85BF98061AF649EE00D0A189 /* CDRTranslucentSideBar.h */,
-				85BF98071AF649EE00D0A189 /* CDRTranslucentSideBar.m */,
-				859D6DB41A9AA4040024FBA4 /* iNet.h */,
-				859D6DB21A9AA3F60024FBA4 /* iNet.m */,
+				859D6D8E1A9926CA0024FBA4 /* CenterViewController.h */,
+				859D6D8F1A9926CA0024FBA4 /* CenterViewController.m */,
+				8507604A1AFFE3A10061DFEA /* LeftViewController.h */,
+				8507604B1AFFE3A10061DFEA /* LeftViewController.m */,
+				8507604D1AFFEC2F0061DFEA /* RightViewController.h */,
+				8507604E1AFFEC2F0061DFEA /* RightViewController.m */,
 				859D6D8B1A9926CA0024FBA4 /* dtvRemote.xcdatamodeld */,
 				858A4F641AA5FC5600B6226E /* images.bundle */,
 				859D6D941A9926CA0024FBA4 /* Images.xcassets */,
@@ -238,12 +284,16 @@
 				855E080C1AF2DD780072B8AA /* dtvChannel.m in Sources */,
 				85428D5E1AA5368600134A23 /* dtvGuide.m in Sources */,
 				859D6DB31A9AA3F60024FBA4 /* iNet.m in Sources */,
-				85BF98081AF649EE00D0A189 /* CDRTranslucentSideBar.m in Sources */,
 				859D6D8D1A9926CA0024FBA4 /* dtvRemote.xcdatamodeld in Sources */,
 				859D6D8A1A9926CA0024FBA4 /* AppDelegate.m in Sources */,
-				859D6D901A9926CA0024FBA4 /* ViewController.m in Sources */,
+				850760481AFF9D740061DFEA /* MMDrawerVisualState.m in Sources */,
+				850760471AFF9D740061DFEA /* MMDrawerController.m in Sources */,
+				859D6D901A9926CA0024FBA4 /* CenterViewController.m in Sources */,
 				85AFB3D61AA35B4A000AEEB4 /* dtvChannels.m in Sources */,
 				855E08091AF2D2AF0072B8AA /* dtvCommand.m in Sources */,
+				8507604F1AFFEC2F0061DFEA /* RightViewController.m in Sources */,
+				8507604C1AFFE3A10061DFEA /* LeftViewController.m in Sources */,
+				850760491AFF9D740061DFEA /* UIViewController+MMDrawerController.m in Sources */,
 				8564F7DC1AD06F520090F308 /* MBProgressHUD.m in Sources */,
 				857CAAFF1AF51E7F004F8058 /* Reachability.m in Sources */,
 				855E080F1AF3C2A00072B8AA /* dtvGuideItem.m in Sources */,
@@ -252,7 +302,7 @@
 				859D6D871A9926CA0024FBA4 /* main.m in Sources */,
 				85428D611AA5379700134A23 /* dtvCommands.m in Sources */,
 				850760371AFF94880061DFEA /* dtvDevice.m in Sources */,
-				8523C75C1AD4B58D00F395B2 /* SideBarTableView.m in Sources */,
+				850760461AFF9D740061DFEA /* MMDrawerBarButtonItem.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
