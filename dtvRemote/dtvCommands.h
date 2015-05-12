@@ -15,7 +15,7 @@
 + (void)changeChannel:(dtvChannel *)channel device:(dtvDevice *)device;
 + (NSString *)getChannelOnDevice:(dtvDevice *)device;
 + (BOOL) sendCommand:(NSString *)command device:(dtvDevice *)device;
-+ (NSArray *) getArrayOfCommands;
++ (NSMutableDictionary *) getCommands;
 
 
 @end

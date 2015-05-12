@@ -18,25 +18,30 @@
     return self;
 }
 
-+ (NSArray *) getArrayOfCommands {
++ (NSMutableDictionary *) getCommands {
 
     NSURL *url = [[NSBundle mainBundle] URLForResource:@"commands" withExtension:@"plist"];
     NSDictionary *commands = [[NSDictionary dictionaryWithContentsOfURL:url] objectForKey: @"Commands"];
-    NSMutableArray *output = [[NSMutableArray alloc] init];
     
+    NSMutableDictionary *output = [[NSMutableDictionary alloc] init];
     NSArray *keys = [commands allKeys];
+    
     for (NSString *action in keys) {
         
         dtvCommand *command = [[dtvCommand alloc] init];
         command.action = action;
         command.desc = commands[action][@"desc"];
         command.category = commands[action][@"category"];
+        command.sortIndex = commands[action][@"index"];
         
+        if (!output[command.category]) {
+            [output setObject:[[NSMutableArray alloc] init] forKey:command.category];
+        }
         
-        [output addObject:command];
+        [output[command.category] addObject:command];
     }
+    
     return output;
-
 }
 
 + (void)changeChannel:(dtvChannel *)channel device:(dtvDevice *)device  {

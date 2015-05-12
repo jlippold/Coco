@@ -17,7 +17,7 @@
 @end
 
 @implementation RightViewController {
-    NSArray *commands;
+    NSMutableDictionary *commands;
     UIView *sideBarView;
     UITableView *sideBarTable;
     dtvDevice *currentDevice;
@@ -27,7 +27,7 @@
     [super viewDidLoad];
     
     currentDevice = [dtvDevices getCurrentDevice];
-    commands = [dtvCommands getArrayOfCommands];
+    commands = [dtvCommands getCommands];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageUpdatedCurrentDevice:)
                                                  name:@"messageUpdatedCurrentDevice" object:nil];
@@ -102,11 +102,14 @@
 }
 
 - (NSString*) tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section {
-    return @"Commands";
+    NSArray *sections = [[commands allKeys] sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
+    return [sections objectAtIndex:section];
 }
 
-- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
-    return [commands count];
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+    NSArray *sections = [[commands allKeys] sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
+    NSString *sectionKey = [sections objectAtIndex:section];
+    return [[commands objectForKey:sectionKey] count];
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -121,28 +124,45 @@
     cell.userInteractionEnabled = YES;
     cell.detailTextLabel.enabled = YES;
     
-    if (indexPath.section == 0) {
-        dtvCommand *c = [commands objectAtIndex:indexPath.row];
-        cell.textLabel.text = c.desc;
-        cell.detailTextLabel.text = [NSString stringWithFormat:@"%@: %@", c.category, c.desc];
-    }
-  
+    NSArray *sections = [[commands allKeys] sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
+    NSString *sectionKey = [sections objectAtIndex:indexPath.section];
+    NSMutableArray *commandArray = [commands objectForKey:sectionKey];
+    NSArray *sortedArray = [commandArray sortedArrayUsingComparator:^NSComparisonResult(id a, id b) {
+        NSString *first = [(dtvCommand*) a sortIndex];
+        NSString *second = [(dtvCommand*) b sortIndex];
+        return [first compare:second];
+    }];
+    
+    
+    dtvCommand *c = [sortedArray objectAtIndex:indexPath.row];
+    cell.textLabel.text = c.desc;
+    cell.detailTextLabel.text = [NSString stringWithFormat:@"%@: %@", c.category, c.desc];
+    
     return cell;
 }
 
-- (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath
-{
+- (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath {
     return NO;
 }
 
-
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-    return 1;
+    return [[commands allKeys] count];
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
-    dtvCommand *c = [commands objectAtIndex:indexPath.row];
+    
+    //cell data
+    NSArray *sections = [[commands allKeys] sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
+    NSString *sectionKey = [sections objectAtIndex:indexPath.section];
+    NSMutableArray *commandArray = [commands objectForKey:sectionKey];
+    NSArray *sortedArray = [commandArray sortedArrayUsingComparator:^NSComparisonResult(id a, id b) {
+        NSString *first = [(dtvCommand*) a sortIndex];
+        NSString *second = [(dtvCommand*) b sortIndex];
+        return [first compare:second];
+    }];
+    
+    dtvCommand *c = [sortedArray objectAtIndex:indexPath.row];
     [dtvCommands sendCommand:c.action device:currentDevice];
 }
 

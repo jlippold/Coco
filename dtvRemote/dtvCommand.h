@@ -13,6 +13,6 @@
 @property (nonatomic, strong) NSString *action;
 @property (nonatomic, strong) NSString *desc;
 @property (nonatomic, strong) NSString *category;
-
+@property (nonatomic, strong) NSString *sortIndex;
 
 @end
