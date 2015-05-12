@@ -238,6 +238,10 @@
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageCloseLeftMenu:)
                                                  name:@"messageCloseLeftMenu" object:nil];
+
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageDidBecomeActive:)
+                                                 name:@"messageDidBecomeActive" object:nil];
+    
 }
 
 
@@ -1443,8 +1447,10 @@
 - (void) messageCloseLeftMenu:(NSNotification *)notification {
     [self showLeftView:nil];
 }
-
-
+- (void) messageDidBecomeActive:(NSNotification *)notification {
+    [self reachabilityChanged:nil];
+    [self onTimerFire:nil];
+}
 
 
 #pragma mark - UI Updates
