@@ -10,19 +10,9 @@
 
 @implementation dtvCommand
 
--(void) setAction:(NSString *) val {
-    action = [[NSString alloc]initWithString: val];
-}
 
--(void) setDescription:(NSString *)val {
-    description = [[NSString alloc] initWithString: val];
-}
-
-- (NSString *) action {
-    return action;
-}
-- (NSString *) description {
-    return description;
+- (id) init {
+    return self;
 }
 
 @end

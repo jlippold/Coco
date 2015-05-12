@@ -123,8 +123,8 @@
     
     if (indexPath.section == 0) {
         dtvCommand *c = [commands objectAtIndex:indexPath.row];
-        cell.textLabel.text = c.description;
-        cell.detailTextLabel.text = c.action;
+        cell.textLabel.text = c.desc;
+        cell.detailTextLabel.text = [NSString stringWithFormat:@"%@: %@", c.category, c.desc];
     }
   
     return cell;

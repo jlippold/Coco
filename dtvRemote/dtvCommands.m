@@ -20,16 +20,22 @@
 
 + (NSArray *) getArrayOfCommands {
 
-    NSArray *someList = [NSArray arrayWithObjects: @"power",@"poweron",@"poweroff",@"format",@"pause",@"rew",@"replay",@"stop",@"advance",@"ffwd",@"record",@"play",@"guide",@"active",@"list",@"exit",@"back",@"menu",@"info",@"up",@"down",@"left",@"right",@"select",@"red",@"green",@"yellow",@"blue",@"chanup",@"chandown",@"prev",@"0",@"1",@"2",@"3",@"4",@"5",@"6",@"7",@"8",@"9",@"dash",@"enter", nil];
+    NSURL *url = [[NSBundle mainBundle] URLForResource:@"commands" withExtension:@"plist"];
+    NSDictionary *commands = [[NSDictionary dictionaryWithContentsOfURL:url] objectForKey: @"Commands"];
+    NSMutableArray *output = [[NSMutableArray alloc] init];
     
-    NSMutableArray *someList2 = [[NSMutableArray alloc] init];
-    for (NSString *val in someList) {
+    NSArray *keys = [commands allKeys];
+    for (NSString *action in keys) {
+        
         dtvCommand *command = [[dtvCommand alloc] init];
-        command.description = val;
-        command.action = val;
-        [someList2 addObject:command];
+        command.action = action;
+        command.desc = commands[action][@"desc"];
+        command.category = commands[action][@"category"];
+        
+        
+        [output addObject:command];
     }
-    return someList2;
+    return output;
 
 }
 

@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Commands</key>
+	<dict>
+
+		<key>menu</key>
+		<dict>
+			<key>desc</key>
+			<string>Main Menu</string>
+			<key>category</key>
+			<string>Menus</string>
+		</dict>
+
+		<key>guide</key>
+		<dict>
+			<key>desc</key>
+			<string>Guide</string>
+			<key>category</key>
+			<string>Menus</string>
+		</dict>
+
+		<key>list</key>
+		<dict>
+			<key>desc</key>
+			<string>List Recordings</string>
+			<key>category</key>
+			<string>Menus</string>
+		</dict>
+
+		<key>info</key>
+		<dict>
+			<key>desc</key>
+			<string>Program Info</string>
+			<key>category</key>
+			<string>Menus</string>
+		</dict>
+
+		<key>select</key>
+		<dict>
+			<key>desc</key>
+			<string>Select</string>
+			<key>category</key>
+			<string>Navigation</string>
+		</dict>
+
+		<key>exit</key>
+		<dict>
+			<key>desc</key>
+			<string>Exit</string>
+			<key>category</key>
+			<string>Navigation</string>
+		</dict>
+
+		<key>enter</key>
+		<dict>
+			<key>desc</key>
+			<string>Enter</string>
+			<key>category</key>
+			<string>Navigation</string>
+		</dict>
+
+		<key>up</key>
+		<dict>
+			<key>desc</key>
+			<string>Up</string>
+			<key>category</key>
+			<string>Navigation</string>
+		</dict>
+
+		<key>down</key>
+		<dict>
+			<key>desc</key>
+			<string>Down</string>
+			<key>category</key>
+			<string>Navigation</string>
+		</dict>
+
+		<key>left</key>
+		<dict>
+			<key>desc</key>
+			<string>Left</string>
+			<key>category</key>
+			<string>Navigation</string>
+		</dict>
+
+		<key>right</key>
+		<dict>
+			<key>desc</key>
+			<string>Right</string>
+			<key>category</key>
+			<string>Navigation</string>
+		</dict>
+
+		<key>back</key>
+		<dict>
+			<key>desc</key>
+			<string>Back</string>
+			<key>category</key>
+			<string>Navigation</string>
+		</dict>
+
+		<key>chanup</key>
+		<dict>
+			<key>desc</key>
+			<string>Channel Up</string>
+			<key>category</key>
+			<string>Channels</string>
+		</dict>
+
+		<key>chandown</key>
+		<dict>
+			<key>desc</key>
+			<string>Channel Down</string>
+			<key>category</key>
+			<string>Channels</string>
+		</dict>
+
+		<key>prev</key>
+		<dict>
+			<key>desc</key>
+			<string>Last Channel</string>
+			<key>category</key>
+			<string>Channels</string>
+		</dict>
+		
+
+		<key>play</key>
+		<dict>
+			<key>desc</key>
+			<string>Play</string>
+			<key>category</key>
+			<string>Playback</string>
+		</dict>
+
+		<key>pause</key>
+		<dict>
+			<key>desc</key>
+			<string>Pause</string>
+			<key>category</key>
+			<string>Playback</string>
+		</dict>
+
+		<key>record</key>
+		<dict>
+			<key>desc</key>
+			<string>Record</string>
+			<key>category</key>
+			<string>Playback</string>
+		</dict>
+
+		<key>stop</key>
+		<dict>
+			<key>desc</key>
+			<string>Stop</string>
+			<key>category</key>
+			<string>Playback</string>
+		</dict>
+
+		<key>ffwd</key>
+		<dict>
+			<key>desc</key>
+			<string>Fast Forward</string>
+			<key>category</key>
+			<string>Playback</string>
+		</dict>
+
+		<key>rew</key>
+		<dict>
+			<key>desc</key>
+			<string>Rewind</string>
+			<key>category</key>
+			<string>Playback</string>
+		</dict>
+
+		<key>advance</key>
+		<dict>
+			<key>desc</key>
+			<string>Skip Forward</string>
+			<key>category</key>
+			<string>Playback</string>
+		</dict>
+
+		<key>replay</key>
+		<dict>
+			<key>desc</key>
+			<string>Skip Back</string>
+			<key>category</key>
+			<string>Playback</string>
+		</dict>
+
+		<key>red</key>
+		<dict>
+			<key>desc</key>
+			<string>Red</string>
+			<key>category</key>
+			<string>Other</string>
+		</dict>
+		<key>green</key>
+		<dict>
+			<key>desc</key>
+			<string>Green</string>
+			<key>category</key>
+			<string>Other</string>
+		</dict>
+		<key>yellow</key>
+		<dict>
+			<key>desc</key>
+			<string>Yellow</string>
+			<key>category</key>
+			<string>Other</string>
+		</dict>
+		<key>blue</key>
+		<dict>
+			<key>desc</key>
+			<string>Blue</string>
+			<key>category</key>
+			<string>Other</string>
+		</dict>
+		<key>format</key>
+		<dict>
+			<key>desc</key>
+			<string>Format</string>
+			<key>category</key>
+			<string>Other</string>
+		</dict>
+		<key>dash</key>
+		<dict>
+			<key>desc</key>
+			<string>Dash</string>
+			<key>category</key>
+			<string>Other</string>
+		</dict>
+		<key>active</key>
+		<dict>
+			<key>desc</key>
+			<string>Active</string>
+			<key>category</key>
+			<string>Other</string>
+		</dict>
+	</dict>
+</dict>
+</plist>

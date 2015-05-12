@@ -8,14 +8,11 @@
 
 #import <Foundation/Foundation.h>
 
-@interface dtvCommand : NSObject {
-    NSString *action;
-    NSString *description;
-}
+@interface dtvCommand : NSObject
 
--(void) setAction:(NSString *) val;
--(void) setDescription:(NSString *) val;
--(NSString *) action;
--(NSString *) description;
+@property (nonatomic, strong) NSString *action;
+@property (nonatomic, strong) NSString *desc;
+@property (nonatomic, strong) NSString *category;
+
 
 @end

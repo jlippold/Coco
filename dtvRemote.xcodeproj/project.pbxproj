@@ -15,6 +15,7 @@
 		850760491AFF9D740061DFEA /* UIViewController+MMDrawerController.m in Sources */ = {isa = PBXBuildFile; fileRef = 850760451AFF9D740061DFEA /* UIViewController+MMDrawerController.m */; };
 		8507604C1AFFE3A10061DFEA /* LeftViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 8507604B1AFFE3A10061DFEA /* LeftViewController.m */; };
 		8507604F1AFFEC2F0061DFEA /* RightViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 8507604E1AFFEC2F0061DFEA /* RightViewController.m */; };
+		850760531B01901D0061DFEA /* commands.plist in Resources */ = {isa = PBXBuildFile; fileRef = 850760521B01901D0061DFEA /* commands.plist */; };
 		85428D5E1AA5368600134A23 /* dtvGuide.m in Sources */ = {isa = PBXBuildFile; fileRef = 85428D5D1AA5368600134A23 /* dtvGuide.m */; };
 		85428D611AA5379700134A23 /* dtvCommands.m in Sources */ = {isa = PBXBuildFile; fileRef = 85428D601AA5379700134A23 /* dtvCommands.m */; };
 		855E08091AF2D2AF0072B8AA /* dtvCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = 855E08081AF2D2AF0072B8AA /* dtvCommand.m */; };
@@ -55,6 +56,7 @@
 		8507604B1AFFE3A10061DFEA /* LeftViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LeftViewController.m; sourceTree = "<group>"; };
 		8507604D1AFFEC2F0061DFEA /* RightViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RightViewController.h; sourceTree = "<group>"; };
 		8507604E1AFFEC2F0061DFEA /* RightViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RightViewController.m; sourceTree = "<group>"; };
+		850760521B01901D0061DFEA /* commands.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = commands.plist; sourceTree = "<group>"; };
 		85428D5C1AA5368600134A23 /* dtvGuide.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = dtvGuide.h; sourceTree = "<group>"; };
 		85428D5D1AA5368600134A23 /* dtvGuide.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = dtvGuide.m; sourceTree = "<group>"; };
 		85428D5F1AA5379700134A23 /* dtvCommands.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = dtvCommands.h; sourceTree = "<group>"; };
@@ -203,6 +205,7 @@
 			isa = PBXGroup;
 			children = (
 				8580653D1AC89A36005672E8 /* categories.plist */,
+				850760521B01901D0061DFEA /* commands.plist */,
 				859D6D851A9926CA0024FBA4 /* Info.plist */,
 				859D6D861A9926CA0024FBA4 /* main.m */,
 			);
@@ -270,6 +273,7 @@
 				85D9B78C1AD195E100958450 /* LaunchScreen.xib in Resources */,
 				859D6D951A9926CA0024FBA4 /* Images.xcassets in Resources */,
 				8580653E1AC89A36005672E8 /* categories.plist in Resources */,
+				850760531B01901D0061DFEA /* commands.plist in Resources */,
 				858A4F651AA5FC5600B6226E /* images.bundle in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
