@@ -19,5 +19,6 @@
 + (NSMutableDictionary *) getSavedDevicesForActiveNetwork;
 
 + (void) saveCurrentDeviceId:(NSString *) deviceId;
++ (void) clearDevicesForNetwork;
 
 @end

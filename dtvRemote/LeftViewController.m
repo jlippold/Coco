@@ -26,8 +26,8 @@
     NSString *ssid;
 }
 
-- (void)viewWillAppear:(BOOL)animated {
-    [self refreshDevicesStatus];
+- (void)viewDidAppear:(BOOL)animated {
+    //[self refreshDevicesStatus];
 }
 
 - (void)viewDidLoad {
@@ -40,7 +40,10 @@
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageUpdatedCurrentDevice:)
                                                  name:@"messageUpdatedCurrentDevice" object:nil];
-    
+
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageUpdatedDevices:)
+                                                 name:@"messageUpdatedDevices" object:nil];
+
     
     devices = [dtvDevices getSavedDevicesForActiveNetwork];
     currentDevice = [dtvDevices getCurrentDevice];
@@ -76,19 +79,23 @@
     sideBarTable.backgroundColor = [UIColor clearColor];
     
     refreshControl = [[UIRefreshControl alloc] init];
-    [refreshControl addTarget:self action:@selector(refreshDevices:) forControlEvents:UIControlEventValueChanged];
+    [refreshControl addTarget:self action:@selector(refreshDevicesStatus:) forControlEvents:UIControlEventValueChanged];
     
     [sideBarTable addSubview:refreshControl];
     [sideBarView addSubview:sideBarTable];
     
     [self.view addSubview:sideBarView];
-    
+    [self refreshDevicesStatus:nil];
     
 }
 
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
+}
+
+- (void) dealloc {
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 
@@ -114,26 +121,28 @@
 - (void)tableView:(UITableView *)tableView willDisplayHeaderView:(UIView *)view forSection:(NSInteger)section {
     UITableViewHeaderFooterView *v = (UITableViewHeaderFooterView *)view;
     v.backgroundView.backgroundColor = [Colors backgroundColor];
-//    v.backgroundView.alpha = 0.9;
     v.backgroundView.tintColor = [Colors tintColor];
-    
     UITableViewHeaderFooterView *header = (UITableViewHeaderFooterView *)view;
     [header.textLabel setTextColor:[Colors textColor]];
 }
 
 - (NSString*) tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section {
-    if (section == 0) { //Devices
-        return ssid;
-    } else {    //Commands
+    if (section == 0) {
+        if ([ssid isEqualToString:@""]) {
+            return @"Not on Wifi";
+        } else {
+            return ssid;
+        }
+    } else {
         return @"Actions";
     }
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
-    if (section == 0) { //Devices
+    if (section == 0) {
         return [devices count];
-    } else {    //Config
-        return 5;
+    } else {
+        return 4;
     }
 }
 
@@ -173,6 +182,7 @@
     }
     
     if (indexPath.section == 1) {
+        cell.detailTextLabel.text = @"";
         switch (indexPath.row) {
             case 0:
                 cell.textLabel.text = @"Refresh devices status";
@@ -187,17 +197,13 @@
                 cell.textLabel.text = [NSString stringWithFormat:@"Change location: %@",
                                        [[NSUserDefaults standardUserDefaults] stringForKey:@"zip"]];
                 break;
-            case 4:
-                cell.textLabel.text = @"Refresh channel list";
-                break;
         }
     }
     
     return cell;
 }
 
-- (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath
-{
+- (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath {
     return NO;
 }
 
@@ -216,26 +222,26 @@
         dtvDevice *device = [devices objectForKey:deviceId];
         if (device.online) {
             [dtvDevices setCurrentDevice:device];
+            [[NSNotificationCenter defaultCenter] postNotificationName:@"messageCloseLeftMenu"
+                                                                object:nil];
+        } else {
+            
         }
         
     }
     if (indexPath.section == 1) {
         switch (indexPath.row) {
             case 0:
-                [self refreshDevicesStatus];
+                [self refreshDevicesStatus:nil];
                 break;
             case 1:
-                //cell.textLabel.text = @"Scan network for new devices";
+                [self refreshDevices:nil];
                 break;
             case 2:
-                //cell.textLabel.text = @"Clear these devices";
+                [self clearDevices];
                 break;
             case 3:
-                //cell.textLabel.text = [NSString stringWithFormat:@"Change location: %@",
-                //                       [[NSUserDefaults standardUserDefaults] stringForKey:@"zip"]];
-                break;
-            case 4:
-                //cell.textLabel.text = @"Refresh channel list";
+                [self setZipCode];
                 break;
         }
     }
@@ -245,20 +251,41 @@
 #pragma mark - Actions
 
 - (IBAction)refreshDevices:(id)sender {
-    [refreshControl endRefreshing];
-    //[self.sideBar dismiss];
-    //[self toggleOverlay:@"show"];
-    //overlayLabel.text = @"Scanning wifi network for devices...";
+    
+    UIAlertController *view = [UIAlertController
+                               alertControllerWithTitle:@"Refresh Devices"
+                               message:@"Are you sure you would like to search this network for available devices?"
+                               preferredStyle:UIAlertControllerStyleAlert];
+    
+    UIAlertAction *cancel = [UIAlertAction actionWithTitle:@"No" style:UIAlertActionStyleDefault handler:
+                             ^(UIAlertAction * action) {
+                                 [view dismissViewControllerAnimated:YES completion:nil];
+                                 return;
+                             }];
     
     
-    [UIApplication sharedApplication].statusBarHidden = YES;
+    UIAlertAction *ok = [UIAlertAction actionWithTitle:@"Yes" style:UIAlertActionStyleDefault handler:
+                         ^(UIAlertAction * action) {
+                             [view dismissViewControllerAnimated:YES completion:nil];
+
+                             [[NSNotificationCenter defaultCenter] postNotificationName:@"messageCloseLeftMenu"
+                                                                                 object:nil];
+                             
+                             [[NSNotificationCenter defaultCenter] postNotificationName:@"messageRefreshDevices"
+                                                                                 object:nil];
+                             return;
+                         }];
     
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
-        [dtvDevices refreshDevicesForNetworks];
-    });
+    [view addAction:ok];
+    [view addAction:cancel];
+    
+    UIViewController *vc = [[[[UIApplication sharedApplication] delegate] window] rootViewController];
+    [vc presentViewController:view animated:YES completion:nil];
+
 }
 
-- (void) refreshDevicesStatus {
+- (IBAction)refreshDevicesStatus:(id)sender  {
+    [refreshControl endRefreshing];
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
         ssid = [iNet fetchSSID];
         devices = [dtvDevices getSavedDevicesForActiveNetwork];
@@ -267,6 +294,50 @@
         [dtvDevices checkStatusOfDevices:devices];
     });
 }
+
+-(void) setZipCode {
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"messagePromptForZipCode"
+                                                        object:nil];
+}
+
+-(void) setChannelLogos {
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"messageDownloadChannelLogos"
+                                                        object:nil];
+}
+- (void) clearDevices {
+    
+    UIAlertController *view = [UIAlertController
+                               alertControllerWithTitle:@"Clear Devices"
+                               message:@"Are you sure you would like to clear all devices on this network?"
+                               preferredStyle:UIAlertControllerStyleAlert];
+    
+    UIAlertAction *cancel = [UIAlertAction actionWithTitle:@"No" style:UIAlertActionStyleDefault handler:
+                             ^(UIAlertAction * action) {
+                                 [view dismissViewControllerAnimated:YES completion:nil];
+                                 return;
+                             }];
+    
+    
+    UIAlertAction *ok = [UIAlertAction actionWithTitle:@"Yes" style:UIAlertActionStyleDefault handler:
+                         ^(UIAlertAction * action) {
+                             [view dismissViewControllerAnimated:YES completion:nil];
+                             
+                             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
+                                 [dtvDevices clearDevicesForNetwork];
+                                 [self refreshDevices:nil];
+                             });
+                             
+                             return;
+                         }];
+    
+    [view addAction:ok];
+    [view addAction:cancel];
+    
+    UIViewController *vc = [[[[UIApplication sharedApplication] delegate] window] rootViewController];
+    [vc presentViewController:view animated:YES completion:nil];
+    
+
+}
 - (void) messageUpdatedStatusOfDevices:(NSNotification *)notification {
     devices = notification.object;
     [self reloadTable];
@@ -274,6 +345,12 @@
 - (void) messageUpdatedCurrentDevice:(NSNotification *)notification {
     currentDevice = notification.object;
     [self reloadTable];
+}
+
+- (void) messageUpdatedDevices:(NSNotification *)notification {
+    devices = notification.object;
+    [self reloadTable];
+    [dtvDevices checkStatusOfDevices:devices];
 }
 
 - (void) reloadTable {

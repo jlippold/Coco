@@ -83,8 +83,6 @@
     BOOL isPlaying;
     BOOL usingVibrancy;
     
-    id SideBarTableViewData;
-    
     Reachability *reach;
     
     
@@ -106,11 +104,13 @@
     [reach startNotifier];
     
     [self initiate];
+
 }
 
 - (IBAction) reachabilityChanged:(id)sender  {
-    NSLog(@"Network has changed, refreshing device list");
-    [dtvDevices refreshDevicesForNetworks];
+    //NSLog(@"Network has changed, refreshing device list");
+    devices = [dtvDevices getSavedDevicesForActiveNetwork];
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"messageUpdatedDevices" object:devices];
 }
 
 - (void) didReceiveMemoryWarning {
@@ -172,7 +172,7 @@
                                             userInfo:nil
                                              repeats:YES];
     
-    [UIApplication sharedApplication].statusBarHidden = NO;
+    [UIApplication sharedApplication].statusBarHidden = YES;
     [UIApplication sharedApplication].statusBarStyle = UIStatusBarStyleLightContent;
 
 }
@@ -233,7 +233,11 @@
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageUpdatedCurrentDevice:)
                                                  name:@"messageUpdatedCurrentDevice" object:nil];
     
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageRefreshDevices:)
+                                                 name:@"messageRefreshDevices" object:nil];
     
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageCloseLeftMenu:)
+                                                 name:@"messageCloseLeftMenu" object:nil];
 }
 
 
@@ -1244,10 +1248,6 @@
     [commandText resignFirstResponder];
 }
 
-- (IBAction) showCommands:(id)sender {
-     //[self.sideBar show];
-}
-
 - (IBAction) showLeftView:(id)sender {
     [self.mm_drawerController toggleDrawerSide:MMDrawerSideLeft animated:YES completion:nil];
 }
@@ -1348,17 +1348,8 @@
 
 - (void) messageUpdatedDevices:(NSNotification *)notification {
     devices = notification.object;
-    
     if ([devices count] == 0) {
-        UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"No Devices Found"
-                                                                       message:@"No devices found on this wifi network." preferredStyle:UIAlertControllerStyleAlert];
-        UIAlertAction* accept = [UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil];
-        [alert addAction:accept];
-        [self presentViewController:alert animated:YES completion:nil];
-        return;
-    } else {
-        //[sideBarTable reloadData];
-        //[self.sideBar show];
+        [self hideStatusOverlay:@"No devices found on this network!"];
     }
 }
 
@@ -1377,8 +1368,7 @@
                          completion:^(BOOL finished) {
                              if (finished && percent == 1) {
                                  overlayProgress.hidden = YES;
-                                 overlayLabel.text = @"Scanning completed!";
-                                 [self toggleOverlay:@"hide"];
+                                 [self hideStatusOverlay:@"Scanning completed!"];
                              }
                          }];
         
@@ -1387,13 +1377,11 @@
 
 - (void) messageNextGuideRefreshTime:(NSNotification *)notification {
     nextRefresh = [notification object];
-    
     [[NSOperationQueue mainQueue] addOperationWithBlock:^{
         NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
         [formatter setDateFormat:@"h:mm a"];
-        overlayLabel.text = [NSString stringWithFormat:@"Next Refresh at %@",
-                              [formatter stringFromDate:nextRefresh]];
-        [self toggleOverlay:@"hide"];
+        [self hideStatusOverlay:[NSString stringWithFormat:@"Next Refresh at %@",
+                                 [formatter stringFromDate:nextRefresh]]];
     }];
 }
 
@@ -1441,23 +1429,19 @@
     [self setNowPlaying:channel];
 }
 
-- (void) messageRefreshSideBarDevices:(NSNotification *)notification {
-    [[NSOperationQueue mainQueue] addOperationWithBlock:^{
-        //[sideBarTable reloadData];
-    }];
-}
-
 - (void) messageUpdatedCurrentDevice:(NSNotification *)notification {
     currentDevice = notification.object;
     [[NSOperationQueue mainQueue] addOperationWithBlock:^{
         [self clearNowPlaying];
         [self displayDevice];
-        //[sideBarTable reloadData];
-        dispatch_time_t delay = dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC * 0.3);
-        dispatch_after(delay, dispatch_get_main_queue(), ^(void){
-            //[self.sideBar dismiss];
-        });
     }];
+}
+
+- (void) messageRefreshDevices:(NSNotification *)notification {
+    [self refreshDevices:nil];
+}
+- (void) messageCloseLeftMenu:(NSNotification *)notification {
+    [self showLeftView:nil];
 }
 
 
@@ -1477,12 +1461,7 @@
 }
 
 - (IBAction)refreshDevices:(id)sender {
-    [refreshControl endRefreshing];
-    //[self.sideBar dismiss];
-    [self toggleOverlay:@"show"];
-    overlayLabel.text = @"Scanning wifi network for devices...";
-    [UIApplication sharedApplication].statusBarHidden = YES;
-    
+    [self showStatusOverlay:@"Scanning wifi network for devices..."];
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
         [dtvDevices refreshDevicesForNetworks];
     });
@@ -1755,31 +1734,17 @@
     channelImage.image = nil;
 }
 
-- (void) setViewTransparancy:(BOOL)transparent {
-    if (transparent) {
-        
-    } else {
-        
-    }
-}
 
 #pragma mark - Guide Updates
 
 - (void) refreshGuideForTime:(NSDate *)time {
 
     [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
-    CGRect frm = overlayProgress.frame;
-    frm.size.width = 0;
-    overlayProgress.frame = frm;
-    overlayProgress.hidden = NO;
-    [self toggleOverlay:@"show"];
-    
-
     NSDate *dt = [dtvGuide getHalfHourIncrement:time];
     NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
     [formatter setDateFormat:@"MMM, d h:mm a"];
-    overlayLabel.text = [NSString stringWithFormat:@"Loading guide for %@",
-                          [formatter stringFromDate:dt]];
+    [self showStatusOverlay:[NSString stringWithFormat:@"Loading guide for %@",
+                             [formatter stringFromDate:dt]]];
 
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
         [dtvGuide refreshGuide:channels sorted:sortedChannels forTime:dt];
@@ -1814,32 +1779,48 @@
     guideTime.text = [dateFormat stringFromDate:sender.date];
 }
 
-- (void) toggleOverlay:(NSString *)action {
-    if ([action isEqualToString:@"show"]) {
+- (void) showStatusOverlay:(NSString *) message {
+    
+    [UIApplication sharedApplication].statusBarHidden = YES;
+    
+    overlayProgress.hidden = YES;
+    CGRect frm = overlayProgress.frame;
+    frm.size.width = 0;
+    overlayProgress.frame = frm;
+    overlayProgress.hidden = NO;
+    
+    overlay.alpha = 0;
+    overlayLabel.text = message;
+    
+    [UIView animateWithDuration:0.5
+                     animations:^{
+                         overlay.alpha = 1.0;
+                     }
+                     completion:^(BOOL finished) {
+                         if (finished) {
+                             [UIApplication sharedApplication].statusBarHidden = YES;
+                         }
+                     }];
+}
+
+- (void) hideStatusOverlay:(NSString *) message {
+    [UIApplication sharedApplication].statusBarHidden = YES;
+    overlay.alpha = 1.0;
+    overlayLabel.text = message;
+    overlayProgress.hidden = YES;
+    
+    dispatch_time_t delay = dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC * 3);
+    dispatch_after(delay, dispatch_get_main_queue(), ^(void){
         [UIView animateWithDuration:0.5
                          animations:^{
-                             overlay.alpha = 0.8;
+                             overlay.alpha = 0.0;
                          }
                          completion:^(BOOL finished) {
                              if (finished) {
-                                 [UIApplication sharedApplication].statusBarHidden = YES;
+                                 [UIApplication sharedApplication].statusBarHidden = NO;
                              }
                          }];
-    } else {
-        dispatch_time_t delay = dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC * 3);
-        dispatch_after(delay, dispatch_get_main_queue(), ^(void){
-            [UIView animateWithDuration:0.5
-                             animations:^{
-                                 overlay.alpha = 0.0;
-                             }
-                             completion:^(BOOL finished) {
-                                 if (finished) {
-                                     [UIApplication sharedApplication].statusBarHidden = NO;
-                                 }
-                             }];
-        });
-    }
+    });
 }
-
 
 @end

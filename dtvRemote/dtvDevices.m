@@ -112,6 +112,18 @@
     
 }
 
++ (void) clearDevicesForNetwork {
+    NSMutableDictionary *networks = [self loadNetworksFromDisk];
+    NSString *ssid = [iNet fetchSSID];
+    
+    if (networks[ssid]) {
+        [networks removeObjectForKey:ssid];
+    }
+    [networks setObject:[[NSMutableDictionary alloc] init] forKey:ssid];
+    [self saveNetworksToDisk:networks];
+    [self sendMessageOfUpdatedDevices:networks[ssid]];
+    
+}
 
 + (NSMutableDictionary *) getSavedDevicesForActiveNetwork {
     if ([iNet isOnWifi]) {
