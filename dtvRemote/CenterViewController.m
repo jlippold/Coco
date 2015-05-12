@@ -63,11 +63,13 @@
     IBOutlet UISlider *seekBar;
     UILabel *timeLeft;
     UIToolbar *toolBar;
-    UITextField *commandText;
+
     UITextField *guideTime;
     UIDatePicker *guideDatePicker;
     NSTimer *timer;
-    UIColor *averageColor;
+    
+    UIScrollView *commandScrollView;
+    UIPageControl *commandPager;
     
     NSDate *nextRefresh;
     NSString *currentProgramId;
@@ -668,39 +670,80 @@
     guideTime.text = @"";
     
     [centerView addSubview:guideTime];
-    
-
-    commandText = [[UITextField alloc] initWithFrame:CGRectMake(0,0,1,1)];
-    
-    UIToolbar *commandTextDone = [[UIToolbar alloc] initWithFrame:CGRectMake(0, 0, [[UIScreen mainScreen] bounds].size.width, 44)];
-    [commandTextDone setBarStyle:UIBarStyleBlackTranslucent];
-    UIBarButtonItem *b1 = [[UIBarButtonItem alloc] initWithTitle:@"Rec" style:UIBarButtonItemStylePlain
-                                                             target:nil action:@selector(sendCommand:)];
-    UIBarButtonItem *b2 = [[UIBarButtonItem alloc] initWithTitle:@"Prev" style:UIBarButtonItemStylePlain
-                                                          target:nil action:@selector(sendCommand:)];
-    UIBarButtonItem *b3 = [[UIBarButtonItem alloc] initWithTitle:@"Menu" style:UIBarButtonItemStylePlain
-                                                          target:nil action:@selector(sendCommand:)];
-    UIBarButtonItem *b4 = [[UIBarButtonItem alloc] initWithTitle:@"Guide" style:UIBarButtonItemStylePlain
-                                                          target:nil action:@selector(sendCommand:)];
-    UIBarButtonItem *b5 = [[UIBarButtonItem alloc] initWithTitle:@"List" style:UIBarButtonItemStylePlain
-                                                          target:nil action:@selector(sendCommand:)];
-    UIBarButtonItem *done3 = [[UIBarButtonItem alloc] initWithTitle:@"Close" style:UIBarButtonItemStyleDone
-                                                            target:nil action:@selector(closeCommands:)];
 
     
-    [commandTextDone setItems: [NSArray arrayWithObjects:b1, flex, b2, flex, b3, flex, b4, flex, b5, flex, done3, nil]];
-    [commandText setInputAccessoryView:commandTextDone];
-    commandText.keyboardType = UIKeyboardTypeNumberPad;
-    [commandText setHidden:YES];
-    commandText.text = @"";
-    [commandText addTarget:self
-                  action:@selector(commandSend:)
-        forControlEvents:UIControlEventEditingChanged];
-    
+}
 
-    [centerView addSubview:commandText];
-
+- (void) showCommandSlider {
+    if (commandScrollView) {
+        [commandScrollView removeFromSuperview];
+        commandScrollView = nil;
+    }
     
+    if (commandPager) {
+        [commandPager removeFromSuperview];
+        commandPager = nil;
+    }
+    
+    commandScrollView = [[UIScrollView alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
+    commandScrollView.pagingEnabled = YES;
+    commandScrollView.delegate = self;
+    commandScrollView.showsHorizontalScrollIndicator = NO;
+    
+    CGRect frm = [[UIScreen mainScreen] bounds];
+    frm.origin.y = frm.size.height - 30;
+    frm.size.height = 10;
+    commandPager = [[UIPageControl alloc] initWithFrame:frm];
+    commandPager.numberOfPages = 3;
+    commandPager.currentPage = 0;
+    
+    [self setupScrollView:commandScrollView];
+    
+    [[[UIApplication sharedApplication] keyWindow] addSubview:commandScrollView];
+    [[[UIApplication sharedApplication] keyWindow] addSubview:commandPager];
+
+}
+
+- (void) setupScrollView:(UIScrollView*)scrollView {
+    
+    UIImage *image1 = [Colors imageWithColor:[Colors greenColor]];
+    UIImage *image2 = [Colors imageWithColor:[Colors redColor]];
+    UIImage *image3 = [Colors imageWithColor:[Colors blueColor]];
+    NSArray *picArray = [[NSArray alloc] initWithObjects:image1, image2, image3, nil];
+    
+    for (int i=0; i<=[picArray count]-1; i++) {
+        
+        UIImage *image = [picArray objectAtIndex:i];
+        CGRect frm = [[UIScreen mainScreen] bounds];
+        frm.origin.x = (i*scrollView.frame.size.width);
+        
+        UIImageView *imgV = [[UIImageView alloc] initWithFrame:frm];
+        imgV.contentMode=UIViewContentModeScaleToFill;
+        [imgV setImage:image];
+        
+        [scrollView addSubview:imgV];
+    }
+    
+    CGSize frame = scrollView.frame.size;
+    frame.width = frame.width * [picArray count] - 1;
+    [scrollView setContentSize:frame];
+}
+
+- (void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate {
+    if (!decelerate) {
+        [self updateCommandPager];
+    }
+}
+
+- (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView {
+    [self updateCommandPager];
+}
+
+-(void) updateCommandPager {
+    
+    CGFloat pageWidth = commandScrollView.frame.size.width;
+    int page = floor((commandScrollView.contentOffset.x - pageWidth / 2) / pageWidth) + 1;
+    commandPager.currentPage = page;
 }
 
 -(UIStatusBarStyle) preferredStatusBarStyle{
@@ -1189,13 +1232,9 @@
 }
 
 - (IBAction) showNumberPad:(id)sender {
-    
-    if (!currentDevice) {
-        return;
-    }
-    
-    [commandText becomeFirstResponder];
+    [self showCommandSlider];
 }
+
 
 - (IBAction) playpause:(id)sender {
     if (isPlaying) {
@@ -1247,10 +1286,6 @@
     [guideTime resignFirstResponder];
 }
 
-- (IBAction) closeCommands:(id)sender {
-    commandText.text = @"";
-    [commandText resignFirstResponder];
-}
 
 - (IBAction) showLeftView:(id)sender {
     [self.mm_drawerController toggleDrawerSide:MMDrawerSideLeft animated:YES completion:nil];
@@ -1280,16 +1315,6 @@
         [dtvCommands sendCommand:@"prev" device:currentDevice];
     }
 
-}
-
-
-- (void) commandSend:(id)sender {
-    // there was a text change in some control
-    NSString *command = commandText.text;
-    if (![command isEqualToString:@""]) {
-        [dtvCommands sendCommand:command device:currentDevice];
-    }
-    commandText.text = @"";
 }
 
 
