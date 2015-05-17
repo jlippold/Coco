@@ -16,12 +16,15 @@
 		8507604C1AFFE3A10061DFEA /* LeftViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 8507604B1AFFE3A10061DFEA /* LeftViewController.m */; };
 		8507604F1AFFEC2F0061DFEA /* RightViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 8507604E1AFFEC2F0061DFEA /* RightViewController.m */; };
 		850760531B01901D0061DFEA /* commands.plist in Resources */ = {isa = PBXBuildFile; fileRef = 850760521B01901D0061DFEA /* commands.plist */; };
-		8507605C1B02DE1F0061DFEA /* CommandSlider.m in Sources */ = {isa = PBXBuildFile; fileRef = 8507605B1B02DE1F0061DFEA /* CommandSlider.m */; };
 		85428D5E1AA5368600134A23 /* dtvGuide.m in Sources */ = {isa = PBXBuildFile; fileRef = 85428D5D1AA5368600134A23 /* dtvGuide.m */; };
 		85428D611AA5379700134A23 /* dtvCommands.m in Sources */ = {isa = PBXBuildFile; fileRef = 85428D601AA5379700134A23 /* dtvCommands.m */; };
 		855E08091AF2D2AF0072B8AA /* dtvCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = 855E08081AF2D2AF0072B8AA /* dtvCommand.m */; };
 		855E080C1AF2DD780072B8AA /* dtvChannel.m in Sources */ = {isa = PBXBuildFile; fileRef = 855E080B1AF2DD780072B8AA /* dtvChannel.m */; };
 		855E080F1AF3C2A00072B8AA /* dtvGuideItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 855E080E1AF3C2A00072B8AA /* dtvGuideItem.m */; };
+		8561434C1B07A1E100AC59BC /* VibrancyViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 8561434A1B07A1E100AC59BC /* VibrancyViewController.m */; };
+		8561434D1B07A1E100AC59BC /* VibrancyViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 8561434B1B07A1E100AC59BC /* VibrancyViewController.xib */; };
+		856143511B07B15B00AC59BC /* NumberPadViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 8561434F1B07B15B00AC59BC /* NumberPadViewController.m */; };
+		856143521B07B15B00AC59BC /* NumberPadViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 856143501B07B15B00AC59BC /* NumberPadViewController.xib */; };
 		8564F7DC1AD06F520090F308 /* MBProgressHUD.m in Sources */ = {isa = PBXBuildFile; fileRef = 8564F7DB1AD06F520090F308 /* MBProgressHUD.m */; };
 		857CAAFC1AF51C9C004F8058 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 857CAAFB1AF51C9C004F8058 /* SystemConfiguration.framework */; };
 		857CAAFF1AF51E7F004F8058 /* Reachability.m in Sources */ = {isa = PBXBuildFile; fileRef = 857CAAFE1AF51E7F004F8058 /* Reachability.m */; };
@@ -58,8 +61,6 @@
 		8507604D1AFFEC2F0061DFEA /* RightViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RightViewController.h; sourceTree = "<group>"; };
 		8507604E1AFFEC2F0061DFEA /* RightViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RightViewController.m; sourceTree = "<group>"; };
 		850760521B01901D0061DFEA /* commands.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = commands.plist; sourceTree = "<group>"; };
-		8507605A1B02DE1F0061DFEA /* CommandSlider.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CommandSlider.h; sourceTree = "<group>"; };
-		8507605B1B02DE1F0061DFEA /* CommandSlider.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CommandSlider.m; sourceTree = "<group>"; };
 		85428D5C1AA5368600134A23 /* dtvGuide.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = dtvGuide.h; sourceTree = "<group>"; };
 		85428D5D1AA5368600134A23 /* dtvGuide.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = dtvGuide.m; sourceTree = "<group>"; };
 		85428D5F1AA5379700134A23 /* dtvCommands.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = dtvCommands.h; sourceTree = "<group>"; };
@@ -70,6 +71,12 @@
 		855E080B1AF2DD780072B8AA /* dtvChannel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = dtvChannel.m; sourceTree = "<group>"; };
 		855E080D1AF3C2A00072B8AA /* dtvGuideItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = dtvGuideItem.h; sourceTree = "<group>"; };
 		855E080E1AF3C2A00072B8AA /* dtvGuideItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = dtvGuideItem.m; sourceTree = "<group>"; };
+		856143491B07A1E100AC59BC /* VibrancyViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VibrancyViewController.h; sourceTree = "<group>"; };
+		8561434A1B07A1E100AC59BC /* VibrancyViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VibrancyViewController.m; sourceTree = "<group>"; };
+		8561434B1B07A1E100AC59BC /* VibrancyViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = VibrancyViewController.xib; sourceTree = "<group>"; };
+		8561434E1B07B15B00AC59BC /* NumberPadViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NumberPadViewController.h; sourceTree = "<group>"; };
+		8561434F1B07B15B00AC59BC /* NumberPadViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NumberPadViewController.m; sourceTree = "<group>"; };
+		856143501B07B15B00AC59BC /* NumberPadViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = NumberPadViewController.xib; sourceTree = "<group>"; };
 		8564F7DA1AD06F520090F308 /* MBProgressHUD.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MBProgressHUD.h; sourceTree = "<group>"; };
 		8564F7DB1AD06F520090F308 /* MBProgressHUD.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MBProgressHUD.m; sourceTree = "<group>"; };
 		857CAAFB1AF51C9C004F8058 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
@@ -195,13 +202,17 @@
 				8507604B1AFFE3A10061DFEA /* LeftViewController.m */,
 				8507604D1AFFEC2F0061DFEA /* RightViewController.h */,
 				8507604E1AFFEC2F0061DFEA /* RightViewController.m */,
-				8507605A1B02DE1F0061DFEA /* CommandSlider.h */,
-				8507605B1B02DE1F0061DFEA /* CommandSlider.m */,
 				859D6D8B1A9926CA0024FBA4 /* dtvRemote.xcdatamodeld */,
 				858A4F641AA5FC5600B6226E /* images.bundle */,
 				859D6D941A9926CA0024FBA4 /* Images.xcassets */,
 				85D9B78B1AD195E100958450 /* LaunchScreen.xib */,
 				859D6D841A9926CA0024FBA4 /* Supporting Files */,
+				856143491B07A1E100AC59BC /* VibrancyViewController.h */,
+				8561434A1B07A1E100AC59BC /* VibrancyViewController.m */,
+				8561434B1B07A1E100AC59BC /* VibrancyViewController.xib */,
+				8561434E1B07B15B00AC59BC /* NumberPadViewController.h */,
+				8561434F1B07B15B00AC59BC /* NumberPadViewController.m */,
+				856143501B07B15B00AC59BC /* NumberPadViewController.xib */,
 			);
 			path = dtvRemote;
 			sourceTree = "<group>";
@@ -275,6 +286,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8561434D1B07A1E100AC59BC /* VibrancyViewController.xib in Resources */,
+				856143521B07B15B00AC59BC /* NumberPadViewController.xib in Resources */,
 				85D9B78C1AD195E100958450 /* LaunchScreen.xib in Resources */,
 				859D6D951A9926CA0024FBA4 /* Images.xcassets in Resources */,
 				8580653E1AC89A36005672E8 /* categories.plist in Resources */,
@@ -290,10 +303,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8561434C1B07A1E100AC59BC /* VibrancyViewController.m in Sources */,
 				855E080C1AF2DD780072B8AA /* dtvChannel.m in Sources */,
 				85428D5E1AA5368600134A23 /* dtvGuide.m in Sources */,
 				859D6DB31A9AA3F60024FBA4 /* iNet.m in Sources */,
 				859D6D8D1A9926CA0024FBA4 /* dtvRemote.xcdatamodeld in Sources */,
+				856143511B07B15B00AC59BC /* NumberPadViewController.m in Sources */,
 				859D6D8A1A9926CA0024FBA4 /* AppDelegate.m in Sources */,
 				850760481AFF9D740061DFEA /* MMDrawerVisualState.m in Sources */,
 				850760471AFF9D740061DFEA /* MMDrawerController.m in Sources */,
@@ -309,7 +324,6 @@
 				850760381AFF94880061DFEA /* dtvDevices.m in Sources */,
 				858975011AFEA9D1004D5D64 /* Colors.m in Sources */,
 				859D6D871A9926CA0024FBA4 /* main.m in Sources */,
-				8507605C1B02DE1F0061DFEA /* CommandSlider.m in Sources */,
 				85428D611AA5379700134A23 /* dtvCommands.m in Sources */,
 				850760371AFF94880061DFEA /* dtvDevice.m in Sources */,
 				850760461AFF9D740061DFEA /* MMDrawerBarButtonItem.m in Sources */,

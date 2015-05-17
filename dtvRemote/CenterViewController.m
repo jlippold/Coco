@@ -17,11 +17,13 @@
 #import "dtvCommands.h"
 #import "dtvDevices.h"
 #import "dtvDevice.h"
-#import "CommandSlider.h"
+#import "VibrancyViewController.h"
 
 #import "MBProgressHUD.h"
 #import "Reachability.h"
 #import "Colors.h"
+
+
 
 @implementation CenterViewController {
 
@@ -676,10 +678,9 @@
 }
 
 - (void) showCommandSlider {
-    CommandSlider *commandSlider = [[CommandSlider alloc] initWithImage:backgroundView.image
-                                                        commands:[[NSDictionary alloc] init]];
-    [[[UIApplication sharedApplication] keyWindow] addSubview:commandSlider];
-    
+    VibrancyViewController *vib = [[VibrancyViewController alloc] init];
+    vib.backgroundView.image = backgroundView.image;
+    [self presentViewController:vib animated:YES completion:nil];
 }
 
 
