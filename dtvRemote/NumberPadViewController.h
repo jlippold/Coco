@@ -10,4 +10,6 @@
 
 @interface NumberPadViewController : UIViewController
 
+- (id) initWithPageTitle:(NSString *)title;
+
 @end

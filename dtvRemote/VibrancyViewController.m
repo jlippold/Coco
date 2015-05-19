@@ -62,7 +62,7 @@
     
 
     navItem = [UINavigationItem alloc];
-    navItem.title = @"Commands";
+    navItem.title = @"Number Pad";
     navItem.rightBarButtonItem = closeButton;
     [navbar pushNavigationItem:navItem animated:false];
     
@@ -97,12 +97,17 @@
     CGFloat pageWidth = _scrollView.frame.size.width;
     int page = floor((_scrollView.contentOffset.x - pageWidth / 2) / pageWidth) + 1;
     _pageControl.currentPage = page;
+    if (page == 0) {
+        navItem.title = @"Number Pad";
+    } else {
+        navItem.title = @"Other Commands";
+    }
 }
 
 - (void) setupScrollView  {
     
-    page1 = [[NumberPadViewController alloc] init];
-    page2 = [[NumberPadViewController alloc] init];
+    page1 = [[NumberPadViewController alloc] initWithPageTitle:@"numbers"];
+    page2 = [[NumberPadViewController alloc] initWithPageTitle:@"commands"];
     
     CGRect frm = _scrollView.bounds;
     page1.view.frame = frm;

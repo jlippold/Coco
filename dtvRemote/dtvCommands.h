@@ -9,15 +9,18 @@
 #import <Foundation/Foundation.h>
 #import "dtvChannel.h"
 #import "dtvDevice.h"
+#import "dtvCommand.h"
 
 @interface dtvCommands : NSObject
 
 + (void)changeChannel:(dtvChannel *)channel device:(dtvDevice *)device;
 + (NSString *)getChannelOnDevice:(dtvDevice *)device;
 + (BOOL) sendCommand:(NSString *)command device:(dtvDevice *)device;
-+ (NSMutableDictionary *) getCommands;
-
-
++ (NSMutableDictionary *) getCommandsForSidebar;
++ (NSMutableDictionary *) getCommandsForNumberPad;
++ (dtvCommand *) getCommandAtnumberPadPagePosition:(NSMutableDictionary *) commands
+                                              page:(NSString *)page
+                                          position:(NSString *)position;
 @end
 
 

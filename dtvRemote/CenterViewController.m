@@ -679,8 +679,8 @@
 
 - (void) showCommandSlider {
     VibrancyViewController *vib = [[VibrancyViewController alloc] init];
-    vib.backgroundView.image = backgroundView.image;
     [self presentViewController:vib animated:YES completion:nil];
+    vib.backgroundView.image = backgroundView.image;
 }
 
 

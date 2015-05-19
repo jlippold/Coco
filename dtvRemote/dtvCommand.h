@@ -10,9 +10,15 @@
 
 @interface dtvCommand : NSObject
 
-@property (nonatomic, strong) NSString *action;
-@property (nonatomic, strong) NSString *desc;
-@property (nonatomic, strong) NSString *category;
-@property (nonatomic, strong) NSString *sortIndex;
+@property (nonatomic, strong) NSString *dtvCommandText;
+@property (nonatomic, strong) NSString *commandDescription;
+@property (nonatomic, strong) NSString *shortName;
+@property (nonatomic, strong) NSString *sideBarCategory;
+@property (nonatomic, strong) NSString *sideBarSortIndex;
+@property BOOL showInNumberPad;
+@property BOOL showInSideBar;
+@property (nonatomic, strong) NSString *numberPadPagePosition;
+@property (nonatomic, strong) NSString *numberPadPageName;
+
 
 @end

@@ -27,12 +27,13 @@
     [super viewDidLoad];
     
     currentDevice = [dtvDevices getCurrentDevice];
-    commands = [dtvCommands getCommands];
+    commands = [dtvCommands getCommandsForSidebar];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageUpdatedCurrentDevice:)
                                                  name:@"messageUpdatedCurrentDevice" object:nil];
     
     sideBarView = [[UIView alloc] initWithFrame:[UIScreen mainScreen].bounds];
+    sideBarView.backgroundColor = [Colors backgroundColor];
     
     CGRect navBarFrame = CGRectMake(0, 0, [[UIScreen mainScreen] bounds].size.width * 0.75, 64.0);
     [[UINavigationBar appearance] setShadowImage:[[UIImage alloc] init]];
@@ -53,7 +54,7 @@
     tableFrame.size.height = tableFrame.size.height - 64;
     tableFrame.origin.x = 0;
     tableFrame.origin.y = 64;
-    sideBarTable = [[UITableView alloc] initWithFrame:tableFrame style:UITableViewStylePlain];
+    sideBarTable = [[UITableView alloc] initWithFrame:tableFrame style:UITableViewStyleGrouped];
     sideBarTable.frame = tableFrame;
     
     sideBarTable.dataSource = self;
@@ -93,12 +94,15 @@
 
 - (void)tableView:(UITableView *)tableView willDisplayHeaderView:(UIView *)view forSection:(NSInteger)section {
     UITableViewHeaderFooterView *v = (UITableViewHeaderFooterView *)view;
-    v.backgroundView.backgroundColor = [UIColor blackColor];
+    v.backgroundView.backgroundColor = [Colors backgroundColor];
     v.backgroundView.alpha = 0.9;
     v.backgroundView.tintColor = [Colors tintColor];
     
     UITableViewHeaderFooterView *header = (UITableViewHeaderFooterView *)view;
     [header.textLabel setTextColor:[Colors textColor]];
+    
+    
+    
 }
 
 - (NSString*) tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section {
@@ -128,15 +132,15 @@
     NSString *sectionKey = [sections objectAtIndex:indexPath.section];
     NSMutableArray *commandArray = [commands objectForKey:sectionKey];
     NSArray *sortedArray = [commandArray sortedArrayUsingComparator:^NSComparisonResult(id a, id b) {
-        NSString *first = [(dtvCommand*) a sortIndex];
-        NSString *second = [(dtvCommand*) b sortIndex];
+        NSString *first = [(dtvCommand*) a sideBarSortIndex];
+        NSString *second = [(dtvCommand*) b sideBarSortIndex];
         return [first compare:second];
     }];
     
     
     dtvCommand *c = [sortedArray objectAtIndex:indexPath.row];
-    cell.textLabel.text = c.desc;
-    cell.detailTextLabel.text = [NSString stringWithFormat:@"%@: %@", c.category, c.desc];
+    cell.textLabel.text = c.commandDescription;
+    cell.detailTextLabel.text = [NSString stringWithFormat:@"%@: %@", c.sideBarCategory, c.commandDescription];
     
     return cell;
 }
@@ -157,13 +161,13 @@
     NSString *sectionKey = [sections objectAtIndex:indexPath.section];
     NSMutableArray *commandArray = [commands objectForKey:sectionKey];
     NSArray *sortedArray = [commandArray sortedArrayUsingComparator:^NSComparisonResult(id a, id b) {
-        NSString *first = [(dtvCommand*) a sortIndex];
-        NSString *second = [(dtvCommand*) b sortIndex];
+        NSString *first = [(dtvCommand*) a commandDescription];
+        NSString *second = [(dtvCommand*) b commandDescription];
         return [first compare:second];
     }];
     
     dtvCommand *c = [sortedArray objectAtIndex:indexPath.row];
-    [dtvCommands sendCommand:c.action device:currentDevice];
+    [dtvCommands sendCommand:c.dtvCommandText device:currentDevice];
 }
 
 - (void) messageUpdatedCurrentDevice:(NSNotification *)notification {
