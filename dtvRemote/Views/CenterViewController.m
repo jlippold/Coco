@@ -271,56 +271,26 @@
     [self createTopSection];
     [self createTableView];
     [self createToolbar];
-    
-
-
 }
 
 - (void) createBackgroundView {
     
     backgroundView = [[UIImageView alloc] initWithImage:[Colors imageWithColor:[Colors backgroundColor]]];
     backgroundView.frame = [[UIScreen mainScreen] bounds];
-    //backgroundView.contentMode = UIViewContentModeScaleAspectFill;
     backgroundView.contentMode = UIViewContentModeScaleToFill;
     backgroundView.alpha = 1.0;
     
     UIBlurEffect *blurEffect = [UIBlurEffect effectWithStyle:UIBlurEffectStyleDark];
-    UIVisualEffectView *effectView = [[UIVisualEffectView alloc] initWithEffect:blurEffect];
-    effectView.translatesAutoresizingMaskIntoConstraints = NO;
-    effectView.userInteractionEnabled = YES;
-    
-    // Add the blur effect to an image view.
-    [backgroundView addSubview:effectView];
-    UIVibrancyEffect *vibrance = [UIVibrancyEffect effectForBlurEffect:blurEffect];
-    
-    bluredEffectView = [[UIVisualEffectView alloc] initWithEffect:vibrance];
-    bluredEffectView.translatesAutoresizingMaskIntoConstraints = NO;
-    bluredEffectView.userInteractionEnabled = YES;
-    
-    // Add the vibrance effect to our blur effect view
-    [effectView.contentView addSubview:bluredEffectView];
-
-    [effectView.contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[v]|" options:0 metrics:nil views: @{ @"v" : bluredEffectView }]];
-    [effectView.contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[v]|" options:0 metrics:nil views: @{ @"v" : bluredEffectView }]];
+    bluredEffectView = [[UIVisualEffectView alloc] initWithEffect:blurEffect];
+    bluredEffectView.frame = [UIScreen mainScreen].bounds;
+    [backgroundView addSubview:bluredEffectView];
     
     CGRect frm = [[UIScreen mainScreen] bounds];
     frm.size.height = 80;
     frm.origin.x = 0;
     frm.origin.y = 400;
     
-    UILabel *test = [[UILabel alloc] initWithFrame:frm];
-    test.text = @"";
-    test.font = [UIFont fontWithName:@"Helvetica" size:30];
-    test.textAlignment = NSTextAlignmentCenter;
-    
-    // Add label to the vibrance content view.
-    [bluredEffectView.contentView addSubview:test];
-    [bluredEffectView.contentView addConstraint:[NSLayoutConstraint constraintWithItem:test attribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual toItem:bluredEffectView.contentView attribute:NSLayoutAttributeCenterX multiplier:1.0 constant:0.0]];
-    [bluredEffectView.contentView addConstraint:[NSLayoutConstraint constraintWithItem:test attribute:NSLayoutAttributeCenterY relatedBy:NSLayoutRelationEqual toItem:bluredEffectView.contentView attribute:NSLayoutAttributeCenterY multiplier:1.0 constant:0.0]];
-    
     [centerView addSubview:backgroundView];
-
-
 }
 
 
@@ -483,7 +453,7 @@
     channelImage.frame = CGRectMake(xOffset,
                                     (seekBar.frame.size.height + seekBar.frame.origin.y) + 66,
                                     50, 44);
-    [bluredEffectView.contentView addSubview:channelImage];
+    [bluredEffectView addSubview:channelImage];
     
     
     boxDescription = [[UILabel alloc] init];
@@ -530,7 +500,7 @@
                                         50, 13);
     [hdImage setHidden:YES];
     
-    [bluredEffectView.contentView addSubview:hdImage];
+    [bluredEffectView addSubview:hdImage];
     
     
     ratingLabel = [[UILabel alloc] init];
@@ -547,7 +517,7 @@
     
     [ratingLabel setHidden:YES];
     
-    [bluredEffectView.contentView addSubview:ratingLabel];
+    [bluredEffectView addSubview:ratingLabel];
     
     stars = [[UILabel alloc] init];
     stars.text = @"★★★★★";
