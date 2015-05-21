@@ -35,7 +35,6 @@
 		8562BAF81B0ADA8200F65F26 /* commands.plist in Resources */ = {isa = PBXBuildFile; fileRef = 8562BAF31B0ADA8200F65F26 /* commands.plist */; };
 		8562BAF91B0ADA8200F65F26 /* images.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 8562BAF41B0ADA8200F65F26 /* images.bundle */; };
 		8562BAFB1B0ADA8200F65F26 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 8562BAF61B0ADA8200F65F26 /* main.m */; };
-		8562BAFD1B0ADAA500F65F26 /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 8562BAFC1B0ADAA500F65F26 /* Info.plist */; };
 		857CAAFC1AF51C9C004F8058 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 857CAAFB1AF51C9C004F8058 /* SystemConfiguration.framework */; };
 		859D6D8A1A9926CA0024FBA4 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 859D6D891A9926CA0024FBA4 /* AppDelegate.m */; };
 		859D6D8D1A9926CA0024FBA4 /* dtvRemote.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 859D6D8B1A9926CA0024FBA4 /* dtvRemote.xcdatamodeld */; };
@@ -311,7 +310,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8562BAFD1B0ADAA500F65F26 /* Info.plist in Resources */,
 				8562BAEB1B0ADA4400F65F26 /* LaunchScreen.xib in Resources */,
 				8562BAEE1B0ADA4400F65F26 /* NumberPadViewController.xib in Resources */,
 				8562BAF81B0ADA8200F65F26 /* commands.plist in Resources */,
