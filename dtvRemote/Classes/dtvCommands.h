@@ -18,6 +18,7 @@
 + (BOOL) sendCommand:(NSString *)command device:(dtvDevice *)device;
 + (NSMutableDictionary *) getCommandsForSidebar;
 + (NSMutableDictionary *) getCommandsForNumberPad;
++ (void) loadCustomCommandsFromUrl:(NSString *) strUrl;
 + (dtvCommand *) getCommandAtnumberPadPagePosition:(NSMutableDictionary *) commands
                                               page:(NSString *)page
                                           position:(NSString *)position;

@@ -9,8 +9,10 @@
 #import "LeftViewController.h"
 #import "dtvDevices.h"
 #import "dtvDevice.h"
+#import "dtvCommands.h"
 #import "Colors.h"
 #import "iNet.h"
+#import "MBProgressHUD.h"
 
 
 @interface LeftViewController ()
@@ -44,6 +46,8 @@
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageUpdatedDevices:)
                                                  name:@"messageUpdatedDevices" object:nil];
 
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageImportedCustomCommands:)
+                                                 name:@"messageImportedCustomCommands" object:nil];
     
     devices = [dtvDevices getSavedDevicesForActiveNetwork];
     currentDevice = [dtvDevices getCurrentDevice];
@@ -142,7 +146,7 @@
     if (section == 0) {
         return [devices count];
     } else {
-        return 4;
+        return 5;
     }
 }
 
@@ -197,6 +201,9 @@
                 cell.textLabel.text = [NSString stringWithFormat:@"Change location: %@",
                                        [[NSUserDefaults standardUserDefaults] stringForKey:@"zip"]];
                 break;
+            case 4:
+                cell.textLabel.text = @"Import custom commands";
+                break;
         }
     }
     
@@ -242,6 +249,9 @@
                 break;
             case 3:
                 [self setZipCode];
+                break;
+            case 4:
+                [self importCommands];
                 break;
         }
     }
@@ -295,6 +305,56 @@
     });
 }
 
+- (void) importCommands {
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Import Commands"
+                                                                   message:@"Please enter a URL to import commands" preferredStyle:UIAlertControllerStyleAlert];
+    
+    UIAlertAction* accept =
+    [UIAlertAction actionWithTitle:@"Import" style:UIAlertActionStyleDefault handler:
+     ^(UIAlertAction * action){
+         
+         UITextField *textField = alert.textFields.firstObject;
+         NSString *url = textField.text;
+         NSLog(@"Entered: %@", url);
+         
+         //save entered zip
+         [[NSUserDefaults standardUserDefaults] setObject:url forKey:@"url"];
+         [[NSUserDefaults standardUserDefaults] synchronize];
+         
+         NSURL *testUrl = [NSURL URLWithString:url];
+         if (testUrl && testUrl.scheme && testUrl.host) {
+         } else {
+             [self importCommands];
+             return;
+         }
+         
+         MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+         hud.mode = MBProgressHUDModeIndeterminate;
+         hud.labelText = [NSString stringWithFormat:@"Importing Commands from %@", url];
+         [dtvCommands loadCustomCommandsFromUrl:url];
+         
+     }];
+    
+    
+    UIAlertAction *cancel = [UIAlertAction actionWithTitle:@"No" style:UIAlertActionStyleDefault handler:
+                             ^(UIAlertAction * action) {
+                                 [self dismissViewControllerAnimated:YES completion:nil];
+                                 return;
+                             }];
+    
+    [alert addAction:accept];
+    [alert addAction:cancel];
+    
+    [alert addTextFieldWithConfigurationHandler:^(UITextField *textField) {
+        textField.text = [[NSUserDefaults standardUserDefaults] stringForKey:@"url"];
+        textField.keyboardType = UIKeyboardTypeURL;
+        textField.placeholder = @"http://somesite.com/commands.json";
+        
+    }];
+    
+    [self presentViewController:alert animated:YES completion:nil];
+}
+
 -(void) setZipCode {
     [[NSNotificationCenter defaultCenter] postNotificationName:@"messagePromptForZipCode"
                                                         object:nil];
@@ -337,6 +397,15 @@
     [vc presentViewController:view animated:YES completion:nil];
     
 
+}
+- (void) messageImportedCustomCommands:(NSNotification *)notification {
+    [MBProgressHUD hideHUDForView:self.view animated:YES];
+    
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Custom Commands"
+                                                                   message:notification.object preferredStyle:UIAlertControllerStyleAlert];
+    UIAlertAction* accept = [UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil];
+    [alert addAction:accept];
+    [self presentViewController:alert animated:YES completion:nil];
 }
 - (void) messageUpdatedStatusOfDevices:(NSNotification *)notification {
     devices = notification.object;

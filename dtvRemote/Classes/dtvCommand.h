@@ -10,6 +10,7 @@
 
 @interface dtvCommand : NSObject
 
+@property BOOL isCustomCommand;
 @property (nonatomic, strong) NSString *dtvCommandText;
 @property (nonatomic, strong) NSString *commandDescription;
 @property (nonatomic, strong) NSString *shortName;
@@ -19,6 +20,5 @@
 @property BOOL showInSideBar;
 @property (nonatomic, strong) NSString *numberPadPagePosition;
 @property (nonatomic, strong) NSString *numberPadPageName;
-
 
 @end

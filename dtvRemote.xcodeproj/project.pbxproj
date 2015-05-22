@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		850F8D291B0EB94C00F9CA10 /* dtvCustomCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = 850F8D281B0EB94C00F9CA10 /* dtvCustomCommand.m */; };
 		8562BAAC1B0AD95000F65F26 /* Reachability.m in Sources */ = {isa = PBXBuildFile; fileRef = 8562BAAB1B0AD95000F65F26 /* Reachability.m */; };
 		8562BAB01B0AD96800F65F26 /* MBProgressHUD.m in Sources */ = {isa = PBXBuildFile; fileRef = 8562BAAF1B0AD96800F65F26 /* MBProgressHUD.m */; };
 		8562BABA1B0AD9A300F65F26 /* MMDrawerBarButtonItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 8562BAB21B0AD9A300F65F26 /* MMDrawerBarButtonItem.m */; };
@@ -43,6 +44,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		850F8D271B0EB94C00F9CA10 /* dtvCustomCommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = dtvCustomCommand.h; path = Classes/dtvCustomCommand.h; sourceTree = "<group>"; };
+		850F8D281B0EB94C00F9CA10 /* dtvCustomCommand.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = dtvCustomCommand.m; path = Classes/dtvCustomCommand.m; sourceTree = "<group>"; };
 		8562BAAA1B0AD95000F65F26 /* Reachability.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Reachability.h; path = Vendor/Reachability/Reachability.h; sourceTree = "<group>"; };
 		8562BAAB1B0AD95000F65F26 /* Reachability.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Reachability.m; path = Vendor/Reachability/Reachability.m; sourceTree = "<group>"; };
 		8562BAAE1B0AD96800F65F26 /* MBProgressHUD.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MBProgressHUD.h; path = Vendor/MBProgressHUD/MBProgressHUD.h; sourceTree = "<group>"; };
@@ -143,6 +146,8 @@
 				8562BAC31B0AD9E200F65F26 /* dtvChannels.m */,
 				8562BAC41B0AD9E200F65F26 /* dtvCommand.h */,
 				8562BAC51B0AD9E200F65F26 /* dtvCommand.m */,
+				850F8D271B0EB94C00F9CA10 /* dtvCustomCommand.h */,
+				850F8D281B0EB94C00F9CA10 /* dtvCustomCommand.m */,
 				8562BAC61B0AD9E200F65F26 /* dtvCommands.h */,
 				8562BAC71B0AD9E200F65F26 /* dtvCommands.m */,
 				8562BAC81B0AD9E200F65F26 /* dtvDevice.h */,
@@ -335,6 +340,7 @@
 				8562BAD51B0AD9E200F65F26 /* dtvCommand.m in Sources */,
 				8562BAD91B0AD9E200F65F26 /* dtvGuide.m in Sources */,
 				859D6D8A1A9926CA0024FBA4 /* AppDelegate.m in Sources */,
+				850F8D291B0EB94C00F9CA10 /* dtvCustomCommand.m in Sources */,
 				8562BAED1B0ADA4400F65F26 /* NumberPadViewController.m in Sources */,
 				8562BADB1B0AD9E200F65F26 /* iNet.m in Sources */,
 				8562BAB01B0AD96800F65F26 /* MBProgressHUD.m in Sources */,

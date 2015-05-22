@@ -8,8 +8,7 @@
 		"buttonIndex": 12,
 		"title": "Fireplace On",
 		"abbreviation": "🔥",
-		"successStatusCode": 200,
-		"onCompleteURL": null
+		"successStatusCode": 200
 	}, {
 		"url": "http://192.168.1.109/0",
 		"method": "GET",
@@ -17,34 +16,30 @@
 		"buttonIndex": 10,
 		"title": "Fireplace Off",
 		"abbreviation": "🔥",
-		"successStatusCode": 200,
-		"onCompleteURL": null
+		"successStatusCode": 200
 	}, {
-		"url": "http://192.168.1.0/",
+		"url": "http://192.168.1.103/",
 		"method": "GET",
 		"data": "Volume_Up",
 		"buttonIndex": 3,
 		"title": "Volume Up",
 		"abbreviation": "🔊",
-		"successStatusCode": 200,
-		"onCompleteURL": null
+		"successStatusCode": 200
 	}, {
-		"url": "http://192.168.1.0/",
+		"url": "http://192.168.1.103/",
 		"method": "GET",
 		"data": "Volume_Mute",
 		"buttonIndex": 2,
 		"title": "Mute",
 		"abbreviation": "🔇",
-		"successStatusCode": 200,
-		"onCompleteURL": null
+		"successStatusCode": 200
 	}, {
-		"url": "http://192.168.1.0/",
+		"url": "http://192.168.1.103/",
 		"method": "GET",
 		"data": "Volume_Down",
 		"buttonIndex": 1,
 		"title": "Volume Down",
 		"abbreviation": "🔈",
-		"successStatusCode": 200,
-		"onCompleteURL": null
+		"successStatusCode": 200
 	}]
 }]
