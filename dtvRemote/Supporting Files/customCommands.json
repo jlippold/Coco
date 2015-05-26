@@ -42,4 +42,64 @@
 		"abbreviation": "🔈",
 		"successStatusCode": 200
 	}]
+}, {
+	"networkName": "lipp",
+	"deviceName": "BEDROOM",
+	"commands": [{
+		"url": "http://192.168.1.92:3000/Sharp/VolumeUp",
+		"method": "GET",
+		"data": "",
+		"buttonIndex": 6,
+		"title": "Volume Up",
+		"abbreviation": "🔊",
+		"successStatusCode": 200
+	}, {
+		"url": "http://192.168.1.92:3000/Sharp/VolumeDown",
+		"method": "GET",
+		"data": "",
+		"buttonIndex": 4,
+		"title": "Volume Down",
+		"abbreviation": "🔈",
+		"successStatusCode": 200
+	}, {
+		"url": "http://192.168.1.92:3000/Sharp/Mute",
+		"method": "GET",
+		"data": "",
+		"buttonIndex": 5,
+		"title": "Mute",
+		"abbreviation": "MT",
+		"successStatusCode": 200
+	}, {
+		"url": "http://192.168.1.92:3000/Sharp/Power",
+		"method": "GET",
+		"data": "",
+		"buttonIndex": 1,
+		"title": "Power",
+		"abbreviation": "PW",
+		"successStatusCode": 200
+	}, {
+		"url": "http://192.168.1.92:3000/Sharp/HDMI1",
+		"method": "GET",
+		"data": "",
+		"buttonIndex": 7,
+		"title": "Watch Roku",
+		"abbreviation": "🔥",
+		"successStatusCode": 200
+	}, {
+		"url": "http://192.168.1.92:3000/Sharp/HDMI2",
+		"method": "GET",
+		"data": "",
+		"buttonIndex": 8,
+		"title": "Watch DirecTv",
+		"abbreviation": "🔥",
+		"successStatusCode": 200
+	}, {
+		"url": "http://192.168.1.92:3000/Sharp/HDMI3",
+		"method": "GET",
+		"data": "",
+		"buttonIndex": 9,
+		"title": "Watch Kodi",
+		"abbreviation": "🔥",
+		"successStatusCode": 200
+	}]
 }]

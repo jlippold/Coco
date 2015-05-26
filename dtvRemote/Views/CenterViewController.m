@@ -22,6 +22,7 @@
 #import "MBProgressHUD.h"
 #import "Reachability.h"
 #import "Colors.h"
+#import "iNet.h"
 
 
 
@@ -34,6 +35,7 @@
     NSMutableDictionary *guide;
     NSMutableDictionary *devices;
     dtvDevice *currentDevice;
+    NSString *lastSSID;
    
     UIImageView *backgroundView;
     UIVisualEffectView *bluredEffectView;
@@ -100,22 +102,8 @@
     [super viewDidLoad];
     [self setNeedsStatusBarAppearanceUpdate];
     
-    reach = [Reachability reachabilityForLocalWiFi];
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(reachabilityChanged:)
-                                                 name:kReachabilityChangedNotification
-                                               object:nil];
-    
-    [reach startNotifier];
-    
     [self initiate];
 
-}
-
-- (IBAction) reachabilityChanged:(id)sender  {
-    //NSLog(@"Network has changed, refreshing device list");
-    devices = [dtvDevices getSavedDevicesForActiveNetwork];
-    [[NSNotificationCenter defaultCenter] postNotificationName:@"messageUpdatedDevices" object:devices];
 }
 
 - (void) didReceiveMemoryWarning {
@@ -129,22 +117,15 @@
 - (void) initiate {
     
     nextRefresh = [NSDate date];
+    timer = [[NSTimer alloc] init];
     currentProgramId = @"";
-    
-    channels = [dtvChannels load:NO];
-    allChannels = [dtvChannels load:YES];
-    sortedChannels = [dtvChannels sortChannels:channels sortBy:@"default"];
-    blockedChannels = [dtvChannels loadBlockedChannels:channels];
-    
-    guide = [[NSMutableDictionary alloc] init];
-    
-    devices = [dtvDevices getSavedDevicesForActiveNetwork];
-    currentDevice = [dtvDevices getCurrentDevice];
     isEditing = NO;
     isPlaying = YES;
+    guide = [[NSMutableDictionary alloc] init];
+    devices = [dtvDevices getSavedDevicesForActiveNetwork];
+    currentDevice = [dtvDevices getCurrentDevice];
+    blockedChannels = [dtvChannels loadBlockedChannels:channels];
     
-    timer = [[NSTimer alloc] init];
-
     xOffset = 140;
     searchBarMinWidth = 74;
     tableXOffset = 255;
@@ -155,12 +136,42 @@
     [self createViews];
     [self displayDevice];
     
+    timer = [NSTimer scheduledTimerWithTimeInterval:60.0
+                                             target:self
+                                           selector:@selector(onTimerFire:)
+                                           userInfo:nil
+                                            repeats:YES];
     
-    if ([[channels allKeys] count] == 0) { //run initial setup
+    [UIApplication sharedApplication].statusBarHidden = YES;
+    [UIApplication sharedApplication].statusBarStyle = UIStatusBarStyleLightContent;
+    
+    channels = [dtvChannels load:NO];
+
+    
+    lastSSID = [iNet fetchSSID];
+    if ([lastSSID isEqualToString:@""]) {
+        [self displayWifiChallenge];
+    } else {
+        [self initiatePull];
+    }
+}
+
+- (void) initiatePull {
+    
+    BOOL firstRun = ([[channels allKeys] count] == 0);
+    
+    if (firstRun) {
+        
+        [self refreshDevices:nil];
         dispatch_after(0, dispatch_get_main_queue(), ^{
             [self promptForZipCode:nil];
         });
+        
     } else {
+        
+        allChannels = [dtvChannels load:YES];
+        sortedChannels = [dtvChannels sortChannels:channels sortBy:@"default"];
+        
         [self refreshGuide:nil];
         
         if (currentDevice) {
@@ -171,21 +182,35 @@
         
     }
     
-    timer = [NSTimer scheduledTimerWithTimeInterval:60.0
-                                              target:self
-                                            selector:@selector(onTimerFire:)
-                                            userInfo:nil
-                                             repeats:YES];
+    reach = [Reachability reachabilityForLocalWiFi];
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(reachabilityChanged:)
+                                                 name:kReachabilityChangedNotification
+                                               object:nil];
     
-    [UIApplication sharedApplication].statusBarHidden = YES;
-    [UIApplication sharedApplication].statusBarStyle = UIStatusBarStyleLightContent;
+    [reach startNotifier];
+}
 
+- (IBAction) reachabilityChanged:(id)sender  {
+    
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
+        NSString *thisSSID = [iNet fetchSSID];
+        
+        if (thisSSID != lastSSID) {
+            lastSSID = thisSSID;
+            devices = [dtvDevices getSavedDevicesForActiveNetwork];
+            NSLog(@"New Network! %lu", (unsigned long)devices.count);
+            [[NSNotificationCenter defaultCenter] postNotificationName:@"messageUpdatedDevices" object:devices];
+        }
+    });
+    
 }
 
 - (void) onTimerFire:(id)sender {
+
     [self refreshNowPlaying:nil scrollToPlayingChanel:NO];
     
-    if ([[NSDate date] timeIntervalSinceDate:nextRefresh] >= 0) {
+    if ([[NSDate date] timeIntervalSinceDate:nextRefresh] >= 0 && [channels count] > 0) {
         [self refreshGuide:nil];
     }
 }
@@ -1023,6 +1048,35 @@
 }
 
 
+- (void) displayWifiChallenge {
+    dispatch_after(0, dispatch_get_main_queue(), ^{
+
+        UIAlertController *view = [UIAlertController
+                                   alertControllerWithTitle:@"No Wifi Connection Found"
+                                   message:@"You must be on the same wifi network as the direct tv box."
+                                   preferredStyle:UIAlertControllerStyleAlert];
+        
+        
+        UIAlertAction *ok = [UIAlertAction actionWithTitle:@"Retry" style:UIAlertActionStyleDefault handler:
+                             ^(UIAlertAction * action) {
+                                 
+                                 [view dismissViewControllerAnimated:YES completion:nil];
+                                 lastSSID = [iNet fetchSSID];
+                                 if ([lastSSID isEqualToString:@""]) {
+                                     [self displayWifiChallenge];
+                                 } else {
+                                     [self initiatePull];
+                                 }
+                             }];
+        
+        [view addAction:ok];
+        
+        UIViewController *vc = [[[[UIApplication sharedApplication] delegate] window] rootViewController];
+        [vc presentViewController:view animated:YES completion:nil];
+    });
+    
+}
+
 - (void) displayNoDeviceError {
     //some message about no device
     UIAlertController *view = [UIAlertController
@@ -1248,30 +1302,39 @@
 }
 
 
-- (void) messageDownloadChannelLogos:(NSNotification *)notification {
+- (void) messageDownloadChannelLogos:(NSNotification *)notification { 
     [MBProgressHUD hideHUDForView:self.view animated:YES];
     channels = [notification object];
     allChannels = [notification object];
+    
     dispatch_async(dispatch_get_main_queue(), ^{
         [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
         MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
         hud.mode = MBProgressHUDModeAnnularDeterminate;
-        hud.labelText = @"Downloading channel logos";
-        hud.detailsLabelText = @"for first use";
-        [dtvChannels downloadChannelImages:channels];
+        hud.labelText = @"Downloading channel information";
+        hud.detailsLabelText = @"This only has to happen once...";
+        
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
+            [dtvChannels downloadChannelImages:channels];
+        });
+        
     });
     
 }
 
 - (void) messageUpdatedChannels:(NSNotification *)notification {
-    channels = [notification object];
+
     dispatch_async(dispatch_get_main_queue(), ^{
         [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
         [MBProgressHUD hideHUDForView:self.view animated:YES];
+        
+        channels = [dtvChannels load:NO];
+        allChannels = [dtvChannels load:YES];
         sortedChannels = [dtvChannels sortChannels:channels sortBy:@"default"];
+        
         [mainTableView reloadData];
         [self refreshGuide:nil];
-        [self setDefaultNowPlayingChannel];
+        //[self setDefaultNowPlayingChannel];
     });
     
 }
@@ -1285,8 +1348,17 @@
 
 - (void) messageUpdatedDevices:(NSNotification *)notification {
     devices = notification.object;
-    if ([devices count] == 0) {
-        [self hideStatusOverlay:@"No devices found on this network!"];
+    if ([[devices allKeys] count] == 0) {
+        [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+            [self hideStatusOverlay:@"No devices found on this network!"];
+            [self hideTopContainer:YES];
+        }];
+    } else {
+        if (!currentDevice) {
+            NSString *deviceId = [devices allKeys][0];
+            dtvDevice *device = [devices objectForKey:deviceId];
+            [dtvDevices setCurrentDevice:device];
+        }
     }
 }
 
@@ -1369,7 +1441,7 @@
 - (void) messageUpdatedCurrentDevice:(NSNotification *)notification {
     currentDevice = notification.object;
     [[NSOperationQueue mainQueue] addOperationWithBlock:^{
-        [self clearNowPlaying];
+        [self hideTopContainer:YES];
         [self displayDevice];
     }];
 }
@@ -1515,7 +1587,9 @@
     int sectionCounter = 0;
     int rowCounter = 0;
     
-    NSArray *sections = [[sortedChannels allKeys] sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
+    NSArray *sections = [[sortedChannels allKeys]
+                         sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
+    
     for (NSString *sectionKey in sections) {
         NSMutableDictionary *sectionData = [sortedChannels objectForKey:sectionKey];
         NSArray *sectionChannels = [[sectionData allKeys] sortedArrayUsingSelector: @selector(compare:)];
@@ -1671,6 +1745,7 @@
     boxTitle.text = @"";
     boxDescription.text = @"";
     channelImage.image = nil;
+    currentProgramId = @"";
 }
 
 

@@ -64,7 +64,7 @@
     bar.titleTextAttributes = @{NSForegroundColorAttributeName : [Colors textColor]};
     
     UINavigationItem *sideBarNavItem = [UINavigationItem alloc];
-    sideBarNavItem.title = @"Device Settings";
+    sideBarNavItem.title = @"Devices & Settings";
     [bar pushNavigationItem:sideBarNavItem animated:false];
     
     [sideBarView addSubview:bar];
@@ -192,7 +192,7 @@
                 cell.textLabel.text = @"Refresh devices status";
                 break;
             case 1:
-                cell.textLabel.text = @"Scan network for new devices";
+                cell.textLabel.text = @"Scan network";
                 break;
             case 2:
                 cell.textLabel.text = @"Clear these devices";
@@ -227,13 +227,11 @@
         NSArray *keys = [[devices allKeys] sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
         NSString *deviceId = keys[indexPath.row];
         dtvDevice *device = [devices objectForKey:deviceId];
-        if (device.online) {
-            [dtvDevices setCurrentDevice:device];
-            [[NSNotificationCenter defaultCenter] postNotificationName:@"messageCloseLeftMenu"
-                                                                object:nil];
-        } else {
-            
-        }
+
+        [dtvDevices setCurrentDevice:device];
+        [[NSNotificationCenter defaultCenter] postNotificationName:@"messageCloseLeftMenu"
+                                                            object:nil];
+
         
     }
     if (indexPath.section == 1) {
@@ -301,7 +299,7 @@
         devices = [dtvDevices getSavedDevicesForActiveNetwork];
         currentDevice = [dtvDevices getCurrentDevice];
         [self reloadTable];
-        [dtvDevices checkStatusOfDevices:devices];
+        [self checkDeviceStatus];
     });
 }
 
@@ -315,9 +313,7 @@
          
          UITextField *textField = alert.textFields.firstObject;
          NSString *url = textField.text;
-         NSLog(@"Entered: %@", url);
-         
-         //save entered zip
+
          [[NSUserDefaults standardUserDefaults] setObject:url forKey:@"url"];
          [[NSUserDefaults standardUserDefaults] synchronize];
          
@@ -342,17 +338,20 @@
                                  return;
                              }];
     
-    [alert addAction:accept];
+
     [alert addAction:cancel];
+    [alert addAction:accept];
     
     [alert addTextFieldWithConfigurationHandler:^(UITextField *textField) {
         textField.text = [[NSUserDefaults standardUserDefaults] stringForKey:@"url"];
         textField.keyboardType = UIKeyboardTypeURL;
-        textField.placeholder = @"http://somesite.com/commands.json";
-        
+        textField.placeholder = @"http://somesite.com/settings.json";
     }];
     
     [self presentViewController:alert animated:YES completion:nil];
+    
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"messageCloseLeftMenu"
+                                                        object:nil];
 }
 
 -(void) setZipCode {
@@ -401,6 +400,10 @@
 - (void) messageImportedCustomCommands:(NSNotification *)notification {
     [MBProgressHUD hideHUDForView:self.view animated:YES];
     
+    if (currentDevice) {
+        [dtvDevices setCurrentDevice:currentDevice];
+    }
+    
     UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Custom Commands"
                                                                    message:notification.object preferredStyle:UIAlertControllerStyleAlert];
     UIAlertAction* accept = [UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil];
@@ -418,8 +421,9 @@
 
 - (void) messageUpdatedDevices:(NSNotification *)notification {
     devices = notification.object;
+    ssid = [iNet fetchSSID];
     [self reloadTable];
-    [dtvDevices checkStatusOfDevices:devices];
+    [self checkDeviceStatus];
 }
 
 - (void) reloadTable {
@@ -428,4 +432,9 @@
     }];
 }
 
+- (void) checkDeviceStatus {
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
+        [dtvDevices checkStatusOfDevices:devices];
+    });
+}
 @end

@@ -72,6 +72,7 @@
                              
                              NSDictionary *props = @{@"identifier" : clientId,
                                                           @"address" : client,
+                                                          @"ssid" : ssid,
                                                           @"name" : [item objectForKey:@"locationName"],
                                                           @"appendage": appendage
                                                      };
@@ -157,9 +158,14 @@
         
         NSURLRequest *request = [[NSURLRequest alloc] initWithURL:url
                                                       cachePolicy:1
-                                                  timeoutInterval:10];
+                                                  timeoutInterval:3];
         
-        [self makeRequest:request queue:[NSOperationQueue mainQueue] completionHandler:
+        NSOperationQueue *deviceCheckQueue = [[NSOperationQueue alloc] init];
+        deviceCheckQueue.name = @"Scanner";
+        deviceCheckQueue.maxConcurrentOperationCount = 20;
+        [deviceCheckQueue cancelAllOperations];
+        
+        [self makeRequest:request queue:deviceCheckQueue completionHandler:
          ^(NSURLResponse *response, NSData *data, NSError *connectionError)
          {
              device.online = NO;
@@ -293,7 +299,7 @@
     }];
     
     blockOperation.completionBlock = ^{
-        [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+        [queue addOperationWithBlock:^{
             handler(response, data, error);
         }];
     };

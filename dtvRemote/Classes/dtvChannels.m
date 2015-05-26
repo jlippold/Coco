@@ -257,27 +257,29 @@
         
         NSString *imagePath =[cacheDirectory stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.png",channelId]];
         
-        [NSURLConnection sendAsynchronousRequest:[NSURLRequest requestWithURL:location]
-                                           queue:channelImagesQueue
-                               completionHandler:^(NSURLResponse *response,
-                                                   NSData *data,
-                                                   NSError *connectionError)
-         {
-             if (data.length > 0 && connectionError == nil) {
-                 [data writeToFile:imagePath atomically:NO];
-             }
-             completed++;
-             if (completed >= total) {
-                 NSLog(@"channels refreshed");
-                 [[NSNotificationCenter defaultCenter] postNotificationName:@"messageUpdatedChannels" object:channels];
-             } else {
-                 long double progress =(completed*1.0/total*1.0);
-                 NSNumber *nsprogress = [NSNumber numberWithDouble:progress];
-                 [[NSNotificationCenter defaultCenter] postNotificationName:@"messageUpdatedChannelsProgress"
-                                                                     object:nsprogress];
-             }
-             
-         }];
+        NSURLResponse* response;
+        NSError *connectionError;
+        
+        NSData* data = [NSURLConnection sendSynchronousRequest:[NSURLRequest requestWithURL:location]
+                                             returningResponse:&response error:&connectionError];
+        
+
+        if (data.length > 0 && connectionError == nil) {
+            [data writeToFile:imagePath atomically:NO];
+        }
+        completed++;
+        if (completed >= total) {
+            NSLog(@"channels refreshed");
+            [[NSNotificationCenter defaultCenter] postNotificationName:@"messageUpdatedChannels" object:channels];
+        } else {
+            long double progress =(completed*1.0/total*1.0);
+            NSNumber *nsprogress = [NSNumber numberWithDouble:progress];
+            [[NSNotificationCenter defaultCenter] postNotificationName:@"messageUpdatedChannelsProgress"
+                                                                object:nsprogress];
+        }
+        
+        
+       
         
     }
     

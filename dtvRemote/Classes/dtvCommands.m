@@ -36,7 +36,7 @@
     return output;
 }
 
-+ (NSMutableDictionary *) getCommandsForSidebar {
++ (NSMutableDictionary *) getCommandsForSidebar:(dtvDevice *) currentDevice {
 
     NSMutableDictionary *output = [[NSMutableDictionary alloc] init];
     NSArray *commands = [self getCommands];
@@ -48,6 +48,18 @@
             }
             
             [output[command.sideBarCategory] addObject:command];
+        }
+    }
+    
+    NSMutableArray *customs = [self loadSavedCustoms];
+    for (dtvCustomCommand *command in customs) {
+        if (!output[@"Customs"]) {
+            [output setObject:[[NSMutableArray alloc] init] forKey:@"Customs"];
+        }
+        if ([command.networkName isEqualToString:currentDevice.ssid] &&
+            [command.deviceName isEqualToString:currentDevice.name]) {
+            
+            [output[@"Customs"] addObject:command];
         }
     }
     
@@ -154,6 +166,47 @@
     return output;
 }
 
++ (BOOL) sendCustomCommand:(dtvCustomCommand *)command {
+    
+    NSString *url = command.url;
+    NSMutableURLRequest *request = [[NSMutableURLRequest alloc] init];
+    
+    if ([[command.method uppercaseString] isEqualToString:@"GET"]) {
+        if (![command.data isEqualToString:@""]) {
+            url = [NSString stringWithFormat:@"%@?%@", url, command.data];
+        }
+    } else {
+        [request setHTTPMethod:[command.method uppercaseString]];
+        if (![command.data isEqualToString:@""]) {
+            
+            [request setValue:[NSString stringWithFormat:@"%lu", (unsigned long)[command.data length]]
+           forHTTPHeaderField:@"Content-length"];
+            
+            [request setHTTPBody:[command.data dataUsingEncoding:NSUTF8StringEncoding]];
+        }
+    }
+    
+    request.URL = [NSURL URLWithString:url];
+
+    NSHTTPURLResponse* response;
+    NSError *connectionError;
+    [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&connectionError];
+    
+    NSString *statusCode = [NSString stringWithFormat: @"%ld", (long)[response statusCode]];
+    
+    if (!connectionError) {
+        if ([statusCode isEqualToString:command.successStatusCode]) {
+            return YES;
+        } else {
+            return NO;
+        }
+    } else {
+        return NO;
+    }
+    
+}
+
+
 + (BOOL) sendCommand:(NSString *)command device:(dtvDevice *)device {
     
     if (!device) {
@@ -226,9 +279,11 @@
                                     customCommand.method = command[@"method"];
                                     customCommand.data = command[@"data"];
                                     customCommand.buttonIndex = command[@"buttonIndex"];
-                                    customCommand.title = command[@"title"];
+                                    customCommand.commandDescription = command[@"title"];
                                     customCommand.abbreviation = command[@"abbreviation"];
                                     customCommand.successStatusCode = command[@"successStatusCode"];
+                                    customCommand.sideBarCategory = @"Customs";
+                                    customCommand.sideBarSortIndex = command[@"0"];
                                     
                                     [output addObject:customCommand];
                                     commandCount++;
@@ -253,7 +308,7 @@
             [[NSNotificationCenter defaultCenter] postNotificationName:@"messageImportedCustomCommands" object:@"No valid commands found at this url"];
         } else {
             
-            errMessage = [NSString stringWithFormat:@"Imported %d command(s) for %d network(s).",
+            errMessage = [NSString stringWithFormat:@"Imported %d command(s) for %d devices(s).",
                           commandCount, networkCount];
             
             [[NSNotificationCenter defaultCenter] postNotificationName:@"messageImportedCustomCommands" object:errMessage];

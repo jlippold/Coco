@@ -60,7 +60,11 @@
     #if (TARGET_IPHONE_SIMULATOR)
         return @"Simulator";
     #else
-        return info[@"SSID"];
+        if (info[@"SSID"]) {
+            return info[@"SSID"];
+        } else {
+            return @"";
+        }
     #endif
     
 }

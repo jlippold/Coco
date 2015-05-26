@@ -18,8 +18,13 @@
 @property (nonatomic, strong) NSString *method;
 @property (nonatomic, strong) NSString *data;
 @property (nonatomic, strong) NSString *buttonIndex;
-@property (nonatomic, strong) NSString *title;
 @property (nonatomic, strong) NSString *abbreviation;
 @property (nonatomic, strong) NSString *successStatusCode;
+
+@property (nonatomic, strong) NSString *sideBarCategory;
+@property (nonatomic, strong) NSString *commandDescription;
+@property (nonatomic, strong) NSString *sideBarSortIndex;
+
+
 
 @end

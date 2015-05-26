@@ -10,6 +10,7 @@
 #import "dtvDevices.h"
 #import "dtvCommands.h"
 #import "dtvCommand.h"
+#import "dtvCustomCommand.h"
 #import "Colors.h"
 
 @interface RightViewController ()
@@ -21,16 +22,19 @@
     UIView *sideBarView;
     UITableView *sideBarTable;
     dtvDevice *currentDevice;
+    UINavigationItem *sideBarNavItem;
 }
 
 - (void)viewDidLoad {
     [super viewDidLoad];
     
     currentDevice = [dtvDevices getCurrentDevice];
-    commands = [dtvCommands getCommandsForSidebar];
+    commands = [dtvCommands getCommandsForSidebar:currentDevice];
+
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageUpdatedCurrentDevice:)
                                                  name:@"messageUpdatedCurrentDevice" object:nil];
+    
     
     sideBarView = [[UIView alloc] initWithFrame:[UIScreen mainScreen].bounds];
     sideBarView.backgroundColor = [Colors backgroundColor];
@@ -43,8 +47,14 @@
     bar.barTintColor = [Colors navBGColor];
     bar.titleTextAttributes = @{NSForegroundColorAttributeName : [Colors textColor]};
     
-    UINavigationItem *sideBarNavItem = [UINavigationItem alloc];
-    sideBarNavItem.title = @"Remote Commands";
+    sideBarNavItem = [UINavigationItem alloc];
+    
+    if (currentDevice) {
+        sideBarNavItem.title = currentDevice.name;
+    } else {
+        sideBarNavItem.title = @"Remote Commands";
+    }
+    
     [bar pushNavigationItem:sideBarNavItem animated:false];
     
     [sideBarView addSubview:bar];
@@ -131,16 +141,24 @@
     NSArray *sections = [[commands allKeys] sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
     NSString *sectionKey = [sections objectAtIndex:indexPath.section];
     NSMutableArray *commandArray = [commands objectForKey:sectionKey];
+    
     NSArray *sortedArray = [commandArray sortedArrayUsingComparator:^NSComparisonResult(id a, id b) {
-        NSString *first = [(dtvCommand*) a sideBarSortIndex];
-        NSString *second = [(dtvCommand*) b sideBarSortIndex];
+        NSString *first = [(id) a sideBarSortIndex];
+        NSString *second = [(id) b sideBarSortIndex];
         return [first compare:second];
     }];
     
-    
-    dtvCommand *c = [sortedArray objectAtIndex:indexPath.row];
-    cell.textLabel.text = c.commandDescription;
-    cell.detailTextLabel.text = [NSString stringWithFormat:@"%@: %@", c.sideBarCategory, c.commandDescription];
+    id obj = [sortedArray objectAtIndex:indexPath.row];
+    if ([obj isKindOfClass:[dtvCommand class]]) {
+        dtvCommand *c = [sortedArray objectAtIndex:indexPath.row];
+        cell.textLabel.text = c.commandDescription;
+        cell.detailTextLabel.text = [NSString stringWithFormat:@"%@: %@", c.sideBarCategory, c.commandDescription];
+    } else {
+        dtvCustomCommand *c = [sortedArray objectAtIndex:indexPath.row];
+        cell.textLabel.text = c.commandDescription;
+        cell.detailTextLabel.text = [NSString stringWithFormat:@"%@: %@", @"Customs", c.commandDescription];
+    }
+
     
     return cell;
 }
@@ -161,17 +179,28 @@
     NSString *sectionKey = [sections objectAtIndex:indexPath.section];
     NSMutableArray *commandArray = [commands objectForKey:sectionKey];
     NSArray *sortedArray = [commandArray sortedArrayUsingComparator:^NSComparisonResult(id a, id b) {
-        NSString *first = [(dtvCommand*) a commandDescription];
-        NSString *second = [(dtvCommand*) b commandDescription];
+        NSString *first = [(id) a sideBarSortIndex];
+        NSString *second = [(id) b sideBarSortIndex];
         return [first compare:second];
     }];
     
-    dtvCommand *c = [sortedArray objectAtIndex:indexPath.row];
-    [dtvCommands sendCommand:c.dtvCommandText device:currentDevice];
+    
+    id obj = [sortedArray objectAtIndex:indexPath.row];
+    if ([obj isKindOfClass:[dtvCommand class]]) {
+        dtvCommand *c = [sortedArray objectAtIndex:indexPath.row];
+        [dtvCommands sendCommand:c.dtvCommandText device:currentDevice];
+    } else {
+        dtvCustomCommand *c = [sortedArray objectAtIndex:indexPath.row];
+        [dtvCommands sendCustomCommand:c];
+    }
+    
 }
 
 - (void) messageUpdatedCurrentDevice:(NSNotification *)notification {
     currentDevice = notification.object;
+    sideBarNavItem.title = currentDevice.name;
+    commands = [dtvCommands getCommandsForSidebar:currentDevice];
+    [sideBarTable reloadData];
 }
 
 @end

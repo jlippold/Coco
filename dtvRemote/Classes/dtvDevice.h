@@ -11,6 +11,7 @@
 @interface dtvDevice : NSObject
 
 @property (nonatomic, strong) NSString *identifier;
+@property (nonatomic, strong) NSString *ssid;
 @property (nonatomic, strong) NSString *address;
 @property (nonatomic, strong) NSString *url;
 @property (nonatomic, strong) NSString *name;

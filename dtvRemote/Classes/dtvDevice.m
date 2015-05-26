@@ -16,6 +16,7 @@
     {
         _identifier = properties[@"identifier"];
         _address = properties[@"address"];
+        _ssid = properties[@"ssid"];
         _url = [NSString stringWithFormat:@"http://%@:8080/", properties[@"address"]];
         _name = properties[@"name"];
         _appendage = properties[@"appendage"];
@@ -31,6 +32,7 @@
 {
     [coder encodeObject:_identifier forKey:@"identifier"];
     [coder encodeObject:_address forKey:@"address"];
+    [coder encodeObject:_ssid forKey:@"ssid"];
     [coder encodeObject:_url forKey:@"url"];
     [coder encodeObject:_name forKey:@"name"];
     [coder encodeObject:_appendage forKey:@"appendage"];
@@ -40,6 +42,7 @@
     if (self = [super init]) {
         _identifier = [decoder decodeObjectForKey:@"identifier"];
         _address = [decoder decodeObjectForKey:@"address"];
+        _ssid = [decoder decodeObjectForKey:@"ssid"];
         _url = [decoder decodeObjectForKey:@"url"];
         _name = [decoder decodeObjectForKey:@"name"];
         _appendage = [decoder decodeObjectForKey:@"appendage"];
