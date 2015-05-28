@@ -266,7 +266,7 @@
                                                  toDate: ends
                                                 options:0];
     
-    NSString *timeLeft = [NSString stringWithFormat:@"%02ld:%02ld", [components hour], [components minute]];
+    NSString *timeLeft = [NSString stringWithFormat:@"%02ld:%02ld", (long)[components hour], (long)[components minute]];
     
     if ([components hour] == 0 && [components minute] <= 10) {
         showIsEndingSoon = YES;

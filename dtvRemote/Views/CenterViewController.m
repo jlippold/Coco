@@ -296,6 +296,8 @@
     [self createTopSection];
     [self createTableView];
     [self createToolbar];
+    
+    [self hideTopContainer:YES];
 }
 
 - (void) createBackgroundView {
@@ -1463,6 +1465,7 @@
 - (void) displayDevice {
     if (currentDevice) {
         navTitle.text = [currentDevice.name capitalizedString];
+        navSubTitle.text = @"N/A";
         [self refreshNowPlaying:nil scrollToPlayingChanel:YES];
     } else {
         navTitle.text = @"No Device Selected";
@@ -1479,9 +1482,17 @@
 }
 
 -(void)hideTopContainer:(BOOL) hide {
+    
     if (hide) {
+        [self clearNowPlaying];
+        [self toggleVibrancyEffects:[UIImage new] enable:NO];
+        
         [UIView animateWithDuration:0.25
                          animations:^{
+                             [mainTableView setFrame:CGRectMake(0, topContainer.frame.origin.y,
+                                                                [[UIScreen mainScreen] bounds].size.width,
+                                                                [[UIScreen mainScreen] bounds].size.height-
+                                                                (topContainer.frame.origin.y+toolbarHeight))];
                              topContainer.alpha = 0.0;
                              boxTitle.text = @"";
                              boxDescription.text = @"";
@@ -1491,6 +1502,9 @@
     } else {
         [UIView animateWithDuration:0.5
                          animations:^{
+                             [mainTableView setFrame:CGRectMake(0, tableXOffset,
+                                                                [[UIScreen mainScreen] bounds].size.width,
+                                                                [[UIScreen mainScreen] bounds].size.height-(tableXOffset+ toolbarHeight))];
                              topContainer.alpha = 1.0;
                          }];
     }
@@ -1673,19 +1687,20 @@
     NSURL* imageUrl = [NSURL URLWithString:
                        [NSString stringWithFormat:@"https://dtvimages.hs.llnwd.net/e1%@", path]];
     
+    [self hideTopContainer:NO];
     [NSURLConnection sendAsynchronousRequest:[NSURLRequest requestWithURL:imageUrl]
                                        queue:[NSOperationQueue mainQueue]
                            completionHandler:^(NSURLResponse *response,
                                                NSData *data,
                                                NSError *connectionError)
      {
+
          if (data.length > 0 && connectionError == nil) {
              UIImage *image = [UIImage imageWithData:data];
              [self toggleVibrancyEffects:image enable:YES];
          } else {
              [self toggleVibrancyEffects:nil enable:NO];
          }
-         [self hideTopContainer:NO];
      }];
 
 }
