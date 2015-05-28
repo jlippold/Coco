@@ -44,6 +44,7 @@
             button.layer.borderWidth = 2.0f;
             button.layer.cornerRadius = 40;
             button.layer.masksToBounds = YES;
+            
         } else { //bottom buttons
             button.layer.cornerRadius = 4;
             button.layer.masksToBounds = YES;

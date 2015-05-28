@@ -108,10 +108,21 @@
     
     page1 = [[NumberPadViewController alloc] initWithPageTitle:@"numbers"];
     page2 = [[NumberPadViewController alloc] initWithPageTitle:@"commands"];
+
+    int offset;
+    float screenHeight = [UIScreen mainScreen].bounds.size.height;
+    
+    if ( screenHeight <= 569 ) {
+        offset = 55; //iphone 5s
+    } else if ( screenHeight <= 668 ) {
+        offset = 110; //iphone6
+    } else {
+        offset = 140; //iphone 6+
+    }
     
     CGRect frm = [UIScreen mainScreen].bounds;
-    frm.origin.y += 72;
-    frm.size.height -= 72;
+    frm.origin.y += offset;
+    frm.size.height -= offset;
     
     page1.view.frame = frm;
     
