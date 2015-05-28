@@ -102,14 +102,19 @@
 + (NSString *)getChannelOnDevice:(dtvDevice *)device {
     
     NSString *chNum = @"";
-    
     NSURL *url = [NSURL URLWithString:
                   [NSString stringWithFormat:@"http://%@:8080/tv/getTuned?%@",
                    device.address, device.appendage ]];
     
     NSURLResponse* response;
     NSError *connectionError;
-    NSData* data = [NSURLConnection sendSynchronousRequest:[NSURLRequest requestWithURL:url]
+    
+    NSURLRequest *request = [[NSURLRequest alloc] initWithURL:url
+                                                  cachePolicy:1
+                                              timeoutInterval:2];
+    
+
+    NSData* data = [NSURLConnection sendSynchronousRequest:request
                                          returningResponse:&response error:&connectionError];
     
     if (data.length > 0 && connectionError == nil) {

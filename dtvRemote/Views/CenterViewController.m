@@ -1538,17 +1538,22 @@
     if (currentDevice) {
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
             NSString *channelNum = [dtvCommands getChannelOnDevice:currentDevice];
-            dtvChannel *channel = [dtvChannels getChannelByNumber:[channelNum intValue] channels:allChannels];
             
-            if (channel.identifier == 0) {
-                [self clearNowPlaying];
+            if ([channelNum isEqualToString:@""]) {
+                navSubTitle.text = @"Offline";
             } else {
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    [self setNowPlaying:channel];
-                    if (scroll) {
-                        [self scrollToChannel:channel];
-                    }
-                });
+                
+                dtvChannel *channel = [dtvChannels getChannelByNumber:[channelNum intValue] channels:allChannels];
+                if (channel.identifier == 0) {
+                    [self clearNowPlaying];
+                } else {
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        [self setNowPlaying:channel];
+                        if (scroll) {
+                            [self scrollToChannel:channel];
+                        }
+                    });
+                }
             }
         });
     }
