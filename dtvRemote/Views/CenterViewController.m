@@ -172,14 +172,15 @@
         allChannels = [dtvChannels load:YES];
         sortedChannels = [dtvChannels sortChannels:channels sortBy:@"default"];
         
-        [self refreshGuide:nil];
+        dispatch_after(0, dispatch_get_main_queue(), ^{
+            
+            [self refreshGuide:nil];
+            
+            if (currentDevice) {
+                [self refreshNowPlaying:nil scrollToPlayingChanel:YES];
+            }
         
-        if (currentDevice) {
-            [self refreshNowPlaying:nil scrollToPlayingChanel:YES];
-        } else {
-            [self setDefaultNowPlayingChannel];
-        }
-        
+        });
     }
     
     reach = [Reachability reachabilityForLocalWiFi];
@@ -676,7 +677,15 @@
 
 - (void) showCommandSlider {
     VibrancyViewController *vib = [[VibrancyViewController alloc] init];
-    [self presentViewController:vib animated:YES completion:nil];
+    [self presentViewController:vib animated:YES completion:^(void) {
+        
+        overlay.alpha = 0;
+        overlayProgress.hidden = YES;
+        overlayLabel.text = @"";
+        [UIApplication sharedApplication].statusBarHidden = NO;
+
+    }];
+    
     vib.backgroundView.image = backgroundView.image;
 }
 
@@ -1463,6 +1472,14 @@
 
 #pragma mark - UI Updates
 
+-(BOOL)isVisible{
+    if (self.isViewLoaded && self.view.window) {
+        // viewController is visible
+        return YES;
+    }
+    return NO;
+}
+
 - (void) displayDevice {
     if (currentDevice) {
         navTitle.text = [currentDevice.name capitalizedString];
@@ -1811,6 +1828,10 @@
 
 - (void) showStatusOverlay:(NSString *) message {
     
+    if (![self isVisible]) {
+        return;
+    }
+    
     [UIApplication sharedApplication].statusBarHidden = YES;
     
     overlayProgress.hidden = YES;
@@ -1834,6 +1855,11 @@
 }
 
 - (void) hideStatusOverlay:(NSString *) message {
+    
+    if (![self isVisible]) {
+        return;
+    }
+    
     [UIApplication sharedApplication].statusBarHidden = YES;
     overlay.alpha = 1.0;
     overlayLabel.text = message;

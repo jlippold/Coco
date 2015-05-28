@@ -28,10 +28,10 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
+    
     if ([self respondsToSelector:@selector(edgesForExtendedLayout)])
         self.edgesForExtendedLayout = UIRectEdgeNone;
     
-    [UIApplication sharedApplication].statusBarHidden = NO;
     self.view.frame = [UIScreen mainScreen].bounds;
     
     pages = 2;
@@ -78,7 +78,9 @@
 }
 
 -(IBAction)dismissView:(id)sender {
-    [self dismissViewControllerAnimated:YES completion:nil];
+    [self dismissViewControllerAnimated:YES completion:^(void) {
+
+    }];
 }
 
 - (void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate {
