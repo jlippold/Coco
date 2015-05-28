@@ -44,7 +44,7 @@
     CGRect frm = _scrollView.bounds;
     frm.size.width = [UIScreen mainScreen].bounds.size.width;
     frm.size.height = [UIScreen mainScreen].bounds.size.height - 72;
-    _scrollView.frame = frm;
+    //_scrollView.frame = frm;
     
     
     CGRect navBarFrame = CGRectMake(0, 0, [[UIScreen mainScreen] bounds].size.width, 64.0);
@@ -109,24 +109,23 @@
     page1 = [[NumberPadViewController alloc] initWithPageTitle:@"numbers"];
     page2 = [[NumberPadViewController alloc] initWithPageTitle:@"commands"];
     
-    CGRect frm = _scrollView.bounds;
+    CGRect frm = [UIScreen mainScreen].bounds;
+    frm.origin.y += 72;
+    frm.size.height -= 72;
+    
     page1.view.frame = frm;
     
     [_scrollView addSubview:page1.view];
     
-    frm = _scrollView.bounds;
-    frm.origin.x = (1*_scrollView.frame.size.width);
+    frm.origin.x = (1 * frm.size.width);
     page2.view.frame = frm;
     
     [_scrollView addSubview:page2.view];
     
-
-    
-    CGSize frame = _scrollView.frame.size;
-    frame.width = frame.width * pages;
+    CGSize frame = frm.size;
+    frame.width = frm.size.width * pages;
     
     [_scrollView setContentSize:frame];
-    
     
 }
 @end
