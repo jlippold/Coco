@@ -10,6 +10,8 @@
 #import "dtvCommands.h"
 #import "dtvCommand.h"
 #import "dtvDevices.h"
+#import "Colors.h"
+
 
 @interface NumberPadViewController ()
 
@@ -37,15 +39,28 @@
         UILabel *label;
         button.hidden = YES;
         
+
+
         if (isRoundButton) {
+            
+            [button setTitleColor:[Colors textColor] forState:UIControlStateNormal];
+            [button setTitleColor:[Colors backgroundColor] forState:UIControlStateHighlighted];
+            [button setTitleColor:[Colors backgroundColor] forState:UIControlStateSelected];
+            
             label = (UILabel *)[self.view viewWithTag:n + 200];
             label.hidden = YES;
-            button.layer.borderColor = [UIColor whiteColor].CGColor;
+            button.layer.borderColor = [Colors lightTextColor].CGColor;
             button.layer.borderWidth = 2.0f;
             button.layer.cornerRadius = 40;
             button.layer.masksToBounds = YES;
+            [label setTextColor:[Colors textColor]];
             
         } else { //bottom buttons
+            
+            [button setTitleColor:[Colors textColor] forState:UIControlStateNormal];
+            [button setTitleColor:[Colors backgroundColor] forState:UIControlStateHighlighted];
+            [button setTitleColor:[Colors backgroundColor] forState:UIControlStateSelected];
+        
             button.layer.cornerRadius = 4;
             button.layer.masksToBounds = YES;
         }
@@ -82,7 +97,8 @@
 
 -(IBAction) tapped:(id)sender {
     UIButton *button = (UIButton *)sender;
-    button.backgroundColor = [UIColor whiteColor];
+    button.backgroundColor = [Colors lightTextColor];
+    
     
     NSString *position = [@(button.tag-100) stringValue];
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{

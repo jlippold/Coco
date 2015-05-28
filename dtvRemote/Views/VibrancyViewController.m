@@ -41,18 +41,16 @@
     _scrollView.delegate = self;
     _scrollView.showsHorizontalScrollIndicator = NO;
     
-    CGRect frm = _scrollView.bounds;
-    frm.size.width = [UIScreen mainScreen].bounds.size.width;
-    frm.size.height = [UIScreen mainScreen].bounds.size.height - 72;
-    //_scrollView.frame = frm;
-    
     
     CGRect navBarFrame = CGRectMake(0, 0, [[UIScreen mainScreen] bounds].size.width, 64.0);
     [[UINavigationBar appearance] setShadowImage:[[UIImage alloc] init]];
+    
     navbar = [[UINavigationBar alloc] initWithFrame:navBarFrame];
-    navbar.barTintColor = [Colors navBGColor];
+    
+    [navbar setBackgroundImage:[UIImage new] forBarMetrics:UIBarMetricsDefault];
     navbar.translucent = YES;
-    navbar.tintColor = [Colors textColor];
+    navbar.backgroundColor = [UIColor colorWithWhite:0.0 alpha:0.3];
+    navbar.tintColor = [UIColor whiteColor];
     navbar.titleTextAttributes = @{NSForegroundColorAttributeName : [Colors textColor]};
     
     UIBarButtonItem *closeButton = [[UIBarButtonItem alloc] initWithTitle:@"Close"
@@ -112,7 +110,7 @@
     int offset;
     float screenHeight = [UIScreen mainScreen].bounds.size.height;
     
-    if ( screenHeight <= 569 ) {
+    if (screenHeight <= 569) {
         offset = 55; //iphone 5s
     } else if ( screenHeight <= 668 ) {
         offset = 110; //iphone6

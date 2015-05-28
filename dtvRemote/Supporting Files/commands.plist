@@ -332,7 +332,7 @@
 			<key>numberPadPageName</key>
 			<string>commands</string>
 			<key>numberPadPagePosition</key>
-			<string>9</string>
+			<string>11</string>
 			<key>shortName</key>
 			<string>ℹ︎</string>
 			<key>dtvCommandText</key>
@@ -354,7 +354,7 @@
 			<key>numberPadPagePosition</key>
 			<string>5</string>
 			<key>shortName</key>
-			<string>◾</string>
+			<string>☷</string>
 			<key>dtvCommandText</key>
 			<string>select</string>
 			<key>sideBarSortIndex</key>
@@ -374,7 +374,7 @@
 			<key>numberPadPagePosition</key>
 			<string>3</string>
 			<key>shortName</key>
-			<string>✖️</string>
+			<string>╳</string>
 			<key>dtvCommandText</key>
 			<string>exit</string>
 			<key>sideBarSortIndex</key>
@@ -494,7 +494,7 @@
 			<key>numberPadPagePosition</key>
 			<string>1</string>
 			<key>shortName</key>
-			<string>🔙</string>
+			<string>↺</string>
 			<key>dtvCommandText</key>
 			<string>back</string>
 			<key>sideBarSortIndex</key>
@@ -514,7 +514,7 @@
 			<key>numberPadPagePosition</key>
 			<string>12</string>
 			<key>shortName</key>
-			<string>▲</string>
+			<string>⇈</string>
 			<key>dtvCommandText</key>
 			<string>chanup</string>
 			<key>sideBarSortIndex</key>
@@ -534,7 +534,7 @@
 			<key>numberPadPagePosition</key>
 			<string>10</string>
 			<key>shortName</key>
-			<string>▼</string>
+			<string>⇊</string>
 			<key>dtvCommandText</key>
 			<string>chandown</string>
 			<key>sideBarSortIndex</key>
@@ -614,7 +614,7 @@
 			<key>numberPadPagePosition</key>
 			<string>12</string>
 			<key>shortName</key>
-			<string>🎥</string>
+			<string>REC</string>
 			<key>dtvCommandText</key>
 			<string>record</string>
 			<key>sideBarSortIndex</key>
@@ -808,7 +808,7 @@
 			<key>showInSideBar</key>
 			<true/>
 			<key>showInNumberPad</key>
-			<true/>
+			<false/>
 			<key>numberPadPageName</key>
 			<string>commands</string>
 			<key>numberPadPagePosition</key>
