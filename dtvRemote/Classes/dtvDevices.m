@@ -50,7 +50,7 @@
              {
                  id client = [prospectiveDevices objectAtIndex:i];
                  
-                 if (i == 50) {
+                 if (i == 113) {
                      //NSLog(@"%@", strUrl);
                  }
             
@@ -85,9 +85,20 @@
                                  [networks setObject:newClient forKey:ssid];
                              }
                              
+                             BOOL needsUpdate = NO;
+                             
                              if (!networks[ssid][clientId]) {
+                                 //new device
+                                 needsUpdate = YES;
+                             } else if (![networks[ssid][clientId] isEqual:device]) {
+                                 //new ip
+                                 needsUpdate = YES;
+                             }
+                             
+                             if (needsUpdate) {
                                  [networks[ssid] setObject:device forKey:clientId];
                              }
+                             
                          }
                          
                      }

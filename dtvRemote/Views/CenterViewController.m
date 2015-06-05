@@ -149,11 +149,21 @@
 
     
     lastSSID = [iNet fetchSSID];
-    if ([lastSSID isEqualToString:@""]) {
-        [self displayWifiChallenge];
+    BOOL firstRun = ([[channels allKeys] count] == 0);
+    
+    if (firstRun) {
+        if ([lastSSID isEqualToString:@""]) {
+            [self displayWifiChallenge:NO];
+        } else {
+            [self initiatePull];
+        }
     } else {
+        if ([lastSSID isEqualToString:@""]) {
+            [self displayWifiChallenge:YES];
+        }
         [self initiatePull];
     }
+
 }
 
 - (void) initiatePull {
@@ -1059,7 +1069,7 @@
 }
 
 
-- (void) displayWifiChallenge {
+- (void) displayWifiChallenge:(BOOL) allowEscape {
     dispatch_after(0, dispatch_get_main_queue(), ^{
 
         UIAlertController *view = [UIAlertController
@@ -1067,14 +1077,19 @@
                                    message:@"You must be on the same wifi network as the direct tv box."
                                    preferredStyle:UIAlertControllerStyleAlert];
         
-        
-        UIAlertAction *ok = [UIAlertAction actionWithTitle:@"Retry" style:UIAlertActionStyleDefault handler:
+        NSString *buttonTitle = allowEscape ? @"Ok" : @"Retry";
+
+        UIAlertAction *ok = [UIAlertAction actionWithTitle:buttonTitle style:UIAlertActionStyleDefault handler:
                              ^(UIAlertAction * action) {
                                  
                                  [view dismissViewControllerAnimated:YES completion:nil];
+                                 if (allowEscape) {
+                                     return;
+                                 }
+                                 
                                  lastSSID = [iNet fetchSSID];
                                  if ([lastSSID isEqualToString:@""]) {
-                                     [self displayWifiChallenge];
+                                     [self displayWifiChallenge:NO];
                                  } else {
                                      [self initiatePull];
                                  }
