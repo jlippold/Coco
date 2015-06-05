@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		85043B941B21374200CE996B /* dtvNowPlaying.m in Sources */ = {isa = PBXBuildFile; fileRef = 85043B931B21374200CE996B /* dtvNowPlaying.m */; };
 		850F8D291B0EB94C00F9CA10 /* dtvCustomCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = 850F8D281B0EB94C00F9CA10 /* dtvCustomCommand.m */; };
 		8562BAAC1B0AD95000F65F26 /* Reachability.m in Sources */ = {isa = PBXBuildFile; fileRef = 8562BAAB1B0AD95000F65F26 /* Reachability.m */; };
 		8562BAB01B0AD96800F65F26 /* MBProgressHUD.m in Sources */ = {isa = PBXBuildFile; fileRef = 8562BAAF1B0AD96800F65F26 /* MBProgressHUD.m */; };
@@ -44,6 +45,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		85043B921B21374200CE996B /* dtvNowPlaying.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = dtvNowPlaying.h; path = Classes/dtvNowPlaying.h; sourceTree = "<group>"; };
+		85043B931B21374200CE996B /* dtvNowPlaying.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = dtvNowPlaying.m; path = Classes/dtvNowPlaying.m; sourceTree = "<group>"; };
 		850F8D271B0EB94C00F9CA10 /* dtvCustomCommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = dtvCustomCommand.h; path = Classes/dtvCustomCommand.h; sourceTree = "<group>"; };
 		850F8D281B0EB94C00F9CA10 /* dtvCustomCommand.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = dtvCustomCommand.m; path = Classes/dtvCustomCommand.m; sourceTree = "<group>"; };
 		8562BAAA1B0AD95000F65F26 /* Reachability.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Reachability.h; path = Vendor/Reachability/Reachability.h; sourceTree = "<group>"; };
@@ -158,6 +161,8 @@
 				8562BACD1B0AD9E200F65F26 /* dtvGuide.m */,
 				8562BACE1B0AD9E200F65F26 /* dtvGuideItem.h */,
 				8562BACF1B0AD9E200F65F26 /* dtvGuideItem.m */,
+				85043B921B21374200CE996B /* dtvNowPlaying.h */,
+				85043B931B21374200CE996B /* dtvNowPlaying.m */,
 				8562BAD01B0AD9E200F65F26 /* iNet.h */,
 				8562BAD11B0AD9E200F65F26 /* iNet.m */,
 			);
@@ -340,6 +345,7 @@
 				8562BAD51B0AD9E200F65F26 /* dtvCommand.m in Sources */,
 				8562BAD91B0AD9E200F65F26 /* dtvGuide.m in Sources */,
 				859D6D8A1A9926CA0024FBA4 /* AppDelegate.m in Sources */,
+				85043B941B21374200CE996B /* dtvNowPlaying.m in Sources */,
 				850F8D291B0EB94C00F9CA10 /* dtvCustomCommand.m in Sources */,
 				8562BAED1B0ADA4400F65F26 /* NumberPadViewController.m in Sources */,
 				8562BADB1B0AD9E200F65F26 /* iNet.m in Sources */,

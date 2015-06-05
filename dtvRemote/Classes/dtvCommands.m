@@ -69,6 +69,9 @@
 + (void)changeChannel:(dtvChannel *)channel device:(dtvDevice *)device  {
     NSLog(@"%@ set to channel %d", device.address, channel.number);
     
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"messageSetNowPlayingChannel"
+                                                        object:@(channel.number).stringValue];
+    
     if (device) {
         NSURL *url = [NSURL URLWithString:
                       [NSString stringWithFormat:@"http://%@:8080/tv/tune?major=%d&%@",

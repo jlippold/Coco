@@ -17,6 +17,7 @@
 #import "dtvCommands.h"
 #import "dtvDevices.h"
 #import "dtvDevice.h"
+#import "dtvNowPlaying.h"
 #import "VibrancyViewController.h"
 
 #import "MBProgressHUD.h"
@@ -283,6 +284,8 @@
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageDidBecomeActive:)
                                                  name:@"messageDidBecomeActive" object:nil];
     
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageUpdatedNowPlaying:)
+                                                 name:@"messageUpdatedNowPlaying" object:nil];
 }
 
 
@@ -1462,7 +1465,7 @@
 - (void) messageSetNowPlayingChannel:(NSNotification *)notification {
     NSString *chNum = notification.object;
     dtvChannel *channel = [dtvChannels getChannelByNumber:[chNum intValue] channels:channels];
-    [self setNowPlaying:channel];
+    [self updateNowPlaying:channel];
 }
 
 - (void) messageUpdatedCurrentDevice:(NSNotification *)notification {
@@ -1484,6 +1487,9 @@
     [self onTimerFire:nil];
 }
 
+- (void) messageUpdatedNowPlaying:(NSNotification *)notification {
+    [self setNowPlaying:notification.object];
+}
 
 #pragma mark - UI Updates
 
@@ -1546,7 +1552,7 @@
 
 - (void) setDefaultNowPlayingChannel {
     dtvChannel *channel = [dtvChannels getChannelByCallSign:@"HBOe" channels:channels];
-    [self setNowPlaying:channel];
+    [self updateNowPlaying:channel];
 }
 
 - (void) refreshNowPlaying:(id)sender scrollToPlayingChanel:(BOOL)scroll {
@@ -1563,7 +1569,7 @@
                     [self clearNowPlaying];
                 } else {
                     dispatch_async(dispatch_get_main_queue(), ^{
-                        [self setNowPlaying:channel];
+                        [self updateNowPlaying:channel];
                         if (scroll) {
                             [self scrollToChannel:channel];
                         }
@@ -1574,49 +1580,60 @@
     }
 }
 
-- (void) setNowPlaying:(dtvChannel *) channel {
-
-   // NSLog(@"Querying Now Playing");
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
-        NSDictionary *guideData = [dtvGuide getNowPlayingForChannel:channel];
-        if ([[guideData allKeys] count] == 0) {
-            return;
-        }
-        NSString *key = [guideData allKeys][0];
-        dtvGuideItem *guideItem = guideData[key];
-        NSDictionary *duration = [dtvGuide getDurationForChannel:guideItem];
-        
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [self setNowPlayingForChannel:channel guideItem:guideItem duration:duration];
-        });
-    });
-
+- (void) updateNowPlaying:(dtvChannel *) channel {
+    dtvNowPlaying *np = [[dtvNowPlaying alloc] init];
+    [np update:channel];
 }
 
-- (void) setNowPlayingForChannel:(dtvChannel *)channel guideItem:(dtvGuideItem*)guideItem duration:(NSDictionary *)duration {
-    
-    seekBar.value = [duration[@"percentage"] doubleValue];
-    timeLeft.text = [NSString stringWithFormat:@"-%@", duration[@"timeLeft"]];
-    
-    if ([currentProgramId isEqualToString:guideItem.programID]) {
+- (void) setNowPlaying:(dtvNowPlaying *) np {
+    if (!np) {
+        [self hideTopContainer:YES];
         return;
     }
     
-    [self hideTopContainer:YES];
-    currentProgramId = guideItem.programID;
-        
-    if (guideItem.hd) {
+    seekBar.value = np.percentComplete;
+    timeLeft.text = np.timeLeft;
+    
+    if ([currentProgramId isEqualToString:np.programId]) {
+        return;
+    }
+    
+    currentProgramId = np.programId;
+    boxTitle.text = np.title;
+    channelImage.image = np.channelImage;
+    navSubTitle.text = [NSString stringWithFormat:@"%d %@", np.channel.number, np.channel.name];
+    boxDescription.text = np.synopsis;
+    
+    if (np.HD) {
         [hdImage setHidden:NO];
     } else {
         [hdImage setHidden:YES];
     }
     
-    channelImage.image = [dtvChannel getImageForChannel:channel];
+    if (np.rating) {
+        ratingLabel.text = np.rating;
+        [ratingLabel setHidden:NO];
+    } else {
+        [ratingLabel setHidden:YES];
+    }
     
-    navSubTitle.text = [NSString stringWithFormat:@"%d %@", channel.number, channel.name];
-    [self setDescriptionForProgramId:guideItem.programID];
-    [self setBoxCoverForChannel:guideItem.imageUrl];
-
+    if (np.stars) {
+        [self setStarRating:np.stars];
+        [stars setHidden:NO];
+    } else {
+        [stars setHidden:YES];
+    }
+    
+    if (np.image) {
+        [self toggleVibrancyEffects:np.image enable:YES];
+    } else {
+        [self toggleVibrancyEffects:nil enable:NO];
+    }
+    
+    if (topContainer.alpha == 0.0) {
+        [self hideTopContainer:NO];
+    }
+    
 }
 
 - (void) setStarRating:(double) rating {
@@ -1626,16 +1643,16 @@
     NSDictionary *userAttributes = @{NSFontAttributeName: font};
     const CGSize textSize = [@"★★★★★" sizeWithAttributes: userAttributes];
     stars.frame = CGRectMake(
-                              [[UIScreen mainScreen] bounds].size.width - textSize.width - 10 ,
-                              (topContainer.frame.size.height - 36),
-                              textSize.width * rating,
-                              29);
+                             [[UIScreen mainScreen] bounds].size.width - textSize.width - 10 ,
+                             (topContainer.frame.size.height - 36),
+                             textSize.width * rating,
+                             29);
 }
 
 - (void) scrollToChannel:(dtvChannel *) channel {
     int row = -1;
     int section = -1;
-
+    
     int sectionCounter = 0;
     int rowCounter = 0;
     
@@ -1663,84 +1680,6 @@
                              atScrollPosition:UITableViewScrollPositionTop
                                      animated:YES];
     }
-}
-
-- (void) setDescriptionForProgramId:(NSString *)programID {
-    
-    NSURL* programURL = [NSURL URLWithString:
-                         [NSString stringWithFormat:@"https://www.directv.com/json/program/flip/%@", programID]];
-    
-    boxTitle.text = @"";
-    boxDescription.text = @"";
-    [NSURLConnection sendAsynchronousRequest:[NSURLRequest requestWithURL:programURL]
-                                       queue:[NSOperationQueue mainQueue]
-                           completionHandler:^(NSURLResponse *response,
-                                               NSData *data,
-                                               NSError *connectionError)
-     {
-         if (data.length > 0 && connectionError == nil) {
-             NSDictionary *json = [NSJSONSerialization JSONObjectWithData:data options:0 error:NULL];
-
-             if (json[@"programDetail"]) {
-
-                 id show = json[@"programDetail"];
-                 if (show[@"description"]) {
-                     boxDescription.text = show[@"description"];
-                 }
-                 NSString *title = show[@"title"];
-                 
-                 if (show[@"title"] && show[@"episodeTitle"]) {
-                     if (![show[@"episodeTitle"] isEqualToString:@""]) {
-                         title = [NSString stringWithFormat:@"%@ - %@",
-                                  title, show[@"episodeTitle"]];
-                     }
-                 }
-                 if (show[@"title"] && show[@"releaseYear"]) {
-                     title = [NSString stringWithFormat:@"%@ (%@)",
-                              title, show[@"releaseYear"]];
-                 }
-                 
-                 if (show[@"rating"]) {
-                     ratingLabel.text = show[@"rating"];
-                     [ratingLabel setHidden:NO];
-                 } else {
-                     [ratingLabel setHidden:YES];
-                 }
-                 
-                 if (show[@"starRatingNum"]) {
-                     [self setStarRating:[show[@"starRatingNum"] doubleValue]];
-                     [stars setHidden:NO];
-                 } else {
-                     [stars setHidden:YES];
-                 }
-                 
-                 boxTitle.text = title;
-                 
-             }
-         }
-     }];
-}
-
-- (void) setBoxCoverForChannel:(NSString *)path {
-    NSURL* imageUrl = [NSURL URLWithString:
-                       [NSString stringWithFormat:@"https://dtvimages.hs.llnwd.net/e1%@", path]];
-    
-    [self hideTopContainer:NO];
-    [NSURLConnection sendAsynchronousRequest:[NSURLRequest requestWithURL:imageUrl]
-                                       queue:[NSOperationQueue mainQueue]
-                           completionHandler:^(NSURLResponse *response,
-                                               NSData *data,
-                                               NSError *connectionError)
-     {
-
-         if (data.length > 0 && connectionError == nil) {
-             UIImage *image = [UIImage imageWithData:data];
-             [self toggleVibrancyEffects:image enable:YES];
-         } else {
-             [self toggleVibrancyEffects:nil enable:NO];
-         }
-     }];
-
 }
 
 - (void) toggleVibrancyEffects:(UIImage *) image enable:(BOOL)enable {
