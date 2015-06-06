@@ -9,6 +9,7 @@
 #import "dtvNowPlaying.h"
 #import "dtvGuide.h"    
 #import "dtvChannel.h"
+#import "Colors.h"
 
 @implementation dtvNowPlaying {
     BOOL checkedDescription;
@@ -126,6 +127,7 @@
          
          if (data.length > 0 && connectionError == nil) {
              _image = [UIImage imageWithData:data];
+             _colors = [[Colors getMainColors:_image] mutableCopy];
          }
          checkedImage = YES;
          

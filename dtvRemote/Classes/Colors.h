@@ -13,7 +13,7 @@
 
 
 + (UIImage *) imageWithColor:(UIColor *)color;
-+ (UIColor *) averageColor:(UIImage*) img;
++ (NSMutableArray *) getMainColors:(UIImage*) img;
 + (UIColor *) textColor;
 + (UIColor *) lightTextColor;
 + (UIColor *) backgroundColor;

@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		85043B941B21374200CE996B /* dtvNowPlaying.m in Sources */ = {isa = PBXBuildFile; fileRef = 85043B931B21374200CE996B /* dtvNowPlaying.m */; };
+		85043B9A1B229D6300CE996B /* CCColorCube.m in Sources */ = {isa = PBXBuildFile; fileRef = 85043B971B229D6300CE996B /* CCColorCube.m */; };
+		85043B9B1B229D6300CE996B /* CCLocalMaximum.m in Sources */ = {isa = PBXBuildFile; fileRef = 85043B991B229D6300CE996B /* CCLocalMaximum.m */; };
 		850F8D291B0EB94C00F9CA10 /* dtvCustomCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = 850F8D281B0EB94C00F9CA10 /* dtvCustomCommand.m */; };
 		8562BAAC1B0AD95000F65F26 /* Reachability.m in Sources */ = {isa = PBXBuildFile; fileRef = 8562BAAB1B0AD95000F65F26 /* Reachability.m */; };
 		8562BAB01B0AD96800F65F26 /* MBProgressHUD.m in Sources */ = {isa = PBXBuildFile; fileRef = 8562BAAF1B0AD96800F65F26 /* MBProgressHUD.m */; };
@@ -47,6 +49,10 @@
 /* Begin PBXFileReference section */
 		85043B921B21374200CE996B /* dtvNowPlaying.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = dtvNowPlaying.h; path = Classes/dtvNowPlaying.h; sourceTree = "<group>"; };
 		85043B931B21374200CE996B /* dtvNowPlaying.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = dtvNowPlaying.m; path = Classes/dtvNowPlaying.m; sourceTree = "<group>"; };
+		85043B961B229D6300CE996B /* CCColorCube.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CCColorCube.h; path = Vendor/CCColorCube/CCColorCube.h; sourceTree = "<group>"; };
+		85043B971B229D6300CE996B /* CCColorCube.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CCColorCube.m; path = Vendor/CCColorCube/CCColorCube.m; sourceTree = "<group>"; };
+		85043B981B229D6300CE996B /* CCLocalMaximum.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CCLocalMaximum.h; path = Vendor/CCColorCube/CCLocalMaximum.h; sourceTree = "<group>"; };
+		85043B991B229D6300CE996B /* CCLocalMaximum.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CCLocalMaximum.m; path = Vendor/CCColorCube/CCLocalMaximum.m; sourceTree = "<group>"; };
 		850F8D271B0EB94C00F9CA10 /* dtvCustomCommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = dtvCustomCommand.h; path = Classes/dtvCustomCommand.h; sourceTree = "<group>"; };
 		850F8D281B0EB94C00F9CA10 /* dtvCustomCommand.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = dtvCustomCommand.m; path = Classes/dtvCustomCommand.m; sourceTree = "<group>"; };
 		8562BAAA1B0AD95000F65F26 /* Reachability.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Reachability.h; path = Vendor/Reachability/Reachability.h; sourceTree = "<group>"; };
@@ -122,6 +128,17 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		85043B951B229D4C00CE996B /* CCColorCube */ = {
+			isa = PBXGroup;
+			children = (
+				85043B961B229D6300CE996B /* CCColorCube.h */,
+				85043B971B229D6300CE996B /* CCColorCube.m */,
+				85043B981B229D6300CE996B /* CCLocalMaximum.h */,
+				85043B991B229D6300CE996B /* CCLocalMaximum.m */,
+			);
+			name = CCColorCube;
+			sourceTree = "<group>";
+		};
 		8507603C1AFF9D5B0061DFEA /* MMDrawerController */ = {
 			isa = PBXGroup;
 			children = (
@@ -172,6 +189,7 @@
 		850760511AFFEC9D0061DFEA /* Vendor */ = {
 			isa = PBXGroup;
 			children = (
+				85043B951B229D4C00CE996B /* CCColorCube */,
 				8562BAAD1B0AD95A00F65F26 /* MBProgressHUD */,
 				8562BAA91B0AD93800F65F26 /* Reachability */,
 				8507603C1AFF9D5B0061DFEA /* MMDrawerController */,
@@ -355,6 +373,7 @@
 				8562BABC1B0AD9A300F65F26 /* MMDrawerVisualState.m in Sources */,
 				8562BAD21B0AD9E200F65F26 /* Colors.m in Sources */,
 				8562BABA1B0AD9A300F65F26 /* MMDrawerBarButtonItem.m in Sources */,
+				85043B9A1B229D6300CE996B /* CCColorCube.m in Sources */,
 				8562BABB1B0AD9A300F65F26 /* MMDrawerController.m in Sources */,
 				8562BAAC1B0AD95000F65F26 /* Reachability.m in Sources */,
 				8562BAD61B0AD9E200F65F26 /* dtvCommands.m in Sources */,
@@ -362,6 +381,7 @@
 				8562BAD31B0AD9E200F65F26 /* dtvChannel.m in Sources */,
 				8562BAEC1B0ADA4400F65F26 /* LeftViewController.m in Sources */,
 				8562BAFB1B0ADA8200F65F26 /* main.m in Sources */,
+				85043B9B1B229D6300CE996B /* CCLocalMaximum.m in Sources */,
 				8562BADA1B0AD9E200F65F26 /* dtvGuideItem.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

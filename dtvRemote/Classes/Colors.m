@@ -7,6 +7,7 @@
 //
 
 #import "Colors.h"
+#import "CCColorCube.h"
 
 @implementation Colors
 
@@ -24,31 +25,24 @@
     return image;
 }
 
-+ (UIColor *)averageColor:(UIImage*) img {
+
++ (NSMutableArray *) getMainColors:(UIImage*) img {
     
-    CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
-    unsigned char rgba[4];
-    CGContextRef context = CGBitmapContextCreate(rgba, 1, 1, 8, 4, colorSpace, kCGImageAlphaPremultipliedLast | kCGBitmapByteOrder32Big);
+    CCColorCube *colorCube = [[CCColorCube alloc] init];
+    int total = 4;
+    NSMutableArray *colors = [[colorCube extractBrightColorsFromImage:img avoidColor:nil count:total] mutableCopy];
     
-    CGContextDrawImage(context, CGRectMake(0, 0, 1, 1), img.CGImage);
-    CGColorSpaceRelease(colorSpace);
-    CGContextRelease(context);
-    
-    if(rgba[3] > 0) {
-        CGFloat alpha = ((CGFloat)rgba[3])/255.0;
-        CGFloat multiplier = alpha/255.0;
-        return [UIColor colorWithRed:((CGFloat)rgba[0])*multiplier
-                               green:((CGFloat)rgba[1])*multiplier
-                                blue:((CGFloat)rgba[2])*multiplier
-                               alpha:alpha];
+    if (colors.count == 0) {
+        return nil;
     }
-    else {
-        return [UIColor colorWithRed:((CGFloat)rgba[0])/255.0
-                               green:((CGFloat)rgba[1])/255.0
-                                blue:((CGFloat)rgba[2])/255.0
-                               alpha:((CGFloat)rgba[3])/255.0];
+    
+    for (int i = (int)colors.count; i < (total-1); i++) {
+        UIColor *first = [colors objectAtIndex:0];
+        [colors addObject:first];
     }
+    return colors;
 }
+
 
 + (UIColor *) textColor {
     return [UIColor colorWithRed:193/255.0f green:193/255.0f blue:193/255.0f alpha:1.0f];

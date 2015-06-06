@@ -19,6 +19,7 @@
 @property (nonatomic, strong) NSString *timeLeft;
 @property (nonatomic, strong) UIImage *image;
 @property (nonatomic, strong) UIImage *channelImage;
+@property (nonatomic, strong) NSMutableArray *colors;
 @property BOOL HD;
 @property double stars;
 @property double percentComplete;

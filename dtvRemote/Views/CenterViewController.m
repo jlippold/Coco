@@ -1640,6 +1640,7 @@
          } else {
              [self toggleVibrancyEffects:nil enable:NO];
          }
+         [self applyColors:np.colors];
          
          if ([self topContainerIsHidden]) {
              [self hideTopContainer:NO];
@@ -1652,11 +1653,65 @@
                           } completion:nil];
          
      }];
-    
-    
-    
-    
+}
 
+-(void) applyColors:(NSMutableArray *) colors {
+     
+    if (colors) {
+        UIColor *mainText = [colors objectAtIndex:0];
+        UIColor *subText = [colors objectAtIndex:1];
+        UIColor *buttons = [colors objectAtIndex:2];
+        //UIColor *others = [colors objectAtIndex:3];
+        
+        [navTitle setTextColor:mainText];
+        navTitle.tintColor = mainText;
+        [navSubTitle setTextColor:subText];
+        navSubTitle.tintColor = subText;
+        
+        timeLeft.textColor = buttons;
+        boxTitle.textColor = mainText;
+        boxDescription.textColor = subText;
+        
+        navItem.leftBarButtonItem.tintColor = buttons;
+        navItem.rightBarButtonItem.tintColor = buttons;
+        
+        [seekBar setMinimumTrackTintColor:buttons];
+        
+        for (UIBarButtonItem* item in toolBar.subviews) {
+            item.tintColor = buttons;
+        }
+        
+        
+        playButton.tintColor = buttons;
+        for (UIBarButtonItem* item in playBar.subviews) {
+            item.tintColor = buttons;
+        }
+        
+    } else {
+        
+        [navTitle setTextColor:[Colors textColor]];
+        navTitle.tintColor = [Colors textColor];
+        [navSubTitle setTextColor:[Colors textColor]];
+        navSubTitle.tintColor = [Colors textColor];
+        
+        timeLeft.textColor = [Colors textColor];
+        boxTitle.textColor = [Colors textColor];
+        boxDescription.textColor = [Colors textColor];
+        
+        navItem.leftBarButtonItem.tintColor = [Colors textColor];
+        navItem.rightBarButtonItem.tintColor = [Colors textColor];
+        
+        [seekBar setMinimumTrackTintColor:[Colors tintColor]];
+        
+        for (UIBarButtonItem* item in toolBar.subviews) {
+            item.tintColor = [Colors textColor];
+        }
+        
+        playButton.tintColor = [Colors textColor];
+        for (UIBarButtonItem* item in playBar.subviews) {
+            item.tintColor = [Colors textColor];
+        }
+    }
     
 }
 
