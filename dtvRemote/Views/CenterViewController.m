@@ -1549,6 +1549,10 @@
     }
 }
 
+-(BOOL)topContainerIsHidden {
+    return topContainer.frame.origin.y == mainTableView.frame.origin.y;
+}
+
 
 - (void) setDefaultNowPlayingChannel {
     dtvChannel *channel = [dtvChannels getChannelByCallSign:@"HBOe" channels:channels];
@@ -1598,41 +1602,61 @@
         return;
     }
     
-    currentProgramId = np.programId;
-    boxTitle.text = np.title;
-    channelImage.image = np.channelImage;
-    navSubTitle.text = [NSString stringWithFormat:@"%d %@", np.channel.number, np.channel.name];
-    boxDescription.text = np.synopsis;
+    [UIView animateWithDuration:0.25
+                     animations:^{
+                         topContainer.alpha = 0.0;
+                         boxCover.alpha = 0.0;
+                     } completion:
+     ^(BOOL finished) {
+         
+         currentProgramId = np.programId;
+         boxTitle.text = np.title;
+         channelImage.image = np.channelImage;
+         navSubTitle.text = [NSString stringWithFormat:@"%d %@", np.channel.number, np.channel.name];
+         boxDescription.text = np.synopsis;
+         
+         if (np.HD) {
+             [hdImage setHidden:NO];
+         } else {
+             [hdImage setHidden:YES];
+         }
+         
+         if (np.rating) {
+             ratingLabel.text = np.rating;
+             [ratingLabel setHidden:NO];
+         } else {
+             [ratingLabel setHidden:YES];
+         }
+         
+         if (np.stars) {
+             [self setStarRating:np.stars];
+             [stars setHidden:NO];
+         } else {
+             [stars setHidden:YES];
+         }
+         
+         if (np.image) {
+             [self toggleVibrancyEffects:np.image enable:YES];
+         } else {
+             [self toggleVibrancyEffects:nil enable:NO];
+         }
+         
+         if ([self topContainerIsHidden]) {
+             [self hideTopContainer:NO];
+         }
+         
+         [UIView animateWithDuration:0.25
+                          animations:^{
+                              topContainer.alpha = 1.0;
+                              boxCover.alpha = 1.0;
+                          } completion:nil];
+         
+     }];
     
-    if (np.HD) {
-        [hdImage setHidden:NO];
-    } else {
-        [hdImage setHidden:YES];
-    }
     
-    if (np.rating) {
-        ratingLabel.text = np.rating;
-        [ratingLabel setHidden:NO];
-    } else {
-        [ratingLabel setHidden:YES];
-    }
     
-    if (np.stars) {
-        [self setStarRating:np.stars];
-        [stars setHidden:NO];
-    } else {
-        [stars setHidden:YES];
-    }
     
-    if (np.image) {
-        [self toggleVibrancyEffects:np.image enable:YES];
-    } else {
-        [self toggleVibrancyEffects:nil enable:NO];
-    }
-    
-    if (topContainer.alpha == 0.0) {
-        [self hideTopContainer:NO];
-    }
+
     
 }
 
