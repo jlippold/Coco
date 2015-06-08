@@ -356,7 +356,7 @@
     navSubTitle = [[UILabel alloc] init];
     navSubTitle.translatesAutoresizingMaskIntoConstraints = YES;
     navSubTitle.font = [UIFont fontWithName:@"Helvetica-Bold" size:14];
-    [navSubTitle setTextColor: [Colors lightTextColor]];
+    [navSubTitle setTextColor: [Colors textColor]];
     navSubTitle.textAlignment = NSTextAlignmentCenter;
     navSubTitle.frame = CGRectMake(0, 42, [[UIScreen mainScreen] bounds].size.width, 20);
     [navSubTitle setFont:[UIFont systemFontOfSize:14]];
@@ -700,6 +700,7 @@
     }];
     
     vib.backgroundView.image = backgroundView.image;
+    
 }
 
 
@@ -1659,18 +1660,18 @@
      
     if (colors) {
         UIColor *mainText = [colors objectAtIndex:0];
-        UIColor *subText = [colors objectAtIndex:1];
+        //UIColor *subText = [colors objectAtIndex:1];
         UIColor *buttons = [colors objectAtIndex:2];
         //UIColor *others = [colors objectAtIndex:3];
         
         [navTitle setTextColor:mainText];
         navTitle.tintColor = mainText;
-        [navSubTitle setTextColor:subText];
-        navSubTitle.tintColor = subText;
+        //[navSubTitle setTextColor:subText];
+        //navSubTitle.tintColor = subText;
         
-        timeLeft.textColor = buttons;
+        //timeLeft.textColor = buttons;
         boxTitle.textColor = mainText;
-        boxDescription.textColor = subText;
+        //boxDescription.textColor = subText;
         
         navItem.leftBarButtonItem.tintColor = buttons;
         navItem.rightBarButtonItem.tintColor = buttons;
@@ -1806,7 +1807,7 @@
         navbar.translucent = NO;
         navbar.tintColor = [Colors textColor];
         
-        [navSubTitle setTextColor: [Colors lightTextColor]];
+        [navSubTitle setTextColor: [Colors textColor]];
     }
 
 }

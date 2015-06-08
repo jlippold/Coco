@@ -36,13 +36,53 @@
         return nil;
     }
     
-    for (int i = (int)colors.count; i < (total-1); i++) {
-        UIColor *first = [colors objectAtIndex:0];
-        [colors addObject:first];
+    for (int i = 0; i < (total-1); i++) {
+        if (i >= colors.count) {
+            UIColor *first = [colors objectAtIndex:0];
+            [colors addObject:first];
+        } else {
+            UIColor *safeColor = [self getNonDarkColor:[colors objectAtIndex:i]];
+            [colors setObject:safeColor atIndexedSubscript:i];
+        }
+
     }
     return colors;
 }
 
+
++ (UIColor *)getNonDarkColor:(UIColor*)someColor {
+    
+    const CGFloat *componentColors = CGColorGetComponents(someColor.CGColor);
+    
+    CGFloat darknessScore = (((componentColors[0]*255) * 299) + ((componentColors[1]*255) * 587) + ((componentColors[2]*255) * 114)) / 1000;
+    
+    if (darknessScore < 100) {
+        return [self changeBrightness:someColor amount:1.5];
+    } else {
+        return someColor;
+    }
+    
+}
+
++ (UIColor*)changeBrightness:(UIColor*)color amount:(CGFloat)amount
+{
+    
+    CGFloat hue, saturation, brightness, alpha;
+    if ([color getHue:&hue saturation:&saturation brightness:&brightness alpha:&alpha]) {
+        brightness += (amount-1.0);
+        brightness = MAX(MIN(brightness, 1.0), 0.0);
+        return [UIColor colorWithHue:hue saturation:saturation brightness:brightness alpha:alpha];
+    }
+    
+    CGFloat white;
+    if ([color getWhite:&white alpha:&alpha]) {
+        white += (amount-1.0);
+        white = MAX(MIN(white, 1.0), 0.0);
+        return [UIColor colorWithWhite:white alpha:alpha];
+    }
+    
+    return nil;
+}
 
 + (UIColor *) textColor {
     return [UIColor colorWithRed:193/255.0f green:193/255.0f blue:193/255.0f alpha:1.0f];
