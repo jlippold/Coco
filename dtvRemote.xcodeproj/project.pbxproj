@@ -107,7 +107,7 @@
 		8562BAF61B0ADA8200F65F26 /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = "Supporting Files/main.m"; sourceTree = "<group>"; };
 		8562BAFC1B0ADAA500F65F26 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		857CAAFB1AF51C9C004F8058 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
-		859D6D811A9926CA0024FBA4 /* dtvRemote.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = dtvRemote.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		859D6D811A9926CA0024FBA4 /* Coco for DirecTV.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Coco for DirecTV.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		859D6D881A9926CA0024FBA4 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		859D6D891A9926CA0024FBA4 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		859D6D8C1A9926CA0024FBA4 /* dtvRemote.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = dtvRemote.xcdatamodel; sourceTree = "<group>"; };
@@ -246,7 +246,7 @@
 		859D6D821A9926CA0024FBA4 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				859D6D811A9926CA0024FBA4 /* dtvRemote.app */,
+				859D6D811A9926CA0024FBA4 /* Coco for DirecTV.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -297,7 +297,7 @@
 			);
 			name = dtvRemote;
 			productName = dtvRemote;
-			productReference = 859D6D811A9926CA0024FBA4 /* dtvRemote.app */;
+			productReference = 859D6D811A9926CA0024FBA4 /* Coco for DirecTV.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -475,7 +475,7 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				INFOPLIST_FILE = dtvRemote/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = "Coco for DirecTV";
 				PROVISIONING_PROFILE = "";
 				TARGETED_DEVICE_FAMILY = 1;
 			};
@@ -489,7 +489,7 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				INFOPLIST_FILE = dtvRemote/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = "Coco for DirecTV";
 				PROVISIONING_PROFILE = "";
 				TARGETED_DEVICE_FAMILY = 1;
 			};
