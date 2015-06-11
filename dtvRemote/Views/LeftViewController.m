@@ -13,6 +13,9 @@
 #import "Colors.h"
 #import "iNet.h"
 #import "MBProgressHUD.h"
+#import "dtvIAP.h"
+
+static NSString *kIdentifierMultiples = @"bz.jed.dtvRemote.multiples";
 
 
 @interface LeftViewController ()
@@ -26,6 +29,9 @@
     NSMutableDictionary *devices;
     dtvDevice *currentDevice;
     NSString *ssid;
+    NSArray *products;
+    NSMutableArray *purchases;
+    BOOL wasPurchased;
 }
 
 - (void)viewDidAppear:(BOOL)animated {
@@ -36,6 +42,9 @@
     [super viewDidLoad];
     
     ssid = [iNet fetchSSID];
+    
+    [self getProducts:nil];
+
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageUpdatedStatusOfDevices:)
                                                  name:@"messageUpdatedStatusOfDevices" object:nil];
@@ -48,6 +57,8 @@
 
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageImportedCustomCommands:)
                                                  name:@"messageImportedCustomCommands" object:nil];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageProductPurchased:) name:IAPHelperProductPurchasedNotification object:nil];
     
     devices = [dtvDevices getSavedDevicesForActiveNetwork];
     currentDevice = [dtvDevices getCurrentDevice];
@@ -146,7 +157,12 @@
     if (section == 0) {
         return [devices count];
     } else {
-        return 5;
+        BOOL purchased = ((int)[products count] == (int)[purchases count]);
+        if (purchased) {
+            return 5;
+        } else {
+            return 7;
+        }
     }
 }
 
@@ -204,6 +220,12 @@
             case 4:
                 cell.textLabel.text = @"Import custom commands";
                 break;
+            case 5:
+                cell.textLabel.text = @"Unlock all features";
+                break;
+            case 6:
+                cell.textLabel.text = @"Restore purchases";
+                break;
         }
     }
     
@@ -224,16 +246,20 @@
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
     
     if (indexPath.section == 0) {
-        NSArray *keys = [[devices allKeys] sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
-        NSString *deviceId = keys[indexPath.row];
-        dtvDevice *device = [devices objectForKey:deviceId];
-
-        [dtvDevices setCurrentDevice:device];
-        [[NSNotificationCenter defaultCenter] postNotificationName:@"messageCloseLeftMenu"
-                                                            object:nil];
-
-        
+        if (wasPurchased) {
+            
+            NSArray *keys = [[devices allKeys] sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
+            NSString *deviceId = keys[indexPath.row];
+            dtvDevice *device = [devices objectForKey:deviceId];
+            
+            [dtvDevices setCurrentDevice:device];
+            [[NSNotificationCenter defaultCenter] postNotificationName:@"messageCloseLeftMenu"
+                                                                object:nil];
+        } else {
+            [self askToBuy];
+        }
     }
+    
     if (indexPath.section == 1) {
         switch (indexPath.row) {
             case 0:
@@ -251,12 +277,46 @@
             case 4:
                 [self importCommands];
                 break;
+            case 5:
+                [self unlock:nil];
+                break;
+            case 6:
+                [self restorePurchases:nil];
+                break;
         }
     }
 }
 
 
 #pragma mark - Actions
+
+- (IBAction)unlock:(id)sender {
+    if ([products count] > 0 ) {
+        SKProduct *product = [products objectAtIndex:0];
+        [[dtvIAP sharedInstance] buyProduct:product];
+    }
+}
+
+- (void)restorePurchases:(id)sender {
+    [[dtvIAP sharedInstance] restoreCompletedTransactions];
+}
+
+
+- (IBAction) getProducts:(id)sender {
+    [[dtvIAP sharedInstance] requestProductsWithCompletionHandler:^(BOOL success, NSArray *p) {
+        if (success) {
+            products = p;
+            [self reloadTable];
+            wasPurchased = NO;
+            purchases = [[NSMutableArray alloc] init];
+            if ([[dtvIAP sharedInstance] productPurchased:kIdentifierMultiples]) {
+                wasPurchased = YES;
+                [purchases addObject:kIdentifierMultiples];
+                [self reloadTable];
+            }
+        }
+    }];
+}
 
 - (IBAction)refreshDevices:(id)sender {
     
@@ -354,12 +414,12 @@
                                                         object:nil];
 }
 
--(void) setZipCode {
+- (void) setZipCode {
     [[NSNotificationCenter defaultCenter] postNotificationName:@"messagePromptForZipCode"
                                                         object:nil];
 }
 
--(void) setChannelLogos {
+- (void) setChannelLogos {
     [[NSNotificationCenter defaultCenter] postNotificationName:@"messageDownloadChannelLogos"
                                                         object:nil];
 }
@@ -397,6 +457,36 @@
     
 
 }
+
+- (void) askToBuy {
+    
+    UIAlertController *view = [UIAlertController
+                               alertControllerWithTitle:@"Upgrade Needed"
+                               message:@"Would you like to purchase the full app to unlock switching devices?"
+                               preferredStyle:UIAlertControllerStyleAlert];
+    
+    UIAlertAction *cancel = [UIAlertAction actionWithTitle:@"No" style:UIAlertActionStyleDefault handler:
+                             ^(UIAlertAction * action) {
+                                 [view dismissViewControllerAnimated:YES completion:nil];
+                                 return;
+                             }];
+    
+    
+    UIAlertAction *ok = [UIAlertAction actionWithTitle:@"Yes" style:UIAlertActionStyleDefault handler:
+                         ^(UIAlertAction * action) {
+                             [view dismissViewControllerAnimated:YES completion:nil];
+                             [self unlock:nil];
+                             return;
+                         }];
+    
+    [view addAction:ok];
+    [view addAction:cancel];
+    
+    UIViewController *vc = [[[[UIApplication sharedApplication] delegate] window] rootViewController];
+    [vc presentViewController:view animated:YES completion:nil];
+    
+    
+}
 - (void) messageImportedCustomCommands:(NSNotification *)notification {
     [MBProgressHUD hideHUDForView:self.view animated:YES];
     
@@ -424,6 +514,10 @@
     ssid = [iNet fetchSSID];
     [self reloadTable];
     [self checkDeviceStatus];
+}
+
+- (void)messageProductPurchased:(NSNotification *)notification {
+    [self getProducts:nil];
 }
 
 - (void) reloadTable {

@@ -40,6 +40,9 @@
 		8562BAF91B0ADA8200F65F26 /* images.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 8562BAF41B0ADA8200F65F26 /* images.bundle */; };
 		8562BAFB1B0ADA8200F65F26 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 8562BAF61B0ADA8200F65F26 /* main.m */; };
 		857CAAFC1AF51C9C004F8058 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 857CAAFB1AF51C9C004F8058 /* SystemConfiguration.framework */; };
+		858120CE1B268E5800133D2B /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 858120CD1B268E5800133D2B /* StoreKit.framework */; };
+		858120D71B27C6AE00133D2B /* IAPHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 858120D61B27C6AE00133D2B /* IAPHelper.m */; };
+		858120DA1B27C75000133D2B /* dtvIAP.m in Sources */ = {isa = PBXBuildFile; fileRef = 858120D91B27C75000133D2B /* dtvIAP.m */; };
 		859D6D8A1A9926CA0024FBA4 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 859D6D891A9926CA0024FBA4 /* AppDelegate.m */; };
 		859D6D8D1A9926CA0024FBA4 /* dtvRemote.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 859D6D8B1A9926CA0024FBA4 /* dtvRemote.xcdatamodeld */; };
 		859D6D951A9926CA0024FBA4 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 859D6D941A9926CA0024FBA4 /* Images.xcassets */; };
@@ -107,6 +110,11 @@
 		8562BAF61B0ADA8200F65F26 /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = "Supporting Files/main.m"; sourceTree = "<group>"; };
 		8562BAFC1B0ADAA500F65F26 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		857CAAFB1AF51C9C004F8058 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
+		858120CD1B268E5800133D2B /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
+		858120D51B27C6AE00133D2B /* IAPHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IAPHelper.h; path = Classes/IAPHelper.h; sourceTree = "<group>"; };
+		858120D61B27C6AE00133D2B /* IAPHelper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = IAPHelper.m; path = Classes/IAPHelper.m; sourceTree = "<group>"; };
+		858120D81B27C75000133D2B /* dtvIAP.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = dtvIAP.h; path = Classes/dtvIAP.h; sourceTree = "<group>"; };
+		858120D91B27C75000133D2B /* dtvIAP.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = dtvIAP.m; path = Classes/dtvIAP.m; sourceTree = "<group>"; };
 		859D6D811A9926CA0024FBA4 /* Coco for DirecTV.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Coco for DirecTV.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		859D6D881A9926CA0024FBA4 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		859D6D891A9926CA0024FBA4 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -120,6 +128,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				858120CE1B268E5800133D2B /* StoreKit.framework in Frameworks */,
 				857CAAFC1AF51C9C004F8058 /* SystemConfiguration.framework in Frameworks */,
 				859D6DB11A9A8F5E0024FBA4 /* CFNetwork.framework in Frameworks */,
 			);
@@ -182,6 +191,10 @@
 				85043B931B21374200CE996B /* dtvNowPlaying.m */,
 				8562BAD01B0AD9E200F65F26 /* iNet.h */,
 				8562BAD11B0AD9E200F65F26 /* iNet.m */,
+				858120D51B27C6AE00133D2B /* IAPHelper.h */,
+				858120D61B27C6AE00133D2B /* IAPHelper.m */,
+				858120D81B27C75000133D2B /* dtvIAP.h */,
+				858120D91B27C75000133D2B /* dtvIAP.m */,
 			);
 			name = Classes;
 			sourceTree = "<group>";
@@ -238,6 +251,7 @@
 		859D6D781A9926CA0024FBA4 = {
 			isa = PBXGroup;
 			children = (
+				858120CD1B268E5800133D2B /* StoreKit.framework */,
 				859D6D831A9926CA0024FBA4 /* dtvRemote */,
 				859D6D821A9926CA0024FBA4 /* Products */,
 			);
@@ -360,6 +374,7 @@
 				8562BAD41B0AD9E200F65F26 /* dtvChannels.m in Sources */,
 				8562BABD1B0AD9A300F65F26 /* UIViewController+MMDrawerController.m in Sources */,
 				859D6D8D1A9926CA0024FBA4 /* dtvRemote.xcdatamodeld in Sources */,
+				858120D71B27C6AE00133D2B /* IAPHelper.m in Sources */,
 				8562BAD51B0AD9E200F65F26 /* dtvCommand.m in Sources */,
 				8562BAD91B0AD9E200F65F26 /* dtvGuide.m in Sources */,
 				859D6D8A1A9926CA0024FBA4 /* AppDelegate.m in Sources */,
@@ -379,6 +394,7 @@
 				8562BAD61B0AD9E200F65F26 /* dtvCommands.m in Sources */,
 				8562BAD81B0AD9E200F65F26 /* dtvDevices.m in Sources */,
 				8562BAD31B0AD9E200F65F26 /* dtvChannel.m in Sources */,
+				858120DA1B27C75000133D2B /* dtvIAP.m in Sources */,
 				8562BAEC1B0ADA4400F65F26 /* LeftViewController.m in Sources */,
 				8562BAFB1B0ADA8200F65F26 /* main.m in Sources */,
 				85043B9B1B229D6300CE996B /* CCLocalMaximum.m in Sources */,
