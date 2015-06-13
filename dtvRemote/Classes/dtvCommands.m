@@ -174,8 +174,8 @@
     return output;
 }
 
-+ (BOOL) sendCustomCommand:(dtvCustomCommand *)command {
-    
++ (void) sendCustomCommand:(dtvCustomCommand *)command {
+     
     NSString *url = command.url;
     NSMutableURLRequest *request = [[NSMutableURLRequest alloc] init];
     
@@ -196,21 +196,12 @@
     
     request.URL = [NSURL URLWithString:url];
 
-    NSHTTPURLResponse* response;
-    NSError *connectionError;
-    [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&connectionError];
-    
-    NSString *statusCode = [NSString stringWithFormat: @"%ld", (long)[response statusCode]];
-    
-    if (!connectionError) {
-        if ([statusCode isEqualToString:command.successStatusCode]) {
-            return YES;
-        } else {
-            return NO;
-        }
-    } else {
-        return NO;
-    }
+    [NSURLConnection sendAsynchronousRequest:request
+                                       queue:[NSOperationQueue mainQueue]
+                           completionHandler:^(NSURLResponse *response, NSData *data, NSError *error) {
+                                //dont care if it worked or not
+                           }];
+
     
 }
 

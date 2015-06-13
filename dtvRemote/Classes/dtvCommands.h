@@ -17,7 +17,7 @@
 + (void)changeChannel:(dtvChannel *)channel device:(dtvDevice *)device;
 + (NSString *)getChannelOnDevice:(dtvDevice *)device;
 + (BOOL) sendCommand:(NSString *)command device:(dtvDevice *)device;
-+ (BOOL) sendCustomCommand:(dtvCustomCommand *)command;
++ (void) sendCustomCommand:(dtvCustomCommand *)command;
 + (NSMutableDictionary *) getCommandsForSidebar:(dtvDevice *) currentDevice;
 + (NSMutableDictionary *) getCommandsForNumberPad;
 + (void) loadCustomCommandsFromUrl:(NSString *) strUrl;
