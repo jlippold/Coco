@@ -1,49 +1,87 @@
 [{
-	"networkName": "lipp",
+	"networkName": "Simulator",
 	"deviceName": "LIVROOM",
 	"commands": [{
-		"url": "http://192.168.1.109/0",
+		"url": "http://192.168.1.104/0",
 		"method": "GET",
 		"data": "111=I=0",
 		"buttonIndex": 12,
 		"title": "Fireplace On",
-		"abbreviation": "🔥",
-		"successStatusCode": 200
+		"abbreviation": "🔥"
 	}, {
-		"url": "http://192.168.1.109/0",
+		"url": "http://192.168.1.104/0",
 		"method": "GET",
 		"data": "131=I=0",
 		"buttonIndex": 10,
 		"title": "Fireplace Off",
-		"abbreviation": "🔥",
-		"successStatusCode": 200
+		"abbreviation": "🔥"
 	}, {
 		"url": "http://192.168.1.103/",
 		"method": "GET",
 		"data": "Volume_Up",
 		"buttonIndex": 3,
 		"title": "Volume Up",
-		"abbreviation": "🔊",
-		"successStatusCode": 200
+		"abbreviation": "🔊"
 	}, {
 		"url": "http://192.168.1.103/",
 		"method": "GET",
 		"data": "Volume_Mute",
 		"buttonIndex": 2,
 		"title": "Mute",
-		"abbreviation": "🔇",
-		"successStatusCode": 200
+		"abbreviation": "🔇"
 	}, {
 		"url": "http://192.168.1.103/",
 		"method": "GET",
 		"data": "Volume_Down",
 		"buttonIndex": 1,
 		"title": "Volume Down",
-		"abbreviation": "🔈",
-		"successStatusCode": 200
+		"abbreviation": "🔈"
+	}, {
+		"url": "http://192.168.1.103/",
+		"method": "GET",
+		"data": "TV_Power",
+		"buttonIndex": 3,
+		"title": "Power",
+		"abbreviation": "🔊"
+	}, {
+		"url": "http://192.168.1.103/",
+		"method": "GET",
+		"data": "Switch_MCE",
+		"buttonIndex": 3,
+		"title": "Watch Media Center",
+		"abbreviation": "🔊"
+	}, {
+		"url": "http://192.168.1.103/",
+		"method": "GET",
+		"data": "Switch_TV",
+		"buttonIndex": 3,
+		"title": "Watch DirecTv",
+		"abbreviation": "🔊"
+	}, {
+		"url": "http://192.168.1.103/",
+		"method": "GET",
+		"data": "Switch_Roku",
+		"buttonIndex": 5,
+		"title": "Watch Roku",
+		"abbreviation": "R",
+		"onCompleteURIScheme": "roku://"
+	}, {
+		"url": "http://192.168.1.103/",
+		"method": "GET",
+		"data": "Restart_MCE",
+		"buttonIndex": 3,
+		"title": "Restart MCE",
+		"abbreviation": "🔊"
+	}, {
+		"url": "http://192.168.1.103/",
+		"method": "GET",
+		"data": "Restart_PC",
+		"buttonIndex": 3,
+		"title": "Restart PC",
+		"abbreviation": "🔊"
 	}]
 }, {
-	"networkName": "lipp",
+	"networkName": "Simulator",
 	"deviceName": "BEDROOM",
 	"commands": [{
 		"url": "http://192.168.1.92:3000/Sharp/VolumeUp",
@@ -51,32 +89,28 @@
 		"data": "",
 		"buttonIndex": 6,
 		"title": "Volume Up",
-		"abbreviation": "🔊",
-		"successStatusCode": 200
+		"abbreviation": "🔊"
 	}, {
 		"url": "http://192.168.1.92:3000/Sharp/VolumeDown",
 		"method": "GET",
 		"data": "",
 		"buttonIndex": 4,
 		"title": "Volume Down",
-		"abbreviation": "🔈",
-		"successStatusCode": 200
+		"abbreviation": "🔈"
 	}, {
 		"url": "http://192.168.1.92:3000/Sharp/Mute",
 		"method": "GET",
 		"data": "",
 		"buttonIndex": 5,
 		"title": "Mute",
-		"abbreviation": "MT",
-		"successStatusCode": 200
+		"abbreviation": "MT"
 	}, {
 		"url": "http://192.168.1.92:3000/Sharp/Power",
 		"method": "GET",
 		"data": "",
 		"buttonIndex": 1,
 		"title": "Power",
-		"abbreviation": "PW",
-		"successStatusCode": 200
+		"abbreviation": "PW"
 	}, {
 		"url": "http://192.168.1.92:3000/Sharp/HDMI1",
 		"method": "GET",
@@ -84,22 +118,27 @@
 		"buttonIndex": 7,
 		"title": "Watch Roku",
 		"abbreviation": "🔥",
-		"successStatusCode": 200
+		"onCompleteURIScheme": "roku://"
 	}, {
 		"url": "http://192.168.1.92:3000/Sharp/HDMI2",
 		"method": "GET",
 		"data": "",
 		"buttonIndex": 8,
 		"title": "Watch DirecTv",
-		"abbreviation": "🔥",
-		"successStatusCode": 200
+		"abbreviation": "🔥"
 	}, {
 		"url": "http://192.168.1.92:3000/Sharp/HDMI3",
 		"method": "GET",
 		"data": "",
 		"buttonIndex": 9,
 		"title": "Watch Kodi",
-		"abbreviation": "🔥",
-		"successStatusCode": 200
+		"abbreviation": "🔥"
+	}, {
+		"url": "http://192.168.1.92:3000/DTV/Power",
+		"method": "GET",
+		"data": "",
+		"buttonIndex": 10,
+		"title": "DirecTv Power",
+		"abbreviation": "PW"
 	}]
 }]

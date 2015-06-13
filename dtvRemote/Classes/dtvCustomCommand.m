@@ -25,7 +25,7 @@
     [coder encodeObject:_buttonIndex forKey:@"buttonIndex"];
     [coder encodeObject:_commandDescription forKey:@"title"];
     [coder encodeObject:_abbreviation forKey:@"abbreviation"];
-    [coder encodeObject:_successStatusCode forKey:@"successStatusCode"];
+    [coder encodeObject:_onCompleteURIScheme forKey:@"onCompleteURIScheme"];
 }
 
 - (id)initWithCoder:(NSCoder *)decoder {
@@ -39,7 +39,7 @@
         _buttonIndex = [decoder decodeObjectForKey:@"buttonIndex"];
         _commandDescription = [decoder decodeObjectForKey:@"title"];
         _abbreviation = [decoder decodeObjectForKey:@"abbreviation"];
-        _successStatusCode = [decoder decodeObjectForKey:@"successStatusCode"];
+        _onCompleteURIScheme = [decoder decodeObjectForKey:@"onCompleteURIScheme"];
     }
     return self;
 }

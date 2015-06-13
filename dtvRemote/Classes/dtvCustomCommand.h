@@ -19,7 +19,7 @@
 @property (nonatomic, strong) NSString *data;
 @property (nonatomic, strong) NSString *buttonIndex;
 @property (nonatomic, strong) NSString *abbreviation;
-@property (nonatomic, strong) NSString *successStatusCode;
+@property (nonatomic, strong) NSString *onCompleteURIScheme;
 
 @property (nonatomic, strong) NSString *sideBarCategory;
 @property (nonatomic, strong) NSString *commandDescription;

@@ -198,11 +198,14 @@
 
     [NSURLConnection sendAsynchronousRequest:request
                                        queue:[NSOperationQueue mainQueue]
-                           completionHandler:^(NSURLResponse *response, NSData *data, NSError *error) {
-                                //dont care if it worked or not
-                           }];
+                           completionHandler:
+     ^(NSURLResponse *response, NSData *data, NSError *error) {
+         if (!error && command.onCompleteURIScheme ) {
+             NSURL *uri = [NSURL URLWithString:command.onCompleteURIScheme];
+             [[UIApplication sharedApplication] openURL:uri];
+         }
+     }];
 
-    
 }
 
 
@@ -280,7 +283,7 @@
                                     customCommand.buttonIndex = command[@"buttonIndex"];
                                     customCommand.commandDescription = command[@"title"];
                                     customCommand.abbreviation = command[@"abbreviation"];
-                                    customCommand.successStatusCode = command[@"successStatusCode"];
+                                    customCommand.onCompleteURIScheme = command[@"onCompleteURIScheme"];
                                     customCommand.sideBarCategory = @"Customs";
                                     customCommand.sideBarSortIndex = command[@"0"];
                                     
@@ -355,16 +358,14 @@
         item[@"data"] &&
         item[@"buttonIndex"] &&
         item[@"title"] &&
-        item[@"abbreviation"] &&
-        item[@"successStatusCode"]) {
+        item[@"abbreviation"]) {
         
         if ([item[@"url"] isKindOfClass:[NSString class]] &&
             [item[@"method"] isKindOfClass:[NSString class]] &&
             [item[@"data"] isKindOfClass:[NSString class]] &&
             [item[@"buttonIndex"] isKindOfClass:[NSNumber class]] &&
             [item[@"title"] isKindOfClass:[NSString class]] &&
-            [item[@"abbreviation"] isKindOfClass:[NSString class]] &&
-            [item[@"successStatusCode"] isKindOfClass:[NSNumber class]]) {
+            [item[@"abbreviation"] isKindOfClass:[NSString class]]) {
             
             valid = true;
         }
