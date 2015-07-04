@@ -73,7 +73,8 @@
                                    @"CINE", @"CINEHD", @"SONIC", @"PPV", @"DTV",
                                    @"BSN", @"NHL", @"MLS", @"PPVHD", @"IACHD",
                                    @"CINE1", @"CINE2", @"CINE3", @"IDEA", @"BEST",
-                                   @"MALL", @"SALE", @"NEW", @"AAN", @"EPL",
+                                   @"MALL", @"SALE", @"NEW", @"AAN", @"EPL", @"HBOLHD"
+                                   @"STZEHD",@"STZWHD",@"STZKHD",@"STZCHD",@"SEDGHD",@"SBLKHD",@"SCINHD",
                                    @"UEFA", @"RGBY", @"EPL", @"MAS", @"NBA", @"PTNW", @"ACT", nil];
         
         NSArray *blockCategories = [NSArray arrayWithObjects:
@@ -91,13 +92,56 @@
         }
     }
     return blocks;
-    
 }
 + (void)saveBlockedChannels:(NSMutableArray *) blockedChannels {
     NSString *key = @"blockedChannels";
     NSMutableDictionary *dataDict = [[NSMutableDictionary alloc] init];
     if (blockedChannels != nil) {
         [dataDict setObject:blockedChannels forKey:key];
+    }
+    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    NSString *documentsDirectoryPath = [paths objectAtIndex:0];
+    NSString *filePath = [documentsDirectoryPath stringByAppendingPathComponent:key];
+    [NSKeyedArchiver archiveRootObject:dataDict toFile:filePath];
+}
+
++ (NSMutableArray *) loadFavoriteChannels:(NSMutableDictionary *)channels {
+    NSString *key = @"favoriteChannels";
+    NSMutableArray *favs = [[NSMutableArray alloc] init];
+    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    NSString *documentsDirectoryPath = [paths objectAtIndex:0];
+    NSString *filePath = [documentsDirectoryPath stringByAppendingPathComponent:key];
+    
+    if ([[NSFileManager defaultManager] fileExistsAtPath:filePath]) {
+        NSData *data = [NSData dataWithContentsOfFile:filePath];
+        NSDictionary *savedData = [NSKeyedUnarchiver unarchiveObjectWithData:data];
+        
+        if ([savedData objectForKey:key] != nil) {
+            favs = [[NSMutableArray alloc] initWithArray:[savedData objectForKey:key] copyItems:YES];
+        }
+    }
+    
+    if ([favs count] == 0) {
+        NSArray *favCallSigns = [NSArray arrayWithObjects:
+                                   @"HBOEHD", @"HBOWHD", @"HB2EHD", @"HB2WHD", nil];
+        
+        for (NSString *key in channels) {
+            dtvChannel *channel = [channels objectForKey:key];
+            
+            if ([favCallSigns containsObject:[channel.callsign uppercaseString]]) {
+                [favs addObject:key];
+            }
+            
+        }
+    }
+    return favs;
+}
+
++ (void)saveFavoriteChannels:(NSMutableArray *) favoriteChannels {
+    NSString *key = @"favoriteChannels";
+    NSMutableDictionary *dataDict = [[NSMutableDictionary alloc] init];
+    if (favoriteChannels != nil) {
+        [dataDict setObject:favoriteChannels forKey:key];
     }
     NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
     NSString *documentsDirectoryPath = [paths objectAtIndex:0];

@@ -18,7 +18,9 @@
 + (void) populateChannels:(NSMutableDictionary *)location;
 + (void) downloadChannelImages:(NSMutableDictionary *)channels;
 + (NSMutableArray *) loadBlockedChannels:(NSMutableDictionary *)channels;
++ (NSMutableArray *) loadFavoriteChannels:(NSMutableDictionary *)channels;
 + (void)saveBlockedChannels:(NSMutableArray *) blockedChannels;
++ (void)saveFavoriteChannels:(NSMutableArray *) favortiteChannels;
 
 
 + (dtvChannel *)getChannelByNumber:(int)number channels:(NSMutableDictionary *)channels;

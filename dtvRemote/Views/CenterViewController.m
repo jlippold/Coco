@@ -127,7 +127,7 @@
     devices = [dtvDevices getSavedDevicesForActiveNetwork];
     currentDevice = [dtvDevices getCurrentDevice];
     blockedChannels = [dtvChannels loadBlockedChannels:channels];
-    favoriteChannels = [[NSMutableArray alloc] init];
+    favoriteChannels = [dtvChannels loadFavoriteChannels:channels];
     
     xOffset = 140;
     searchBarMinWidth = 74;
@@ -1262,12 +1262,13 @@
     if (isEditing) {
         //Going back to regular mode
         [dtvChannels saveBlockedChannels:blockedChannels];
+        [dtvChannels saveFavoriteChannels:favoriteChannels];
         isEditing = NO;
         editButton.image = [UIImage imageNamed:@"images.bundle/favorite"];
         channels = [dtvChannels load:NO];
         blockedChannels = [[NSMutableArray alloc] init];
+        favoriteChannels = [[NSMutableArray alloc] init];
         sortedChannels = [dtvChannels sortChannels:channels sortBy:@"default"];
-        //NSIndexPath *indexpath = (NSIndexPath*)[[_mainTableView indexPathsForVisibleRows] objectAtIndex:0];
         
     } else {
         //Going into edit mode
@@ -1275,6 +1276,7 @@
         editButton.image = [UIImage imageNamed:@"images.bundle/favortite-selected"];
         channels = [dtvChannels load:YES];
         blockedChannels = [dtvChannels loadBlockedChannels:channels];
+        favoriteChannels = [dtvChannels loadFavoriteChannels:channels];
         sortedChannels = [dtvChannels sortChannels:channels sortBy:@"default"];
     }
     
