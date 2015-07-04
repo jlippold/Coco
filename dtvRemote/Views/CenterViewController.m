@@ -926,6 +926,7 @@
         UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
         CGRect frame = CGRectMake(0, 0, image.size.width, image.size.height);
         button.frame = frame;
+        button.userInteractionEnabled = NO;
         [button setBackgroundImage:image forState:UIControlStateNormal];
         button.backgroundColor = [UIColor clearColor];
         cell.accessoryView = button;
@@ -998,6 +999,7 @@
         button.tintColor = [Colors textColor];
         CGRect frame = CGRectMake(0, 0, image.size.width, image.size.height);
         button.frame = frame;
+        button.userInteractionEnabled = NO;
         [button setBackgroundImage:image forState:UIControlStateNormal];
         button.backgroundColor = [UIColor clearColor];
         cell.accessoryView = button;
