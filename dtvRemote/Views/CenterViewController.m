@@ -33,6 +33,7 @@
     NSMutableDictionary *allChannels;
     NSMutableDictionary *sortedChannels;
     NSMutableArray *blockedChannels;
+    NSMutableArray *favoriteChannels;
     NSMutableDictionary *guide;
     NSMutableDictionary *devices;
     dtvDevice *currentDevice;
@@ -126,6 +127,7 @@
     devices = [dtvDevices getSavedDevicesForActiveNetwork];
     currentDevice = [dtvDevices getCurrentDevice];
     blockedChannels = [dtvChannels loadBlockedChannels:channels];
+    favoriteChannels = [[NSMutableArray alloc] init];
     
     xOffset = 140;
     searchBarMinWidth = 74;
@@ -651,7 +653,7 @@
                              style:UIBarButtonItemStylePlain target:self action:@selector(sortChannels:) ];
     
     editButton = [[UIBarButtonItem alloc]
-                   initWithImage:[UIImage imageNamed:@"images.bundle/edit"]
+                   initWithImage:[UIImage imageNamed:@"images.bundle/favorite"]
                    style:UIBarButtonItemStylePlain target:self action:@selector(toggleEditMode:)];
     
     UIBarButtonItem *refresh = [[UIBarButtonItem alloc]
@@ -842,7 +844,7 @@
 
     cell.indentationLevel = 1;
     cell.indentationWidth = 2;
-    cell.accessoryType = UITableViewCellAccessoryCheckmark;
+    //cell.accessoryType = UITableViewCellAccessoryCheckmark;
     cell.userInteractionEnabled = YES;
     
     if (usingVibrancy) {
@@ -911,13 +913,23 @@
         cell.textLabel.text = channel.name;
         cell.detailTextLabel.text = [NSString stringWithFormat:@"%d - %@", channel.number, channel.callsign];
         
+        UIImage *image = [UIImage new];
+        
         if ([blockedChannels containsObject:chId]) {
-            cell.accessoryView = [[UIImageView alloc] initWithImage:[UIImage new]];
-            cell.accessoryType = UITableViewCellAccessoryNone;
-        } else {
-            cell.accessoryView = nil;
-            cell.accessoryType = UITableViewCellAccessoryCheckmark;
+            image = [UIImage imageNamed:@"images.bundle/hidden"];
         }
+
+        if ([favoriteChannels containsObject:chId]) {
+            image = [UIImage imageNamed:@"images.bundle/favorite"];
+        }
+        
+        UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
+        CGRect frame = CGRectMake(0, 0, image.size.width, image.size.height);
+        button.frame = frame;
+        [button setBackgroundImage:image forState:UIControlStateNormal];
+        button.backgroundColor = [UIColor clearColor];
+        cell.accessoryView = button;
+        
     } else {
         cell.accessoryView = [[UIImageView alloc] initWithImage:[UIImage new]];
         
@@ -947,17 +959,63 @@
     
     if (isEditing) {
         
-        UITableViewCell *cell =[tableView cellForRowAtIndexPath:indexPath];
+        UITableViewCell *cell = [tableView cellForRowAtIndexPath:indexPath];
+        
+        UIImage *image = [UIImage new];
+        
+        BOOL match = false;
+        
+        if (![blockedChannels containsObject:chId] && ![favoriteChannels containsObject:chId] ) {
+            //nothing to blocked
+            image = [UIImage imageNamed:@"images.bundle/hidden"];
+            if ([favoriteChannels containsObject:chId]) {
+                [favoriteChannels removeObject:chId];
+            }
+            [blockedChannels addObject:chId];
+            match = true;
+        } else
+            
+        if ([blockedChannels containsObject:chId] && !match) {
+            //blocked to favortie
+            image = [UIImage imageNamed:@"images.bundle/favorite"];
+            if ([blockedChannels containsObject:chId]) {
+                [blockedChannels removeObject:chId];
+            }
+            [favoriteChannels addObject:chId];
+            match = true;
+        } else {
+            //favorite to nothing
+            image = [UIImage new];
+            if ([favoriteChannels containsObject:chId]) {
+                [favoriteChannels removeObject:chId];
+            }
+            if ([blockedChannels containsObject:chId]) {
+                [blockedChannels removeObject:chId];
+            }
+        }
+        
+        UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
+        button.tintColor = [Colors textColor];
+        CGRect frame = CGRectMake(0, 0, image.size.width, image.size.height);
+        button.frame = frame;
+        [button setBackgroundImage:image forState:UIControlStateNormal];
+        button.backgroundColor = [UIColor clearColor];
+        cell.accessoryView = button;
+        
+        /*
         if ([blockedChannels containsObject:chId]) {
             [blockedChannels removeObject:chId];
             cell.accessoryView = [[UIImageView alloc] initWithImage:[UIImage new]];
-            cell.accessoryType = UITableViewCellAccessoryNone;
+
         } else {
             [blockedChannels addObject:chId];
             cell.accessoryView = nil;
             cell.accessoryType = UITableViewCellAccessoryCheckmark;
         }
-        [mainTableView reloadRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationNone];
+         [mainTableView reloadRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationNone];
+         */
+        
+        
     } else {
         
         if (!currentDevice) {
@@ -1205,7 +1263,7 @@
         //Going back to regular mode
         [dtvChannels saveBlockedChannels:blockedChannels];
         isEditing = NO;
-        editButton.image = [UIImage imageNamed:@"images.bundle/edit"];
+        editButton.image = [UIImage imageNamed:@"images.bundle/favorite"];
         channels = [dtvChannels load:NO];
         blockedChannels = [[NSMutableArray alloc] init];
         sortedChannels = [dtvChannels sortChannels:channels sortBy:@"default"];
@@ -1214,7 +1272,7 @@
     } else {
         //Going into edit mode
         isEditing = YES;
-        editButton.image = [UIImage imageNamed:@"images.bundle/done"];
+        editButton.image = [UIImage imageNamed:@"images.bundle/favortite-selected"];
         channels = [dtvChannels load:YES];
         blockedChannels = [dtvChannels loadBlockedChannels:channels];
         sortedChannels = [dtvChannels sortChannels:channels sortBy:@"default"];
