@@ -15,7 +15,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "859D6D801A9926CA0024FBA4"
-               BuildableName = "dtvRemote.app"
+               BuildableName = "Coco for DirecTV.app"
                BlueprintName = "dtvRemote"
                ReferencedContainer = "container:dtvRemote.xcodeproj">
             </BuildableReference>
@@ -57,7 +57,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "859D6D801A9926CA0024FBA4"
-            BuildableName = "dtvRemote.app"
+            BuildableName = "Coco for DirecTV.app"
             BlueprintName = "dtvRemote"
             ReferencedContainer = "container:dtvRemote.xcodeproj">
          </BuildableReference>
@@ -72,11 +72,12 @@
       ignoresPersistentStateOnLaunch = "NO"
       debugDocumentVersioning = "YES"
       allowLocationSimulation = "YES">
-      <BuildableProductRunnable>
+      <BuildableProductRunnable
+         runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "859D6D801A9926CA0024FBA4"
-            BuildableName = "dtvRemote.app"
+            BuildableName = "Coco for DirecTV.app"
             BlueprintName = "dtvRemote"
             ReferencedContainer = "container:dtvRemote.xcodeproj">
          </BuildableReference>
@@ -90,11 +91,12 @@
       useCustomWorkingDirectory = "NO"
       buildConfiguration = "Release"
       debugDocumentVersioning = "YES">
-      <BuildableProductRunnable>
+      <BuildableProductRunnable
+         runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "859D6D801A9926CA0024FBA4"
-            BuildableName = "dtvRemote.app"
+            BuildableName = "Coco for DirecTV.app"
             BlueprintName = "dtvRemote"
             ReferencedContainer = "container:dtvRemote.xcodeproj">
          </BuildableReference>

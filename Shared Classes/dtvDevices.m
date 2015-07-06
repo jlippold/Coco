@@ -9,6 +9,7 @@
 #import "dtvDevices.h"
 #import "dtvDevice.h"
 #import "iNet.h"
+#import "Util.h"
 
 @implementation dtvDevices
 
@@ -50,8 +51,8 @@
              {
                  id client = [prospectiveDevices objectAtIndex:i];
                  
-                 if (i == 113) {
-                     //NSLog(@"%@", strUrl);
+                 if (i == 50) {
+                     NSLog(@"%@", strUrl);
                  }
             
                  
@@ -202,34 +203,13 @@
 }
 
 + (void) saveNetworksToDisk:(NSMutableDictionary *) devices {
-    NSString *key = @"devices";
-    NSMutableDictionary *dataDict = [[NSMutableDictionary alloc] init];
-    if (devices != nil) {
-        [dataDict setObject:devices forKey:key];
+    if (devices) {
+        [Util saveObjectToDisk:devices key:@"devices"];
     }
-    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-    NSString *documentsDirectoryPath = [paths objectAtIndex:0];
-    NSString *filePath = [documentsDirectoryPath stringByAppendingPathComponent:key];
-    [NSKeyedArchiver archiveRootObject:dataDict toFile:filePath];
 }
 
 + (NSMutableDictionary *) loadNetworksFromDisk {
-    NSString *key = @"devices";
-    NSMutableDictionary *devices = [[NSMutableDictionary alloc] init];
-    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-    NSString *documentsDirectoryPath = [paths objectAtIndex:0];
-    NSString *filePath = [documentsDirectoryPath stringByAppendingPathComponent:key];
-    
-    if ([[NSFileManager defaultManager] fileExistsAtPath:filePath]) {
-        NSData *data = [NSData dataWithContentsOfFile:filePath];
-        NSDictionary *savedData = [NSKeyedUnarchiver unarchiveObjectWithData:data];
-        
-        if ([savedData objectForKey:key] != nil) {
-            NSMutableDictionary *base = [[savedData objectForKey:key] mutableCopy];
-            devices = [base mutableCopy];
-        }
-    }
-    return devices;
+    return (NSMutableDictionary *)[Util loadObjectFromDisk:@"devices" objectType:@"NSMutableDictionary"];
 }
 
 
@@ -254,34 +234,14 @@
 }
 
 + (NSString *) getLastUsedDeviceById {
-    NSString *key = @"deviceId";
-    NSString *deviceId = @"";
-    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-    NSString *documentsDirectoryPath = [paths objectAtIndex:0];
-    NSString *filePath = [documentsDirectoryPath stringByAppendingPathComponent:key];
-    
-    if ([[NSFileManager defaultManager] fileExistsAtPath:filePath]) {
-        NSData *data = [NSData dataWithContentsOfFile:filePath];
-        NSDictionary *savedData = [NSKeyedUnarchiver unarchiveObjectWithData:data];
-        
-        if ([savedData objectForKey:key] != nil) {
-            deviceId = [savedData objectForKey:key];
-        }
-    }
-    
+    NSString *deviceId = (NSString *)[Util loadObjectFromDisk:@"deviceId" objectType:@"NSString"];
     return  deviceId;
 }
 
 + (void) saveCurrentDeviceId:(NSString *)deviceId {
-    NSString *key = @"deviceId";
-    NSMutableDictionary *dataDict = [[NSMutableDictionary alloc] init];
-    if (deviceId != nil) {
-        [dataDict setObject:deviceId forKey:key];
+    if (deviceId) {
+        [Util saveObjectToDisk:deviceId key:@"deviceId"];
     }
-    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-    NSString *documentsDirectoryPath = [paths objectAtIndex:0];
-    NSString *filePath = [documentsDirectoryPath stringByAppendingPathComponent:key];
-    [NSKeyedArchiver archiveRootObject:dataDict toFile:filePath];
 }
 
 + (NSMutableArray *) getCandidates:(NSString *)subnet {

@@ -11,6 +11,7 @@
 #import "dtvChannel.h"
 #import "dtvDevice.h"
 #import "dtvCustomCommand.h"
+#import "Util.h"
 
 @implementation dtvCommands
 
@@ -201,8 +202,12 @@
                            completionHandler:
      ^(NSURLResponse *response, NSData *data, NSError *error) {
          if (!error && command.onCompleteURIScheme ) {
+            #ifndef WATCH_KIT_EXTENSION_TARGET
+            #else
              NSURL *uri = [NSURL URLWithString:command.onCompleteURIScheme];
              [[UIApplication sharedApplication] openURL:uri];
+            #endif
+             
          }
      }];
 
@@ -321,33 +326,15 @@
 }
 
 + (void)saveCustoms:(NSMutableArray *) customs {
-    NSString *key = @"customs";
-    NSMutableDictionary *dataDict = [[NSMutableDictionary alloc] init];
-    if (customs != nil) {
-        [dataDict setObject:customs forKey:key];
+    if (customs) {
+        [Util saveObjectToDisk:customs key:@"customs"];
     }
-    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-    NSString *documentsDirectoryPath = [paths objectAtIndex:0];
-    NSString *filePath = [documentsDirectoryPath stringByAppendingPathComponent:key];
-    [NSKeyedArchiver archiveRootObject:dataDict toFile:filePath];
 }
 
 + (NSMutableArray *) loadSavedCustoms {
     
-    NSMutableArray *customs = [[NSMutableArray alloc] init];
-    NSString *key = @"customs";
-    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-    NSString *documentsDirectoryPath = [paths objectAtIndex:0];
-    NSString *filePath = [documentsDirectoryPath stringByAppendingPathComponent:key];
-    
-    if ([[NSFileManager defaultManager] fileExistsAtPath:filePath]) {
-        NSData *data = [NSData dataWithContentsOfFile:filePath];
-        NSDictionary *savedData = [NSKeyedUnarchiver unarchiveObjectWithData:data];
-        
-        if ([savedData objectForKey:key] != nil) {
-            customs = [savedData objectForKey:key];
-        }
-    }
+    NSMutableArray *customs = (NSMutableArray *)[Util loadObjectFromDisk:@"customs"
+                                                             objectType:@"NSMutableArray"];
     return customs;
 }
 

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="7702" systemVersion="14D136" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="7706" systemVersion="14D136" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES">
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="7701"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="7703"/>
     </dependencies>
     <objects>
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="VibrancyViewController">
@@ -120,20 +120,20 @@
                     <exclude reference="qnv-7Y-EHa"/>
                 </mask>
                 <mask key="constraints">
-                    <exclude reference="75B-Bf-UY7"/>
-                    <exclude reference="b4c-IF-tR5"/>
-                    <exclude reference="g7j-vs-32h"/>
-                    <exclude reference="mSq-6R-TK2"/>
-                    <exclude reference="6lV-rM-p1X"/>
-                    <exclude reference="EIj-h4-LAf"/>
-                    <exclude reference="Hd5-wR-n2a"/>
-                    <exclude reference="SU8-vu-p2G"/>
                     <exclude reference="3if-Pq-8N0"/>
                     <exclude reference="Is9-wn-oGv"/>
                     <exclude reference="Vus-y5-YaE"/>
                     <exclude reference="W6H-bv-3my"/>
                     <exclude reference="7nU-aW-PJr"/>
                     <exclude reference="XPh-O0-x9E"/>
+                    <exclude reference="6lV-rM-p1X"/>
+                    <exclude reference="EIj-h4-LAf"/>
+                    <exclude reference="Hd5-wR-n2a"/>
+                    <exclude reference="SU8-vu-p2G"/>
+                    <exclude reference="75B-Bf-UY7"/>
+                    <exclude reference="b4c-IF-tR5"/>
+                    <exclude reference="g7j-vs-32h"/>
+                    <exclude reference="mSq-6R-TK2"/>
                 </mask>
             </variation>
             <variation key="widthClass=compact">
@@ -143,20 +143,20 @@
                     <include reference="qnv-7Y-EHa"/>
                 </mask>
                 <mask key="constraints">
-                    <include reference="75B-Bf-UY7"/>
-                    <include reference="b4c-IF-tR5"/>
-                    <include reference="g7j-vs-32h"/>
-                    <include reference="mSq-6R-TK2"/>
-                    <include reference="6lV-rM-p1X"/>
-                    <include reference="EIj-h4-LAf"/>
-                    <include reference="Hd5-wR-n2a"/>
-                    <include reference="SU8-vu-p2G"/>
                     <include reference="3if-Pq-8N0"/>
                     <include reference="Is9-wn-oGv"/>
                     <include reference="Vus-y5-YaE"/>
                     <include reference="W6H-bv-3my"/>
                     <include reference="7nU-aW-PJr"/>
                     <include reference="XPh-O0-x9E"/>
+                    <include reference="6lV-rM-p1X"/>
+                    <include reference="EIj-h4-LAf"/>
+                    <include reference="Hd5-wR-n2a"/>
+                    <include reference="SU8-vu-p2G"/>
+                    <include reference="75B-Bf-UY7"/>
+                    <include reference="b4c-IF-tR5"/>
+                    <include reference="g7j-vs-32h"/>
+                    <include reference="mSq-6R-TK2"/>
                 </mask>
             </variation>
             <point key="canvasLocation" x="294" y="329"/>

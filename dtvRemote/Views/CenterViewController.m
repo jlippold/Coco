@@ -1004,20 +1004,6 @@
         button.backgroundColor = [UIColor clearColor];
         cell.accessoryView = button;
         
-        /*
-        if ([blockedChannels containsObject:chId]) {
-            [blockedChannels removeObject:chId];
-            cell.accessoryView = [[UIImageView alloc] initWithImage:[UIImage new]];
-
-        } else {
-            [blockedChannels addObject:chId];
-            cell.accessoryView = nil;
-            cell.accessoryType = UITableViewCellAccessoryCheckmark;
-        }
-         [mainTableView reloadRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationNone];
-         */
-        
-        
     } else {
         
         if (!currentDevice) {

@@ -8,38 +8,21 @@
 
 #import "dtvChannels.h"
 #import "dtvChannel.h"
+#import "Util.h"
 
 @implementation dtvChannels
 
 
 + (void)save:(NSMutableDictionary *) channels {
-    NSString *key = @"channels";
-    NSMutableDictionary *dataDict = [[NSMutableDictionary alloc] init];
-    if (channels != nil) {
-        [dataDict setObject:channels forKey:key];
+    if (channels) {
+        [Util saveObjectToDisk:channels key:@"channels"];
     }
-    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-    NSString *documentsDirectoryPath = [paths objectAtIndex:0];
-    NSString *filePath = [documentsDirectoryPath stringByAppendingPathComponent:key];
-    [NSKeyedArchiver archiveRootObject:dataDict toFile:filePath];
 }
 
 + (NSMutableDictionary *) load:(BOOL)showBlocks {
-    NSString *key = @"channels";
-    NSMutableDictionary *channels = [[NSMutableDictionary alloc] init];
-    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-    NSString *documentsDirectoryPath = [paths objectAtIndex:0];
-    NSString *filePath = [documentsDirectoryPath stringByAppendingPathComponent:key];
-    
-    if ([[NSFileManager defaultManager] fileExistsAtPath:filePath]) {
-        NSData *data = [NSData dataWithContentsOfFile:filePath];
-        NSDictionary *savedData = [NSKeyedUnarchiver unarchiveObjectWithData:data];
-        
-        if ([savedData objectForKey:key] != nil) {
-            channels = [[NSMutableDictionary alloc] initWithDictionary:[savedData objectForKey:key]];
-        }
-    }
-    
+
+    NSMutableDictionary *channels = (NSMutableDictionary *)[Util loadObjectFromDisk:@"channels" objectType:@"NSMutableDictionary"];
+
     //remove blocks
     if (!showBlocks) {
         NSMutableArray *blocks = [self loadBlockedChannels:channels];
@@ -53,20 +36,10 @@
 }
 
 + (NSMutableArray *) loadBlockedChannels:(NSMutableDictionary *)channels {
-    NSString *key = @"blockedChannels";
-    NSMutableArray *blocks = [[NSMutableArray alloc] init];
-    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-    NSString *documentsDirectoryPath = [paths objectAtIndex:0];
-    NSString *filePath = [documentsDirectoryPath stringByAppendingPathComponent:key];
     
-    if ([[NSFileManager defaultManager] fileExistsAtPath:filePath]) {
-        NSData *data = [NSData dataWithContentsOfFile:filePath];
-        NSDictionary *savedData = [NSKeyedUnarchiver unarchiveObjectWithData:data];
-        
-        if ([savedData objectForKey:key] != nil) {
-            blocks = [[NSMutableArray alloc] initWithArray:[savedData objectForKey:key] copyItems:YES];
-        }
-    }
+    NSMutableArray *blocks = (NSMutableArray *)[Util loadObjectFromDisk:@"blockedChannels"
+                                                             objectType:@"NSMutableArray"];
+
     
     if ([blocks count] == 0) {
         NSArray *blockCallSigns = [NSArray arrayWithObjects:
@@ -94,36 +67,18 @@
     return blocks;
 }
 + (void)saveBlockedChannels:(NSMutableArray *) blockedChannels {
-    NSString *key = @"blockedChannels";
-    NSMutableDictionary *dataDict = [[NSMutableDictionary alloc] init];
-    if (blockedChannels != nil) {
-        [dataDict setObject:blockedChannels forKey:key];
+    if (blockedChannels) {
+        [Util saveObjectToDisk:blockedChannels key:@"blockedChannels"];
     }
-    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-    NSString *documentsDirectoryPath = [paths objectAtIndex:0];
-    NSString *filePath = [documentsDirectoryPath stringByAppendingPathComponent:key];
-    [NSKeyedArchiver archiveRootObject:dataDict toFile:filePath];
 }
 
 + (NSMutableArray *) loadFavoriteChannels:(NSMutableDictionary *)channels {
-    NSString *key = @"favoriteChannels";
-    NSMutableArray *favs = [[NSMutableArray alloc] init];
-    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-    NSString *documentsDirectoryPath = [paths objectAtIndex:0];
-    NSString *filePath = [documentsDirectoryPath stringByAppendingPathComponent:key];
-    
-    if ([[NSFileManager defaultManager] fileExistsAtPath:filePath]) {
-        NSData *data = [NSData dataWithContentsOfFile:filePath];
-        NSDictionary *savedData = [NSKeyedUnarchiver unarchiveObjectWithData:data];
-        
-        if ([savedData objectForKey:key] != nil) {
-            favs = [[NSMutableArray alloc] initWithArray:[savedData objectForKey:key] copyItems:YES];
-        }
-    }
-    
+
+    NSMutableArray *favs = (NSMutableArray *)[Util loadObjectFromDisk:@"favoriteChannels"
+                                                             objectType:@"NSMutableArray"];
     if ([favs count] == 0) {
         NSArray *favCallSigns = [NSArray arrayWithObjects:
-                                   @"HBOEHD", @"HBOWHD", @"HB2EHD", @"HB2WHD", nil];
+                                   @"COM", @"CNN", @"HBOE", @"MTV", nil];
         
         for (NSString *key in channels) {
             dtvChannel *channel = [channels objectForKey:key];
@@ -138,15 +93,9 @@
 }
 
 + (void)saveFavoriteChannels:(NSMutableArray *) favoriteChannels {
-    NSString *key = @"favoriteChannels";
-    NSMutableDictionary *dataDict = [[NSMutableDictionary alloc] init];
-    if (favoriteChannels != nil) {
-        [dataDict setObject:favoriteChannels forKey:key];
+    if (favoriteChannels) {
+        [Util saveObjectToDisk:favoriteChannels key:@"favoriteChannels"];
     }
-    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-    NSString *documentsDirectoryPath = [paths objectAtIndex:0];
-    NSString *filePath = [documentsDirectoryPath stringByAppendingPathComponent:key];
-    [NSKeyedArchiver archiveRootObject:dataDict toFile:filePath];
 }
 
 + (void) getLocationsForZipCode:(NSString *)zipCode {
@@ -243,8 +192,9 @@
                      }
                      
                      NSString *category = @"Uncategorized";
-                     if (categories[[item objectForKey:@"chCall"]]) {
-                         category = categories[[item objectForKey:@"chCall"]];
+                     NSString *callsign = [[item objectForKey:@"chCall"] uppercaseString];
+                     if (categories[callsign]) {
+                         category = categories[callsign];
                      }
                      
                      if ([category isEqualToString:@"Uncategorized"] &&
@@ -281,13 +231,13 @@
 }
 
 + (void) downloadChannelImages:(NSMutableDictionary *)channels {
-    [self clearCaches];
+    [self clearCachedImages];
     
     NSOperationQueue *channelImagesQueue = [[NSOperationQueue alloc] init];
     channelImagesQueue.name = @"Channel Images Cache";
     channelImagesQueue.maxConcurrentOperationCount = 5;
     
-    NSString *cacheDirectory = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) lastObject];
+    NSString *cacheDirectory = [Util getDocumentsDirectory];
     NSArray *keys = [channels allKeys];
     
     __block int completed = 0;
@@ -299,7 +249,7 @@
         
         NSURL *location = [NSURL URLWithString:[NSString stringWithFormat:@"https://www.directv.com/images/logos/channels/dark/medium/%03d.png", channel.logoId]];
         
-        NSString *imagePath =[cacheDirectory stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.png",channelId]];
+        NSString *imagePath = [cacheDirectory stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.png",channelId]];
         
         NSURLResponse* response;
         NSError *connectionError;
@@ -329,13 +279,15 @@
     
 }
 
-+ (void)clearCaches {
++ (void)clearCachedImages {
     [[NSURLCache sharedURLCache] removeAllCachedResponses];
     NSFileManager *fileManager = [NSFileManager defaultManager];
-    NSString *cacheDirectory = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) lastObject];
+    NSString *cacheDirectory = [Util getDocumentsDirectory];
     NSArray *cacheFiles = [fileManager contentsOfDirectoryAtPath:cacheDirectory error:nil];
     for (NSString *file in cacheFiles) {
-        [fileManager removeItemAtPath:[cacheDirectory stringByAppendingPathComponent:file] error:nil];
+        if ([file hasPrefix:@".png"]) {
+            [fileManager removeItemAtPath:[cacheDirectory stringByAppendingPathComponent:file] error:nil];
+        }
     }
 }
 
@@ -416,35 +368,14 @@
 }
 
 + (NSString *) DTVCookie {
-
-    NSString *cookie = @"";
-    
-    NSString *key = @"saveDTVCookie";
-    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-    NSString *documentsDirectoryPath = [paths objectAtIndex:0];
-    NSString *filePath = [documentsDirectoryPath stringByAppendingPathComponent:key];
-    
-    if ([[NSFileManager defaultManager] fileExistsAtPath:filePath]) {
-        NSData *data = [NSData dataWithContentsOfFile:filePath];
-        NSDictionary *savedData = [NSKeyedUnarchiver unarchiveObjectWithData:data];
-        
-        if ([savedData objectForKey:key] != nil) {
-            cookie = [savedData objectForKey:key];
-        }
-    }
-    return cookie;
+    NSString *cookie = (NSString *)[Util loadObjectFromDisk:@"saveDTVCookie" objectType:@"NSString"];
+    return  cookie;
 }
 
 + (void)saveDTVCookie:(NSString *) channels {
-    NSString *key = @"saveDTVCookie";
-    NSMutableDictionary *dataDict = [[NSMutableDictionary alloc] init];
-    if (channels != nil) {
-        [dataDict setObject:channels forKey:key];
+    if (channels) {
+        [Util saveObjectToDisk:channels key:@"saveDTVCookie"];
     }
-    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-    NSString *documentsDirectoryPath = [paths objectAtIndex:0];
-    NSString *filePath = [documentsDirectoryPath stringByAppendingPathComponent:key];
-    [NSKeyedArchiver archiveRootObject:dataDict toFile:filePath];
 }
 
 

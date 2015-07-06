@@ -48,7 +48,9 @@ NSString *const IAPHelperProductPurchasedNotification = @"IAPHelperProductPurcha
         for (NSString *productIdentifier in _productIdentifiers) {
             // TODO: create a BOOL value named "productPurchased" and return a BOOL value for a given productIdentifier (boolForKey) for NSUserDefaults' standardUserDefaults method
             // TODO: once you implemented this, uncomment the if-else statement. Everything should build just fine.
-            BOOL productPurchased = [[NSUserDefaults standardUserDefaults] boolForKey:productIdentifier];
+            
+            NSUserDefaults *sharedDefaults = [[NSUserDefaults alloc] initWithSuiteName:@"group.dtvRemote.shares"];
+            BOOL productPurchased = [sharedDefaults boolForKey:productIdentifier];
             if (productPurchased) {
                 [_purchasedProductIdentifiers addObject:productIdentifier];
                 NSLog(@"Previously purchased: %@", productIdentifier);
@@ -136,7 +138,12 @@ NSString *const IAPHelperProductPurchasedNotification = @"IAPHelperProductPurcha
 {
     
     [self provideContentForProductIdentifier:transaction.payment.productIdentifier];
-    [[NSUserDefaults standardUserDefaults] setBool:YES forKey:transaction.payment.productIdentifier];
+    
+    //[[NSUserDefaults standardUserDefaults] setBool:YES forKey:transaction.payment.productIdentifier];
+    NSUserDefaults *sharedDefaults = [[NSUserDefaults alloc] initWithSuiteName:@"group.dtvRemote.shares"];
+    [sharedDefaults setBool:YES forKey:transaction.payment.productIdentifier];
+    [sharedDefaults synchronize];
+    
     [[SKPaymentQueue defaultQueue] finishTransaction:transaction];
 }
 
@@ -168,8 +175,13 @@ NSString *const IAPHelperProductPurchasedNotification = @"IAPHelperProductPurcha
 - (void)provideContentForProductIdentifier:(NSString *)productIdentifier
 {
     [_purchasedProductIdentifiers addObject:productIdentifier];
-    [[NSUserDefaults standardUserDefaults] setBool:YES forKey:productIdentifier];
-    [[NSUserDefaults standardUserDefaults] synchronize];
+    //[[NSUserDefaults standardUserDefaults] setBool:YES forKey:productIdentifier];
+    //[[NSUserDefaults standardUserDefaults] synchronize];
+    
+    NSUserDefaults *sharedDefaults = [[NSUserDefaults alloc] initWithSuiteName:@"group.dtvRemote.shares"];
+    [sharedDefaults setBool:YES forKey:productIdentifier];
+    [sharedDefaults synchronize];
+    
     [[NSNotificationCenter defaultCenter] postNotificationName:IAPHelperProductPurchasedNotification
                                                         object:productIdentifier
                                                       userInfo:nil];

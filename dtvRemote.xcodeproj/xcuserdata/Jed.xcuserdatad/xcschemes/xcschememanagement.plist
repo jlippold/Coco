@@ -4,6 +4,11 @@
 <dict>
 	<key>SchemeUserState</key>
 	<dict>
+		<key>dtvRemote-Widget.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>1</integer>
+		</dict>
 		<key>dtvRemote.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
@@ -18,6 +23,11 @@
 			<true/>
 		</dict>
 		<key>859D6D9C1A9926CA0024FBA4</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>85B514361B486DCD009E0E79</key>
 		<dict>
 			<key>primary</key>
 			<true/>
