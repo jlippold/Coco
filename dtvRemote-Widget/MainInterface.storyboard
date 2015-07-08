@@ -14,23 +14,28 @@
                         <viewControllerLayoutGuide type="bottom" id="H9y-6n-euk"/>
                     </layoutGuides>
                     <view key="view" contentMode="scaleToFill" simulatedAppContext="notificationCenter" id="S3S-Oj-5AN">
-                        <rect key="frame" x="0.0" y="0.0" width="320" height="200"/>
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="100"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <collectionView opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" ambiguous="YES" misplaced="YES" bounces="NO" scrollEnabled="NO" showsHorizontalScrollIndicator="NO" showsVerticalScrollIndicator="NO" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="Mc6-Sb-zhB">
-                                <rect key="frame" x="6" y="42" width="308" height="150"/>
+                            <collectionView opaque="NO" multipleTouchEnabled="YES" contentMode="scaleToFill" bounces="NO" scrollEnabled="NO" showsHorizontalScrollIndicator="NO" showsVerticalScrollIndicator="NO" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="Mc6-Sb-zhB">
+                                <rect key="frame" x="6" y="42" width="291" height="48"/>
                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                 <color key="tintColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
-                                <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="10" minimumInteritemSpacing="10" id="r9t-3o-5lK">
+                                <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="6" minimumInteritemSpacing="6" id="r9t-3o-5lK">
                                     <size key="itemSize" width="50" height="50"/>
-                                    <size key="headerReferenceSize" width="0.0" height="0.0"/>
+                                    <size key="headerReferenceSize" width="291" height="12"/>
                                     <size key="footerReferenceSize" width="0.0" height="0.0"/>
                                     <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
                                 </collectionViewFlowLayout>
                                 <cells/>
+                                <collectionReusableView key="sectionHeaderView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="HeaderView" id="Obo-0V-VMc">
+                                    <rect key="frame" x="0.0" y="0.0" width="291" height="12"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                    <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                                </collectionReusableView>
                             </collectionView>
-                            <segmentedControl opaque="NO" contentMode="scaleToFill" ambiguous="YES" misplaced="YES" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="bar" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="0QK-g6-St1">
-                                <rect key="frame" x="8" y="6" width="123" height="29"/>
+                            <segmentedControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="bar" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="0QK-g6-St1">
+                                <rect key="frame" x="8" y="6" width="291" height="29"/>
                                 <segments>
                                     <segment title="First"/>
                                     <segment title="Second"/>
@@ -39,10 +44,13 @@
                             </segmentedControl>
                         </subviews>
                         <constraints>
+                            <constraint firstAttribute="trailingMargin" secondItem="Mc6-Sb-zhB" secondAttribute="trailing" constant="7" id="9vV-qB-pfR"/>
                             <constraint firstItem="Mc6-Sb-zhB" firstAttribute="top" secondItem="0QK-g6-St1" secondAttribute="bottom" constant="8" id="CGa-b8-ibR"/>
                             <constraint firstItem="0QK-g6-St1" firstAttribute="leading" secondItem="S3S-Oj-5AN" secondAttribute="leadingMargin" constant="-8" id="EpJ-eN-xOe"/>
-                            <constraint firstItem="H9y-6n-euk" firstAttribute="top" secondItem="Mc6-Sb-zhB" secondAttribute="bottom" constant="8" id="h4e-j7-3BM"/>
-                            <constraint firstAttribute="centerX" secondItem="Mc6-Sb-zhB" secondAttribute="centerX" id="lOR-bn-aGi"/>
+                            <constraint firstItem="Mc6-Sb-zhB" firstAttribute="leading" secondItem="S3S-Oj-5AN" secondAttribute="leadingMargin" constant="-10" id="Iz7-jj-0ev"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="0QK-g6-St1" secondAttribute="trailing" constant="5" id="KBi-AU-xhl"/>
+                            <constraint firstItem="H9y-6n-euk" firstAttribute="top" secondItem="Mc6-Sb-zhB" secondAttribute="bottom" constant="10" id="Mzw-kS-MEF"/>
+                            <constraint firstItem="0QK-g6-St1" firstAttribute="top" secondItem="Znm-wc-TSG" secondAttribute="bottom" constant="6" id="ojz-xj-4cO"/>
                         </constraints>
                     </view>
                     <extendedEdge key="edgesForExtendedLayout"/>
@@ -50,7 +58,7 @@
                     <nil key="simulatedTopBarMetrics"/>
                     <nil key="simulatedBottomBarMetrics"/>
                     <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
-                    <size key="freeformSize" width="320" height="200"/>
+                    <size key="freeformSize" width="320" height="100"/>
                     <connections>
                         <outlet property="cv" destination="Mc6-Sb-zhB" id="5XL-CD-8N7"/>
                         <outlet property="deviceSegmentedControl" destination="0QK-g6-St1" id="pGN-hA-qP4"/>

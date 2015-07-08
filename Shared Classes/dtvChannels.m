@@ -47,7 +47,7 @@
                                    @"BSN", @"NHL", @"MLS", @"PPVHD", @"IACHD",
                                    @"CINE1", @"CINE2", @"CINE3", @"IDEA", @"BEST",
                                    @"MALL", @"SALE", @"NEW", @"AAN", @"EPL", @"HBOLHD"
-                                   @"STZEHD",@"STZWHD",@"STZKHD",@"STZCHD",@"SEDGHD",@"SBLKHD",@"SCINHD",
+                                   @"STZE",@"STZW",@"STZKHD",@"STZCHD",@"SEDG",@"SBLK",@"SCINHD",
                                    @"UEFA", @"RGBY", @"EPL", @"MAS", @"NBA", @"PTNW", @"ACT", nil];
         
         NSArray *blockCategories = [NSArray arrayWithObjects:
@@ -75,8 +75,9 @@
 + (NSMutableArray *) loadFavoriteChannels:(NSMutableDictionary *)channels {
 
     NSMutableArray *favs = (NSMutableArray *)[Util loadObjectFromDisk:@"favoriteChannels"
-                                                             objectType:@"NSMutableArray"];
-    if ([favs count] == 0) {
+                                                             objectType:@"NSMutableArrayWithNil"];
+    if (!favs) {
+        favs = [[NSMutableArray alloc] init];
         NSArray *favCallSigns = [NSArray arrayWithObjects:
                                    @"COM", @"CNN", @"HBOE", @"MTV", nil];
         

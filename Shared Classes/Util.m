@@ -46,6 +46,10 @@
         returnedObj = [[NSMutableArray alloc] init];
     }
     
+    if ([objectType isEqualToString:@"NSMutableArrayWithNil"]) {
+        returnedObj = nil;
+    }
+    
     if ([[NSFileManager defaultManager] fileExistsAtPath:filePath]) {
         
         NSData *data = [NSData dataWithContentsOfFile:filePath];

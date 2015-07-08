@@ -51,12 +51,48 @@
     [_cv setDelegate:self];
     
     [self.cv registerClass:[UICollectionViewCell class] forCellWithReuseIdentifier:@"Cell"];
+    [self.cv registerClass:[UICollectionReusableView class] forSupplementaryViewOfKind:UICollectionElementKindSectionHeader withReuseIdentifier:@"HeaderView"];
+
+    self.view.translatesAutoresizingMaskIntoConstraints = NO;
+    [_cv reloadData];
     
+    self.preferredContentSize = CGSizeMake(290, 340);
 }
 
 
 - (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout*)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath; {
      return CGSizeMake(50, 50);
+}
+
+
+- (UICollectionReusableView *)collectionView:(UICollectionView *)collectionView viewForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
+{
+    UICollectionReusableView *reusableview = nil;
+    
+    if (kind == UICollectionElementKindSectionHeader) {
+        UICollectionReusableView *headerView = [collectionView dequeueReusableSupplementaryViewOfKind:UICollectionElementKindSectionHeader withReuseIdentifier:@"HeaderView" forIndexPath:indexPath];
+        UILabel *label = [[UILabel alloc] init];
+        CGRect frm = _cv.frame;
+        frm.size.height = 12;
+        frm.origin.x = 2;
+        frm.origin.y = 8;
+        
+        label.text = @"Favorite Channels";
+        label.textColor = [Colors textColor];
+        label.font = [UIFont fontWithName:@"Helvetica-Bold" size:12];
+        label.backgroundColor = [UIColor clearColor];
+        label.textAlignment = NSTextAlignmentLeft;
+        label.frame = frm;
+        //headerView.frame = frm;
+        [headerView addSubview:label];
+        reusableview = headerView;
+    }
+    
+    return reusableview;
+}
+
+- (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout referenceSizeForHeaderInSection:(NSInteger)section {
+    return CGSizeMake(290, 20.0f);
 }
 
 -(UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
@@ -72,9 +108,20 @@
     NSString *chId = [favoriteChannels objectAtIndex:indexPath.row];
     dtvChannel *channel = channels[chId];
     UIImageView *iv = [[UIImageView alloc] init];
-    iv.frame = CGRectMake(0, 5, 50, 40);
+    iv.frame = CGRectMake(2.5f, 0, 45, 40);
     iv.image = [dtvChannel getImageForChannel:channel];
+    
+    UILabel *label = [[UILabel alloc] init];
+    label.text = [NSString stringWithFormat:@"%d %@", channel.number, channel.name];
+    label.textColor = [Colors textColor];
+    label.font = [UIFont fontWithName:@"Helvetica" size:10];
+    label.backgroundColor = [UIColor clearColor];
+    label.textAlignment = NSTextAlignmentCenter;
+    label.frame = CGRectMake(0, 40, 50, 10);
+    
     [cell addSubview:iv];
+    [cell addSubview:label];
+    
     /*
      
     Command button

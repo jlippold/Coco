@@ -338,6 +338,32 @@
     return customs;
 }
 
++ (NSMutableArray *) loadFavoriteCommands {
+    
+    NSMutableArray *favs = (NSMutableArray *)[Util loadObjectFromDisk:@"favoriteCommands"
+                                                           objectType:@"NSMutableArrayWithNil"];
+    if (!favs) {
+    
+        NSArray *defaultFavs = [NSArray arrayWithObjects:
+                                 @"Play", @"Pause", @"Channel Up", @"Channel Down", nil];
+        
+        NSArray *commands = [self getCommands];
+
+        for (dtvCommand *command in commands) {
+            if ([defaultFavs containsObject:command.commandDescription]) {
+                [favs addObject:command.commandDescription];
+            }
+        }
+    }
+    return favs;
+}
+
++ (void)saveFavoriteCommands:(NSMutableArray *) favoriteCommands {
+    if (favoriteCommands) {
+        [Util saveObjectToDisk:favoriteCommands key:@"favoriteCommands"];
+    }
+}
+
 + (BOOL) isValidJsonCommand:(id) item {
     BOOL valid = false;
     if (item[@"url"] &&

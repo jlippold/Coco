@@ -24,6 +24,8 @@
 + (dtvCommand *) getCommandAtnumberPadPagePosition:(NSMutableDictionary *) commands
                                               page:(NSString *)page
                                           position:(NSString *)position;
++ (NSMutableArray *) loadFavoriteCommands;
++ (void)saveFavoriteCommands:(NSMutableArray *) favoriteCommands;
 @end
 
 

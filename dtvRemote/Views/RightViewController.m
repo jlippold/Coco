@@ -23,6 +23,9 @@
     UITableView *sideBarTable;
     dtvDevice *currentDevice;
     UINavigationItem *sideBarNavItem;
+    BOOL isEditing;
+    IBOutlet UIBarButtonItem *favButton;
+    NSMutableArray *favoriteCommands;
 }
 
 - (void)viewDidLoad {
@@ -30,7 +33,7 @@
     
     currentDevice = [dtvDevices getCurrentDevice];
     commands = [dtvCommands getCommandsForSidebar:currentDevice];
-
+    isEditing = NO;
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageUpdatedCurrentDevice:)
                                                  name:@"messageUpdatedCurrentDevice" object:nil];
@@ -55,7 +58,15 @@
         sideBarNavItem.title = @"Remote Commands";
     }
     
+    
+    favButton = [[UIBarButtonItem alloc]
+                                  initWithImage:[UIImage imageNamed:@"images.bundle/favorite"]
+                                  style:UIBarButtonItemStylePlain target:self action:@selector(chooseFavorites:)];
+    
+    sideBarNavItem.rightBarButtonItem = favButton;
+    
     [bar pushNavigationItem:sideBarNavItem animated:false];
+    
     
     [sideBarView addSubview:bar];
     
@@ -85,6 +96,23 @@
 
 - (void) dealloc {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
+- (IBAction)chooseFavorites:(id)sender {
+    if (isEditing) {
+        //Going back to regular mode
+        [dtvCommands saveFavoriteCommands:favoriteCommands];
+        favoriteCommands = [[NSMutableArray alloc] init];
+        favButton.image = [UIImage imageNamed:@"images.bundle/favorite"];
+        isEditing = NO;
+    } else {
+        //Going into edit mode
+        favButton.image = [UIImage imageNamed:@"images.bundle/favortite-selected"];
+        isEditing = YES;
+        favoriteCommands = [dtvCommands loadFavoriteCommands];
+    }
+    
+    [sideBarTable reloadData];
 }
 
 
@@ -149,17 +177,37 @@
     }];
     
     id obj = [sortedArray objectAtIndex:indexPath.row];
+    BOOL isFavorite = NO;
     if ([obj isKindOfClass:[dtvCommand class]]) {
         dtvCommand *c = [sortedArray objectAtIndex:indexPath.row];
         cell.textLabel.text = c.commandDescription;
         cell.detailTextLabel.text = [NSString stringWithFormat:@"%@: %@", c.sideBarCategory, c.commandDescription];
+        isFavorite = [favoriteCommands containsObject:c.commandDescription];
     } else {
         dtvCustomCommand *c = [sortedArray objectAtIndex:indexPath.row];
         cell.textLabel.text = c.commandDescription;
         cell.detailTextLabel.text = [NSString stringWithFormat:@"%@: %@", @"Customs", c.commandDescription];
+        isFavorite = [favoriteCommands containsObject:c.commandDescription];
     }
 
-    
+    if (isEditing) {
+        
+        UIImage *image = [UIImage new];
+        
+        if (isFavorite) {
+            image = [UIImage imageNamed:@"images.bundle/favorite"];
+        }
+        
+        UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
+        CGRect frame = CGRectMake(0, 0, image.size.width, image.size.height);
+        button.frame = frame;
+        button.userInteractionEnabled = NO;
+        [button setBackgroundImage:image forState:UIControlStateNormal];
+        button.backgroundColor = [UIColor clearColor];
+        cell.accessoryView = button;
+    } else {
+        cell.accessoryView = [[UIImageView alloc] initWithImage:[UIImage new]];
+    }
     return cell;
 }
 
@@ -184,15 +232,48 @@
         return [first compare:second];
     }];
     
-    
     id obj = [sortedArray objectAtIndex:indexPath.row];
-    if ([obj isKindOfClass:[dtvCommand class]]) {
-        dtvCommand *c = [sortedArray objectAtIndex:indexPath.row];
-        [dtvCommands sendCommand:c.dtvCommandText device:currentDevice];
+    if (isEditing) {
+
+        NSString *desc;
+        UIImage *image = [UIImage new];
+        
+        if ([obj isKindOfClass:[dtvCommand class]]) {
+            dtvCommand *c = [sortedArray objectAtIndex:indexPath.row];
+            desc = c.commandDescription;
+        } else {
+            dtvCustomCommand *c = [sortedArray objectAtIndex:indexPath.row];
+            desc = c.commandDescription;
+        }
+
+        if ([favoriteCommands containsObject:desc]) {
+            [favoriteCommands removeObject:desc];
+        } else {
+            [favoriteCommands addObject:desc];
+            image = [UIImage imageNamed:@"images.bundle/favorite"];
+        }
+        
+        UITableViewCell *cell = [tableView cellForRowAtIndexPath:indexPath];
+        UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
+        button.tintColor = [Colors textColor];
+        CGRect frame = CGRectMake(0, 0, image.size.width, image.size.height);
+        button.frame = frame;
+        button.userInteractionEnabled = NO;
+        [button setBackgroundImage:image forState:UIControlStateNormal];
+        button.backgroundColor = [UIColor clearColor];
+        cell.accessoryView = button;
+        
     } else {
-        dtvCustomCommand *c = [sortedArray objectAtIndex:indexPath.row];
-        [dtvCommands sendCustomCommand:c];
+
+        if ([obj isKindOfClass:[dtvCommand class]]) {
+            dtvCommand *c = [sortedArray objectAtIndex:indexPath.row];
+            [dtvCommands sendCommand:c.dtvCommandText device:currentDevice];
+        } else {
+            dtvCustomCommand *c = [sortedArray objectAtIndex:indexPath.row];
+            [dtvCommands sendCustomCommand:c];
+        }
     }
+
     
 }
 
