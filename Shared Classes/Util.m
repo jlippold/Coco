@@ -68,8 +68,11 @@
     NSFileManager *fileManager = [NSFileManager defaultManager];
     NSURL *storeUrl = [fileManager containerURLForSecurityApplicationGroupIdentifier:@"group.dtvRemote.shares"];
     NSString *groupPath = [[storeUrl absoluteString] substringFromIndex:6];
-    
     return groupPath;
 }
 
++ (id) getDocumentsURL {
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    return [fileManager containerURLForSecurityApplicationGroupIdentifier:@"group.dtvRemote.shares"];
+}
 @end

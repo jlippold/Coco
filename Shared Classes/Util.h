@@ -13,5 +13,6 @@
 + (void) saveObjectToDisk:(id)obj key:(NSString *)key;
 + (id) loadObjectFromDisk:(NSString *)key objectType:(NSString *)objectType;
 + (id) getDocumentsDirectory;
++ (id) getDocumentsURL;
 
 @end

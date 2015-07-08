@@ -22,8 +22,10 @@
 @implementation TodayViewController {
     NSMutableDictionary *devices;
     dtvDevice *currentDevice;
+    NSMutableDictionary *commands;
     NSMutableDictionary *channels;
     NSMutableArray *favoriteChannels;
+    NSMutableArray *favoriteCommands;
 }
 
 - (void)viewDidLoad {
@@ -32,7 +34,10 @@
     devices = [dtvDevices getSavedDevicesForActiveNetwork];
     currentDevice = [dtvDevices getCurrentDevice];
     channels = [dtvChannels load:NO];
+    
     favoriteChannels = [dtvChannels loadFavoriteChannels:channels];
+    favoriteCommands = [dtvCommands getCommandArrayOfFavorites];
+    
     
     [_deviceSegmentedControl removeAllSegments];
     
@@ -105,62 +110,88 @@
         cell = [[UICollectionViewCell alloc] init];
     }
     
-    NSString *chId = [favoriteChannels objectAtIndex:indexPath.row];
-    dtvChannel *channel = channels[chId];
-    UIImageView *iv = [[UIImageView alloc] init];
-    iv.frame = CGRectMake(2.5f, 0, 45, 40);
-    iv.image = [dtvChannel getImageForChannel:channel];
+    if (indexPath.section == 0) {
+        NSString *chId = [favoriteChannels objectAtIndex:indexPath.row];
+        dtvChannel *channel = channels[chId];
+        UIImageView *iv = [[UIImageView alloc] init];
+        iv.frame = CGRectMake(2.5f, 0, 45, 40);
+        iv.image = [dtvChannel getImageForChannel:channel];
+        
+        UILabel *label = [[UILabel alloc] init];
+        label.text = [NSString stringWithFormat:@"%d %@", channel.number, channel.name];
+        label.textColor = [Colors textColor];
+        label.font = [UIFont fontWithName:@"Helvetica" size:10];
+        label.backgroundColor = [UIColor clearColor];
+        label.textAlignment = NSTextAlignmentCenter;
+        label.frame = CGRectMake(0, 40, 50, 10);
+        
+        [cell addSubview:iv];
+        [cell addSubview:label];
+    }
     
-    UILabel *label = [[UILabel alloc] init];
-    label.text = [NSString stringWithFormat:@"%d %@", channel.number, channel.name];
-    label.textColor = [Colors textColor];
-    label.font = [UIFont fontWithName:@"Helvetica" size:10];
-    label.backgroundColor = [UIColor clearColor];
-    label.textAlignment = NSTextAlignmentCenter;
-    label.frame = CGRectMake(0, 40, 50, 10);
-    
-    [cell addSubview:iv];
-    [cell addSubview:label];
-    
-    /*
-     
-    Command button
-     
-    UILabel *label = [[UILabel alloc] init];
-    label.text = @"Volume Up";
-    label.textColor = [Colors textColor];
-    label.font = [UIFont fontWithName:@"Helvetica" size:10];
-    label.backgroundColor = [UIColor clearColor];
-    label.textAlignment = NSTextAlignmentCenter;
+    if (indexPath.section == 1) {
+        id obj = [favoriteCommands objectAtIndex:indexPath.row];
+        NSString *title;
+        NSString *subTitle;
+        
+        if ([obj isKindOfClass:[dtvCommand class]]) {
+            dtvCommand *c = [favoriteCommands objectAtIndex:indexPath.row];
+            title = c.shortName;
+            subTitle = c.commandDescription;
+        } else {
+            dtvCustomCommand *c = [favoriteCommands objectAtIndex:indexPath.row];
+            title = c.abbreviation;
+            subTitle = c.commandDescription;
+        }
+        
+        UILabel *label = [[UILabel alloc] init];
+        label.text = title;
+        label.textColor = [Colors textColor];
+        label.font = [UIFont fontWithName:@"Helvetica" size:10];
+        label.backgroundColor = [UIColor clearColor];
+        label.textAlignment = NSTextAlignmentCenter;
+        
+        UIButton *button = [[UIButton alloc] init];
+        [button setTitleColor:[Colors textColor] forState:UIControlStateNormal];
+        [button setTitleColor:[Colors backgroundColor] forState:UIControlStateHighlighted];
+        [button setTitleColor:[Colors backgroundColor] forState:UIControlStateSelected];
+        
+        button.layer.borderColor = [Colors lightTextColor].CGColor;
+        button.layer.borderWidth = 1.5f;
+        button.layer.cornerRadius = 5;
+        button.layer.masksToBounds = YES;
+        [button setFrame:CGRectMake(0, 0, 50, 30)];
+        [button setTitle:subTitle forState:UIControlStateNormal];
+        
+        [label setFrame:CGRectMake(0, 34, 50, 10)];
+        [label setTextColor:[Colors textColor]];
+        
+        [cell addSubview:button];
+        [cell addSubview:label];
+        
+    }
 
-    UIButton *button = [[UIButton alloc] init];
-    [button setTitleColor:[Colors textColor] forState:UIControlStateNormal];
-    [button setTitleColor:[Colors backgroundColor] forState:UIControlStateHighlighted];
-    [button setTitleColor:[Colors backgroundColor] forState:UIControlStateSelected];
-    
-    button.layer.borderColor = [Colors lightTextColor].CGColor;
-    button.layer.borderWidth = 1.5f;
-    button.layer.cornerRadius = 5;
-    button.layer.masksToBounds = YES;
-    [button setFrame:CGRectMake(0, 0, 50, 30)];
-    [button setTitle:@"VUP" forState:UIControlStateNormal];
-    
-    [label setFrame:CGRectMake(0, 34, 50, 10)];
-    [label setTextColor:[Colors textColor]];
-    
-    [cell addSubview:button];
-    [cell addSubview:label];
-     */
     
     return cell;
 }
 
 - (NSInteger)numberOfSectionsInCollectionView: (UICollectionView *)collectionView {
-    return 1;
+    int sections = 0;
+    if (favoriteCommands && [favoriteCommands count] > 0) {
+        sections++;
+    }
+    if (favoriteChannels && [favoriteChannels count] > 0) {
+        sections++;
+    }
+    return sections;
 }
 
 - (NSInteger)collectionView:(UICollectionView *)view numberOfItemsInSection:(NSInteger)section {
-    return favoriteChannels.count;
+    if (section == 0) {
+        return favoriteChannels.count;
+    } else {
+        return favoriteCommands.count;
+    }
 }
 
 - (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath {

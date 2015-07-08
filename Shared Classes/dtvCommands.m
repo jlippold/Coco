@@ -150,8 +150,18 @@
 }
 
 + (NSArray *) getCommands {
-    NSURL *url = [[NSBundle mainBundle] URLForResource:@"commands" withExtension:@"plist"];
-    NSArray *commands = [[NSDictionary dictionaryWithContentsOfURL:url] objectForKey: @"Commands"];
+
+    
+    NSString *sharedDir = [Util getDocumentsDirectory];
+    NSString *filePath = [sharedDir stringByAppendingPathComponent:@"commands.plist"];
+    if (![[NSFileManager defaultManager] fileExistsAtPath:filePath]) {
+        NSURL *url = [[NSBundle mainBundle] URLForResource:@"commands" withExtension:@"plist"];
+        if ([[NSFileManager defaultManager] fileExistsAtPath:[url path]]) {
+            [[NSFileManager defaultManager] copyItemAtPath:[url path] toPath:filePath error: NULL];
+        }
+    }
+    
+    NSArray *commands = [[NSDictionary dictionaryWithContentsOfFile:filePath] objectForKey:@"Commands"];
     
     NSMutableArray *output = [[NSMutableArray alloc] init];
     
@@ -356,6 +366,30 @@
         }
     }
     return favs;
+}
+
+
++ (NSMutableArray *) getCommandArrayOfFavorites {
+    
+    NSMutableArray *favorites = [self loadFavoriteCommands];
+    
+    NSMutableArray *output = [[NSMutableArray alloc] init];
+    NSArray *commands = [self getCommands];
+    
+    for (dtvCommand *command in commands) {
+        if ([favorites containsObject:command.commandDescription]) {
+            [output addObject:command];
+        }
+    }
+    
+    NSMutableArray *customs = [self loadSavedCustoms];
+    for (dtvCustomCommand *command in customs) {
+        if ([favorites containsObject:command.commandDescription]) {
+            [output addObject:command];
+        }
+    }
+
+    return output;
 }
 
 + (void)saveFavoriteCommands:(NSMutableArray *) favoriteCommands {
