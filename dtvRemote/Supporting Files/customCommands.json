@@ -1,114 +1,122 @@
 [{
-	"networkName": "Simulator",
+	"networkName": "lipp",
 	"deviceName": "LIVROOM",
 	"commands": [{
+		"url": "http://192.168.1.93:3000/Panasonic/VolumeUp",
+		"method": "GET",
+		"data": "",
+		"buttonIndex": 6,
+		"fontAwesome": "volume-up",
+		"title": "Volume Up",
+		"abbreviation": "VU"
+	}, {
+		"url": "http://192.168.1.93:3000/Panasonic/VolumeDown",
+		"method": "GET",
+		"data": "",
+		"buttonIndex": 4,
+		"fontAwesome": "volume-down",
+		"title": "Volume Down",
+		"abbreviation": "VD"
+	}, {
+		"url": "http://192.168.1.93:3000/Panasonic/Mute",
+		"method": "GET",
+		"data": "",
+		"buttonIndex": 5,
+		"fontAwesome": "volume-off",
+		"title": "Mute",
+		"abbreviation": "MT"
+	}, {
+		"url": "http://192.168.1.93:3000/Panasonic/Power",
+		"method": "GET",
+		"data": "",
+		"buttonIndex": 1,
+		"fontAwesome": "power-off",
+		"title": "Power",
+		"abbreviation": "PW"
+	}, {
+		"url": "http://192.168.1.93:3000/Panasonic/Input1",
+		"method": "GET",
+		"data": "",
+		"buttonIndex": 7,
+		"fontAwesome": "desktop",
+		"title": "Watch DirecTv",
+		"abbreviation": "Dt"
+	}, {
+		"url": "http://192.168.1.93:3000/Panasonic/Input2",
+		"method": "GET",
+		"data": "",
+		"buttonIndex": 8,
+		"fontAwesome": "ticket",
+		"title": "Watch Kodi",
+		"abbreviation": "Kd",
+		"onCompleteURIScheme": "kodi://"
+	}, {
+		"url": "http://192.168.1.93:3000/Panasonic/Input3",
+		"method": "GET",
+		"data": "",
+		"buttonIndex": 9,
+		"fontAwesome": "film",
+		"title": "Watch Roku",
+		"abbreviation": "Rk",
+		"onCompleteURIScheme": "roku://"
+	}, {
+		"url": "http://192.168.1.93:3000/DTV/Power",
+		"method": "GET",
+		"data": "",
+		"buttonIndex": 10,
+		"fontAwesome": "power-off",
+		"title": "DirecTv Power",
+		"abbreviation": "PW"
+	}, {
 		"url": "http://192.168.1.104/0",
 		"method": "GET",
 		"data": "111=I=0",
 		"buttonIndex": 12,
+		"fontAwesome": "fire",
 		"title": "Fireplace On",
-		"abbreviation": "🔥"
+		"abbreviation": "F1"
 	}, {
 		"url": "http://192.168.1.104/0",
 		"method": "GET",
 		"data": "131=I=0",
 		"buttonIndex": 10,
+		"fontAwesome": "fire-extinguisher",
 		"title": "Fireplace Off",
-		"abbreviation": "🔥"
-	}, {
-		"url": "http://192.168.1.103/",
-		"method": "GET",
-		"data": "Volume_Up",
-		"buttonIndex": 3,
-		"title": "Volume Up",
-		"abbreviation": "🔊"
-	}, {
-		"url": "http://192.168.1.103/",
-		"method": "GET",
-		"data": "Volume_Mute",
-		"buttonIndex": 2,
-		"title": "Mute",
-		"abbreviation": "🔇"
-	}, {
-		"url": "http://192.168.1.103/",
-		"method": "GET",
-		"data": "Volume_Down",
-		"buttonIndex": 1,
-		"title": "Volume Down",
-		"abbreviation": "🔈"
-	}, {
-		"url": "http://192.168.1.103/",
-		"method": "GET",
-		"data": "TV_Power",
-		"buttonIndex": 3,
-		"title": "Power",
-		"abbreviation": "🔊"
-	}, {
-		"url": "http://192.168.1.103/",
-		"method": "GET",
-		"data": "Switch_MCE",
-		"buttonIndex": 3,
-		"title": "Watch Media Center",
-		"abbreviation": "🔊"
-	}, {
-		"url": "http://192.168.1.103/",
-		"method": "GET",
-		"data": "Switch_TV",
-		"buttonIndex": 3,
-		"title": "Watch DirecTv",
-		"abbreviation": "🔊"
-	}, {
-		"url": "http://192.168.1.103/",
-		"method": "GET",
-		"data": "Switch_Roku",
-		"buttonIndex": 5,
-		"title": "Watch Roku",
-		"abbreviation": "R",
-		"onCompleteURIScheme": "roku://"
-	}, {
-		"url": "http://192.168.1.103/",
-		"method": "GET",
-		"data": "Restart_MCE",
-		"buttonIndex": 3,
-		"title": "Restart MCE",
-		"abbreviation": "🔊"
-	}, {
-		"url": "http://192.168.1.103/",
-		"method": "GET",
-		"data": "Restart_PC",
-		"buttonIndex": 3,
-		"title": "Restart PC",
-		"abbreviation": "🔊"
+		"abbreviation": "F0"
 	}]
 }, {
-	"networkName": "Simulator",
+	"networkName": "lipp",
 	"deviceName": "BEDROOM",
 	"commands": [{
 		"url": "http://192.168.1.92:3000/Sharp/VolumeUp",
 		"method": "GET",
 		"data": "",
 		"buttonIndex": 6,
+		"fontAwesome": "volume-up",
 		"title": "Volume Up",
-		"abbreviation": "🔊"
+		"abbreviation": "Vu"
 	}, {
 		"url": "http://192.168.1.92:3000/Sharp/VolumeDown",
 		"method": "GET",
 		"data": "",
 		"buttonIndex": 4,
+		"fontAwesome": "volume-down",
 		"title": "Volume Down",
-		"abbreviation": "🔈"
+		"abbreviation": "Vd"
 	}, {
 		"url": "http://192.168.1.92:3000/Sharp/Mute",
 		"method": "GET",
 		"data": "",
 		"buttonIndex": 5,
+		"fontAwesome": "volume-off",
 		"title": "Mute",
-		"abbreviation": "MT"
+		"abbreviation": "Mt"
 	}, {
 		"url": "http://192.168.1.92:3000/Sharp/Power",
 		"method": "GET",
 		"data": "",
 		"buttonIndex": 1,
+		"fontAwesome": "power-off",
 		"title": "Power",
 		"abbreviation": "PW"
 	}, {
@@ -116,28 +124,32 @@
 		"method": "GET",
 		"data": "",
 		"buttonIndex": 7,
+		"fontAwesome": "film",
 		"title": "Watch Roku",
-		"abbreviation": "🔥",
+		"abbreviation": "Rk",
 		"onCompleteURIScheme": "roku://"
 	}, {
 		"url": "http://192.168.1.92:3000/Sharp/HDMI2",
 		"method": "GET",
 		"data": "",
 		"buttonIndex": 8,
+		"fontAwesome": "desktop",
 		"title": "Watch DirecTv",
-		"abbreviation": "🔥"
+		"abbreviation": "Dt"
 	}, {
 		"url": "http://192.168.1.92:3000/Sharp/HDMI3",
 		"method": "GET",
 		"data": "",
 		"buttonIndex": 9,
+		"fontAwesome": "ticket",
 		"title": "Watch Kodi",
-		"abbreviation": "🔥"
+		"abbreviation": "Kd"
 	}, {
 		"url": "http://192.168.1.92:3000/DTV/Power",
 		"method": "GET",
 		"data": "",
 		"buttonIndex": 10,
+		"fontAwesome": "power-off",
 		"title": "DirecTv Power",
 		"abbreviation": "PW"
 	}]

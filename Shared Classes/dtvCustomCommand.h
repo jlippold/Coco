@@ -18,13 +18,13 @@
 @property (nonatomic, strong) NSString *method;
 @property (nonatomic, strong) NSString *data;
 @property (nonatomic, strong) NSString *buttonIndex;
-@property (nonatomic, strong) NSString *abbreviation;
+@property (nonatomic, strong) NSString *shortName;
 @property (nonatomic, strong) NSString *onCompleteURIScheme;
 
 @property (nonatomic, strong) NSString *sideBarCategory;
 @property (nonatomic, strong) NSString *commandDescription;
 @property (nonatomic, strong) NSString *sideBarSortIndex;
-
+@property (nonatomic, strong) NSString *fontAwesome;
 
 
 @end

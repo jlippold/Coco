@@ -910,17 +910,19 @@
     if (isEditing) {
         [l2 setHidden:YES];
         
-        cell.textLabel.text = channel.name;
-        cell.detailTextLabel.text = [NSString stringWithFormat:@"%d - %@", channel.number, channel.callsign];
+        cell.textLabel.text = [NSString stringWithFormat:@"%d: %@", channel.number, channel.name];
+        cell.detailTextLabel.text = @"Visible";
         
         UIImage *image = [UIImage new];
         
         if ([blockedChannels containsObject:chId]) {
             image = [UIImage imageNamed:@"images.bundle/hidden"];
+            cell.detailTextLabel.text = @"Hidden";
         }
 
         if ([favoriteChannels containsObject:chId]) {
             image = [UIImage imageNamed:@"images.bundle/favorite"];
+            cell.detailTextLabel.text = @"Favorite";
         }
         
         UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -948,7 +950,8 @@
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
-    NSArray *sections = [[sortedChannels allKeys] sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
+    NSArray *sections = [[sortedChannels allKeys]
+                         sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
     NSString *sectionKey = [sections objectAtIndex:indexPath.section];
     NSMutableDictionary *sectionData = [sortedChannels objectForKey:sectionKey];
     NSArray *sectionChannels = [[sectionData allKeys] sortedArrayUsingSelector: @selector(compare:)];
@@ -961,7 +964,6 @@
     if (isEditing) {
         
         UITableViewCell *cell = [tableView cellForRowAtIndexPath:indexPath];
-        
         UIImage *image = [UIImage new];
         
         BOOL match = false;
@@ -973,6 +975,7 @@
                 [favoriteChannels removeObject:chId];
             }
             [blockedChannels addObject:chId];
+            cell.detailTextLabel.text = @"Hidden";
             match = true;
         } else
             
@@ -983,6 +986,7 @@
                 [blockedChannels removeObject:chId];
             }
             [favoriteChannels addObject:chId];
+            cell.detailTextLabel.text = @"Favorite";
             match = true;
         } else {
             //favorite to nothing
@@ -993,6 +997,7 @@
             if ([blockedChannels containsObject:chId]) {
                 [blockedChannels removeObject:chId];
             }
+            cell.detailTextLabel.text = @"Visible";
         }
         
         UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];

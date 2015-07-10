@@ -20,5 +20,6 @@
 @property BOOL showInSideBar;
 @property (nonatomic, strong) NSString *numberPadPagePosition;
 @property (nonatomic, strong) NSString *numberPadPageName;
+@property (nonatomic, strong) NSString *fontAwesome;
 
 @end

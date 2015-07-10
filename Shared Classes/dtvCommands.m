@@ -57,8 +57,8 @@
         if (!output[@"Customs"]) {
             [output setObject:[[NSMutableArray alloc] init] forKey:@"Customs"];
         }
-        if ([command.networkName isEqualToString:currentDevice.ssid] &&
-            [command.deviceName isEqualToString:currentDevice.name]) {
+        if ([[command.networkName uppercaseString] isEqualToString:[currentDevice.ssid uppercaseString]] &&
+            [[command.deviceName uppercaseString] isEqualToString:[currentDevice.name uppercaseString]]) {
             
             [output[@"Customs"] addObject:command];
         }
@@ -151,33 +151,33 @@
 
 + (NSArray *) getCommands {
 
-    
-    NSString *sharedDir = [Util getDocumentsDirectory];
-    NSString *filePath = [sharedDir stringByAppendingPathComponent:@"commands.plist"];
-    if (![[NSFileManager defaultManager] fileExistsAtPath:filePath]) {
-        NSURL *url = [[NSBundle mainBundle] URLForResource:@"commands" withExtension:@"plist"];
-        if ([[NSFileManager defaultManager] fileExistsAtPath:[url path]]) {
-            [[NSFileManager defaultManager] copyItemAtPath:[url path] toPath:filePath error: NULL];
-        }
-    }
-    
-    NSArray *commands = [[NSDictionary dictionaryWithContentsOfFile:filePath] objectForKey:@"Commands"];
+    NSString *filePath = [[Util getDocumentsDirectory] stringByAppendingPathComponent:@"commands.json"];
     
     NSMutableArray *output = [[NSMutableArray alloc] init];
+    if (![[NSFileManager defaultManager] fileExistsAtPath:filePath]){
+        return output;
+    }
     
-    for (NSMutableDictionary *entry in commands) {
+    NSData* data = [NSData dataWithContentsOfFile:filePath];
+    
+    NSArray *json = [NSJSONSerialization JSONObjectWithData:data options:0 error:NULL];
+
+    
+    for (NSMutableDictionary *entry in json) {
         
         dtvCommand *command = [[dtvCommand alloc] init];
         command.dtvCommandText = entry[@"dtvCommandText"];
-        command.commandDescription = entry[@"commandDescription"];
+        command.commandDescription = entry[@"title"];
         command.sideBarCategory = entry[@"sideBarCategory"];
         command.sideBarSortIndex = entry[@"sideBarSortIndex"];
         command.showInNumberPad = [entry[@"showInNumberPad"] boolValue];
         command.showInSideBar = [entry[@"showInSideBar"] boolValue];
         command.numberPadPagePosition = entry[@"numberPadPagePosition"];
         command.numberPadPageName = entry[@"numberPadPageName"];
-        command.shortName = entry[@"shortName"];
+        command.shortName = entry[@"abbreviation"];
         command.isCustomCommand = NO;
+        command.fontAwesome = entry[@"fontAwesome"] ? entry[@"fontAwesome"] : nil;
+        
         [output addObject:command];
         
     }
@@ -257,12 +257,17 @@
 + (void) loadCustomCommandsFromUrl:(NSString *) strUrl {
     //@"https://jed.bz/settings.json"
     
-    NSURL *url = [NSURL URLWithString:strUrl];
+    
+    NSURLRequest *req = [[NSURLRequest alloc] initWithURL:[NSURL URLWithString:strUrl]
+                                              cachePolicy:NSURLRequestReloadIgnoringLocalAndRemoteCacheData
+                                          timeoutInterval:10.0] ;
+    
     NSURLResponse* response;
     NSError *connectionError;
-    NSData* data = [NSURLConnection sendSynchronousRequest:[NSURLRequest requestWithURL:url]
-                                         returningResponse:&response error:&connectionError];
+    
+    NSData* data = [NSURLConnection sendSynchronousRequest:req returningResponse:&response error:&connectionError];
    
+    
     NSMutableArray *output = [[NSMutableArray alloc] init];
     int networkCount = 0;
     int commandCount = 0;
@@ -297,11 +302,13 @@
                                     customCommand.data = command[@"data"];
                                     customCommand.buttonIndex = command[@"buttonIndex"];
                                     customCommand.commandDescription = command[@"title"];
-                                    customCommand.abbreviation = command[@"abbreviation"];
+                                    customCommand.shortName = command[@"abbreviation"];
                                     customCommand.onCompleteURIScheme = command[@"onCompleteURIScheme"];
                                     customCommand.sideBarCategory = @"Customs";
                                     customCommand.sideBarSortIndex = command[@"0"];
-                                    
+                                    customCommand.fontAwesome =
+                                        command[@"fontAwesome"] ? command[@"fontAwesome"] : nil;
+
                                     [output addObject:customCommand];
                                     commandCount++;
                                 }

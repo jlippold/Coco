@@ -14,6 +14,7 @@
 #import "iNet.h"
 #import "MBProgressHUD.h"
 #import "dtvIAP.h"
+#import "UIImage+FontAwesome.h"
 
 static NSString *kIdentifierMultiples = @"bz.jed.dtvRemote.multiples";
 
@@ -124,12 +125,7 @@ static NSString *kIdentifierMultiples = @"bz.jed.dtvRemote.multiples";
     cell.backgroundColor = [Colors backgroundColor];
     cell.userInteractionEnabled = YES;
     [cell setTintColor:[Colors tintColor]];
-    
-    if (indexPath.section == 0) {
-        [cell.textLabel setTextColor: [Colors textColor]];
-    } else {
-        [cell.textLabel setTextColor: [Colors blueColor]];
-    }
+    [cell.textLabel setTextColor: [Colors textColor]];
 
 }
 
@@ -159,9 +155,9 @@ static NSString *kIdentifierMultiples = @"bz.jed.dtvRemote.multiples";
     } else {
         BOOL purchased = ((int)[products count] == (int)[purchases count]);
         if (purchased) {
-            return 5;
+            return 4;
         } else {
-            return 7;
+            return 6;
         }
     }
 }
@@ -178,6 +174,9 @@ static NSString *kIdentifierMultiples = @"bz.jed.dtvRemote.multiples";
     cell.userInteractionEnabled = YES;
     cell.detailTextLabel.enabled = YES;
     
+    cell.imageView.contentMode = UIViewContentModeScaleAspectFit;
+    UIImage *cellImage;
+    
     if (indexPath.section == 0) {
         NSArray *keys = [[devices allKeys] sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
         
@@ -185,49 +184,103 @@ static NSString *kIdentifierMultiples = @"bz.jed.dtvRemote.multiples";
         dtvDevice *thisDevice = devices[key];
         
         cell.textLabel.text = thisDevice.name;
+        cell.detailTextLabel.textColor = [Colors textColor];
+        
         if (thisDevice.lastChecked == nil) {
             cell.detailTextLabel.text = @"Checking...";
-            [cell.detailTextLabel setTextColor:[Colors lightTextColor]];
+            
+            cellImage = [UIImage imageWithIcon:@"fa-spinner"
+                               backgroundColor:[UIColor clearColor]
+                                     iconColor:[Colors textColor]
+                                       andSize:CGSizeMake(16, 16)];
+            
         } else if (thisDevice.online) {
             cell.detailTextLabel.text = @"Online";
-            [cell.detailTextLabel setTextColor:[Colors greenColor]];
+            
+            
+            
+            if ([thisDevice.identifier isEqualToString:currentDevice.identifier]) {
+                
+                cell.detailTextLabel.textColor = [Colors greenColor ];
+                
+                cell.detailTextLabel.text = @"Active Device";
+                cellImage = [UIImage imageWithIcon:@"fa-check"
+                                   backgroundColor:[UIColor clearColor]
+                                         iconColor:[Colors greenColor]
+                                           andSize:CGSizeMake(16, 16)];
+            } else {
+                
+                cell.detailTextLabel.text = @"Ready";
+                cellImage = [UIImage imageWithIcon:@"fa-check"
+                                   backgroundColor:[UIColor clearColor]
+                                         iconColor:[Colors textColor]
+                                           andSize:CGSizeMake(16, 16)];
+                
+            }
+            
+
+            
         } else {
             cell.detailTextLabel.text = @"Offline";
-            [cell.detailTextLabel setTextColor:[Colors redColor]];
+            
+            cellImage = [UIImage imageWithIcon:@"fa-exclamation-triangle"
+                               backgroundColor:[UIColor clearColor]
+                                     iconColor:[Colors textColor]
+                                       andSize:CGSizeMake(16, 16)];
         }
         
-        if ([thisDevice.identifier isEqualToString:currentDevice.identifier]) {
-            [cell setAccessoryType:UITableViewCellAccessoryCheckmark];
-        }
     }
     
     if (indexPath.section == 1) {
         cell.detailTextLabel.text = @"";
         switch (indexPath.row) {
             case 0:
-                cell.textLabel.text = @"Refresh devices status";
+                cell.textLabel.text = @"Scan network";
+                cellImage = [UIImage imageWithIcon:@"fa-wifi"
+                                   backgroundColor:[UIColor clearColor]
+                                         iconColor:[Colors textColor]
+                                           andSize:CGSizeMake(16, 16)];
                 break;
             case 1:
-                cell.textLabel.text = @"Scan network";
+                cell.textLabel.text = @"Clear these devices";
+                cellImage = [UIImage imageWithIcon:@"fa-times"
+                                   backgroundColor:[UIColor clearColor]
+                                         iconColor:[Colors textColor]
+                                           andSize:CGSizeMake(16, 16)];
                 break;
             case 2:
-                cell.textLabel.text = @"Clear these devices";
-                break;
-            case 3:
                 cell.textLabel.text = [NSString stringWithFormat:@"Change location: %@",
                                        [[NSUserDefaults standardUserDefaults] stringForKey:@"zip"]];
+                cellImage = [UIImage imageWithIcon:@"fa-location-arrow"
+                                   backgroundColor:[UIColor clearColor]
+                                         iconColor:[Colors textColor]
+                                           andSize:CGSizeMake(16, 16)];
+                break;
+            case 3:
+                cell.textLabel.text = @"Import custom commands";
+                cellImage = [UIImage imageWithIcon:@"fa-cloud-download"
+                                   backgroundColor:[UIColor clearColor]
+                                         iconColor:[Colors textColor]
+                                           andSize:CGSizeMake(16, 16)];
                 break;
             case 4:
-                cell.textLabel.text = @"Import custom commands";
+                cell.textLabel.text = @"Unlock all features";
+                cellImage = [UIImage imageWithIcon:@"fa-unlock-alt"
+                                   backgroundColor:[UIColor clearColor]
+                                         iconColor:[Colors textColor]
+                                           andSize:CGSizeMake(16, 16)];
                 break;
             case 5:
-                cell.textLabel.text = @"Unlock all features";
-                break;
-            case 6:
                 cell.textLabel.text = @"Restore purchases";
+                cellImage = [UIImage imageWithIcon:@"fa-recycle"
+                                   backgroundColor:[UIColor clearColor]
+                                         iconColor:[Colors textColor]
+                                           andSize:CGSizeMake(16, 16)];
                 break;
         }
     }
+    
+    cell.imageView.image = cellImage;
     
     return cell;
 }
@@ -263,24 +316,21 @@ static NSString *kIdentifierMultiples = @"bz.jed.dtvRemote.multiples";
     if (indexPath.section == 1) {
         switch (indexPath.row) {
             case 0:
-                [self refreshDevicesStatus:nil];
-                break;
-            case 1:
                 [self refreshDevices:nil];
                 break;
-            case 2:
+            case 1:
                 [self clearDevices];
                 break;
-            case 3:
+            case 2:
                 [self setZipCode];
                 break;
-            case 4:
+            case 3:
                 [self importCommands];
                 break;
-            case 5:
+            case 4:
                 [self unlock:nil];
                 break;
-            case 6:
+            case 5:
                 [self restorePurchases:nil];
                 break;
         }

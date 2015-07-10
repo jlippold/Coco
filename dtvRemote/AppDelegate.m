@@ -11,6 +11,7 @@
 #import "CenterViewController.h"
 #import "LeftViewController.h"
 #import "RightViewController.h"
+#import "Util.h"
 
 @interface AppDelegate ()
 @property (nonatomic,strong) MMDrawerController * drawerController;
@@ -20,6 +21,18 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     
+    //copy commands to shared directory, for watch and extensions
+    NSString *sharedDir = [Util getDocumentsDirectory];
+    NSString *filePath = [sharedDir stringByAppendingPathComponent:@"commands.json"];
+    
+    NSURL *url = [[NSBundle mainBundle] URLForResource:@"commands" withExtension:@"json"];
+    
+    if ([[NSFileManager defaultManager] fileExistsAtPath:filePath] == YES) {
+        [[NSFileManager defaultManager] removeItemAtPath:filePath error:NULL];
+    }
+    
+    [[NSFileManager defaultManager] copyItemAtPath:[url path] toPath:filePath error: NULL];
+
 
     CenterViewController *center = [[CenterViewController alloc] init];
     LeftViewController *left = [[LeftViewController alloc] init];
@@ -36,6 +49,8 @@
 
     [self.window setRootViewController:self.drawerController];
     [self.window makeKeyAndVisible];
+    
+
     
     return YES;
 }

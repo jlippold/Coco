@@ -82,7 +82,8 @@
         frm.origin.x = 2;
         frm.origin.y = 8;
         
-        label.text = @"Favorite Channels";
+        
+        label.text = indexPath.section == 0 ? @"Favorite Channels" : @"Commands";
         label.textColor = [Colors textColor];
         label.font = [UIFont fontWithName:@"Helvetica-Bold" size:12];
         label.backgroundColor = [UIColor clearColor];
@@ -136,12 +137,12 @@
         
         if ([obj isKindOfClass:[dtvCommand class]]) {
             dtvCommand *c = [favoriteCommands objectAtIndex:indexPath.row];
-            title = c.shortName;
-            subTitle = c.commandDescription;
+            title = c.commandDescription;
+            subTitle = c.shortName;
         } else {
             dtvCustomCommand *c = [favoriteCommands objectAtIndex:indexPath.row];
-            title = c.abbreviation;
-            subTitle = c.commandDescription;
+            title = c.commandDescription;
+            subTitle = c.shortName;
         }
         
         UILabel *label = [[UILabel alloc] init];
@@ -160,8 +161,9 @@
         button.layer.borderWidth = 1.5f;
         button.layer.cornerRadius = 5;
         button.layer.masksToBounds = YES;
-        [button setFrame:CGRectMake(0, 0, 50, 30)];
+        [button setFrame:CGRectMake(2.5f, 0, 45, 30)];
         [button setTitle:subTitle forState:UIControlStateNormal];
+        button.userInteractionEnabled = NO;
         
         [label setFrame:CGRectMake(0, 34, 50, 10)];
         [label setTextColor:[Colors textColor]];
@@ -195,11 +197,21 @@
 }
 
 - (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath {
-    
-    NSString *chId = [favoriteChannels objectAtIndex:indexPath.row];
-    dtvChannel *channel = channels[chId];
-    
-    [dtvCommands changeChannel:channel device:currentDevice];
+    if (indexPath.section == 0) {
+        NSString *chId = [favoriteChannels objectAtIndex:indexPath.row];
+        dtvChannel *channel = channels[chId];
+        [dtvCommands changeChannel:channel device:currentDevice];
+    } else {
+        id obj = [favoriteCommands objectAtIndex:indexPath.row];
+        
+        if ([obj isKindOfClass:[dtvCommand class]]) {
+            dtvCommand *c = [favoriteCommands objectAtIndex:indexPath.row];
+            [dtvCommands sendCommand:c.dtvCommandText device:currentDevice];
+        } else {
+            dtvCustomCommand *c = [favoriteCommands objectAtIndex:indexPath.row];
+            [dtvCommands sendCustomCommand:c];
+        }
+    }
 }
 
 - (void)didReceiveMemoryWarning {

@@ -24,8 +24,10 @@
     [coder encodeObject:_data forKey:@"data"];
     [coder encodeObject:_buttonIndex forKey:@"buttonIndex"];
     [coder encodeObject:_commandDescription forKey:@"title"];
-    [coder encodeObject:_abbreviation forKey:@"abbreviation"];
+    [coder encodeObject:_shortName forKey:@"shortName"];
     [coder encodeObject:_onCompleteURIScheme forKey:@"onCompleteURIScheme"];
+    [coder encodeObject:_fontAwesome forKey:@"fontAwesome"];
+    
 }
 
 - (id)initWithCoder:(NSCoder *)decoder {
@@ -38,8 +40,9 @@
         _data = [decoder decodeObjectForKey:@"data"];
         _buttonIndex = [decoder decodeObjectForKey:@"buttonIndex"];
         _commandDescription = [decoder decodeObjectForKey:@"title"];
-        _abbreviation = [decoder decodeObjectForKey:@"abbreviation"];
+        _shortName = [decoder decodeObjectForKey:@"shortName"];
         _onCompleteURIScheme = [decoder decodeObjectForKey:@"onCompleteURIScheme"];
+        _fontAwesome = [decoder decodeObjectForKey:@"fontAwesome"];
     }
     return self;
 }

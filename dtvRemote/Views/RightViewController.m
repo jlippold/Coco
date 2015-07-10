@@ -12,6 +12,7 @@
 #import "dtvCommand.h"
 #import "dtvCustomCommand.h"
 #import "Colors.h"
+#import "UIImage+FontAwesome.h"
 
 @interface RightViewController ()
 
@@ -33,11 +34,14 @@
     
     currentDevice = [dtvDevices getCurrentDevice];
     commands = [dtvCommands getCommandsForSidebar:currentDevice];
+    favoriteCommands = [dtvCommands loadFavoriteCommands];
     isEditing = NO;
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageUpdatedCurrentDevice:)
                                                  name:@"messageUpdatedCurrentDevice" object:nil];
     
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageImportedCustomCommands:)
+                                                 name:@"messageImportedCustomCommands" object:nil];
     
     sideBarView = [[UIView alloc] initWithFrame:[UIScreen mainScreen].bounds];
     sideBarView.backgroundColor = [Colors backgroundColor];
@@ -63,6 +67,7 @@
                                   initWithImage:[UIImage imageNamed:@"images.bundle/favorite"]
                                   style:UIBarButtonItemStylePlain target:self action:@selector(chooseFavorites:)];
     
+    favButton.tintColor = [Colors textColor];
     sideBarNavItem.rightBarButtonItem = favButton;
     
     [bar pushNavigationItem:sideBarNavItem animated:false];
@@ -102,14 +107,12 @@
     if (isEditing) {
         //Going back to regular mode
         [dtvCommands saveFavoriteCommands:favoriteCommands];
-        favoriteCommands = [[NSMutableArray alloc] init];
         favButton.image = [UIImage imageNamed:@"images.bundle/favorite"];
         isEditing = NO;
     } else {
         //Going into edit mode
         favButton.image = [UIImage imageNamed:@"images.bundle/favortite-selected"];
         isEditing = YES;
-        favoriteCommands = [dtvCommands loadFavoriteCommands];
     }
     
     [sideBarTable reloadData];
@@ -125,7 +128,7 @@
     cell.backgroundColor = [Colors backgroundColor];
     cell.userInteractionEnabled = YES;
     [cell setTintColor:[Colors tintColor]];
-
+    
     [cell.textLabel setTextColor: [Colors textColor]];
     [cell.detailTextLabel setTextColor:[Colors textColor]];
 }
@@ -138,8 +141,6 @@
     
     UITableViewHeaderFooterView *header = (UITableViewHeaderFooterView *)view;
     [header.textLabel setTextColor:[Colors textColor]];
-    
-    
     
 }
 
@@ -178,18 +179,38 @@
     
     id obj = [sortedArray objectAtIndex:indexPath.row];
     BOOL isFavorite = NO;
+    cell.imageView.contentMode = UIViewContentModeScaleAspectFit;
+    UIImage *cellImage;
+    
     if ([obj isKindOfClass:[dtvCommand class]]) {
         dtvCommand *c = [sortedArray objectAtIndex:indexPath.row];
         cell.textLabel.text = c.commandDescription;
-        cell.detailTextLabel.text = [NSString stringWithFormat:@"%@: %@", c.sideBarCategory, c.commandDescription];
         isFavorite = [favoriteCommands containsObject:c.commandDescription];
+        
+        if (c.fontAwesome) {
+            cellImage = [UIImage imageWithIcon:[NSString stringWithFormat:@"fa-%@", c.fontAwesome]
+                               backgroundColor:[UIColor clearColor]
+                                     iconColor:[Colors textColor]
+                                       andSize:CGSizeMake(16, 16)];
+        }
+        
     } else {
         dtvCustomCommand *c = [sortedArray objectAtIndex:indexPath.row];
         cell.textLabel.text = c.commandDescription;
-        cell.detailTextLabel.text = [NSString stringWithFormat:@"%@: %@", @"Customs", c.commandDescription];
         isFavorite = [favoriteCommands containsObject:c.commandDescription];
+        
+        if (c.fontAwesome) {
+            cellImage = [UIImage imageWithIcon:[NSString stringWithFormat:@"fa-%@", c.fontAwesome]
+                               backgroundColor:[UIColor clearColor]
+                                     iconColor:[Colors textColor]
+                                       andSize:CGSizeMake(16, 16)];
+        }
     }
-
+    
+    cell.detailTextLabel.text = isFavorite ? @"Favorite" : @"";
+    cell.imageView.image = cellImage;
+    
+    
     if (isEditing) {
         
         UIImage *image = [UIImage new];
@@ -208,6 +229,8 @@
     } else {
         cell.accessoryView = [[UIImageView alloc] initWithImage:[UIImage new]];
     }
+    
+
     return cell;
 }
 
@@ -246,14 +269,17 @@
             desc = c.commandDescription;
         }
 
+        UITableViewCell *cell = [tableView cellForRowAtIndexPath:indexPath];
+        
         if ([favoriteCommands containsObject:desc]) {
             [favoriteCommands removeObject:desc];
+            cell.detailTextLabel.text = @"";
         } else {
             [favoriteCommands addObject:desc];
             image = [UIImage imageNamed:@"images.bundle/favorite"];
+            cell.detailTextLabel.text = @"Favorite";
         }
-        
-        UITableViewCell *cell = [tableView cellForRowAtIndexPath:indexPath];
+
         UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
         button.tintColor = [Colors textColor];
         CGRect frame = CGRectMake(0, 0, image.size.width, image.size.height);
@@ -280,6 +306,11 @@
 - (void) messageUpdatedCurrentDevice:(NSNotification *)notification {
     currentDevice = notification.object;
     sideBarNavItem.title = currentDevice.name;
+    commands = [dtvCommands getCommandsForSidebar:currentDevice];
+    [sideBarTable reloadData];
+}
+
+- (void) messageImportedCustomCommands:(NSNotification *)notification {
     commands = [dtvCommands getCommandsForSidebar:currentDevice];
     [sideBarTable reloadData];
 }

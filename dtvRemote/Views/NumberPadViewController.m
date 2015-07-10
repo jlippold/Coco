@@ -11,7 +11,7 @@
 #import "dtvCommand.h"
 #import "dtvDevices.h"
 #import "Colors.h"
-
+#import "UIImage+FontAwesome.h"
 
 @interface NumberPadViewController ()
 
@@ -39,7 +39,10 @@
         UILabel *label;
         button.hidden = YES;
         
-
+        dtvCommand *command = [dtvCommands getCommandAtnumberPadPagePosition:commands
+                                                                        page:pageTitle
+                                                                    position:[@(n) stringValue]];
+        BOOL hasIcon = command.fontAwesome ? YES : NO;
 
         if (isRoundButton) {
             
@@ -49,10 +52,17 @@
             
             label = (UILabel *)[self.view viewWithTag:n + 200];
             label.hidden = YES;
-            button.layer.borderColor = [Colors lightTextColor].CGColor;
-            button.layer.borderWidth = 2.0f;
-            button.layer.cornerRadius = 40;
-            button.layer.masksToBounds = YES;
+            
+            if (hasIcon) {
+                button.layer.borderColor = [UIColor clearColor].CGColor;
+            } else {
+                button.layer.borderColor = [Colors lightTextColor].CGColor;
+                button.layer.borderWidth = 2.0f;
+                button.layer.cornerRadius = 40;
+                button.layer.masksToBounds = YES;
+
+            }
+
             [label setTextColor:[Colors textColor]];
             
         } else { //bottom buttons
@@ -66,15 +76,28 @@
         }
         
         
-        dtvCommand *command = [dtvCommands getCommandAtnumberPadPagePosition:commands
-                                                                        page:pageTitle
-                                                                    position:[@(n) stringValue]];
+
         if (command) {
             button.hidden = NO;
             if (isRoundButton) {
                 label.hidden = NO;
                 label.text = command.commandDescription;
-                [button setTitle:command.shortName forState:UIControlStateNormal];
+                
+                if (hasIcon) {
+                    UIImage *image = [UIImage imageWithIcon:
+                                      [NSString stringWithFormat:@"fa-%@", command.fontAwesome]
+                                            backgroundColor:[UIColor clearColor]
+                                                  iconColor:[Colors textColor]
+                                                    andSize:CGSizeMake(30, 30)];
+                    
+                    [button setImage:image forState:UIControlStateNormal];
+                    [button setTitle:@"" forState:UIControlStateNormal];
+
+                } else {
+                    [button setTitle:command.shortName forState:UIControlStateNormal];
+                }
+
+                
             } else {
                 [button setTitle:command.commandDescription forState:UIControlStateNormal];
             }

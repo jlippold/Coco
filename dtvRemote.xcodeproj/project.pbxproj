@@ -21,9 +21,13 @@
 		8562BAF01B0ADA4400F65F26 /* VibrancyViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 8562BAE81B0ADA4400F65F26 /* VibrancyViewController.m */; };
 		8562BAF11B0ADA4400F65F26 /* VibrancyViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 8562BAE91B0ADA4400F65F26 /* VibrancyViewController.xib */; };
 		8562BAF71B0ADA8200F65F26 /* categories.plist in Resources */ = {isa = PBXBuildFile; fileRef = 8562BAF21B0ADA8200F65F26 /* categories.plist */; };
-		8562BAF81B0ADA8200F65F26 /* commands.plist in Resources */ = {isa = PBXBuildFile; fileRef = 8562BAF31B0ADA8200F65F26 /* commands.plist */; };
 		8562BAF91B0ADA8200F65F26 /* images.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 8562BAF41B0ADA8200F65F26 /* images.bundle */; };
 		8562BAFB1B0ADA8200F65F26 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 8562BAF61B0ADA8200F65F26 /* main.m */; };
+		857006991B4F415600C50687 /* FAImageView.m in Sources */ = {isa = PBXBuildFile; fileRef = 857006971B4F415600C50687 /* FAImageView.m */; };
+		8570069A1B4F415600C50687 /* FontAwesome.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 857006981B4F415600C50687 /* FontAwesome.ttf */; };
+		8570069E1B4F41BB00C50687 /* FAImageView.m in Sources */ = {isa = PBXBuildFile; fileRef = 8570069C1B4F41BB00C50687 /* FAImageView.m */; };
+		8570069F1B4F41BB00C50687 /* FontAwesome.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8570069D1B4F41BB00C50687 /* FontAwesome.ttf */; };
+		857006A11B4F426400C50687 /* commands.json in Resources */ = {isa = PBXBuildFile; fileRef = 857006A01B4F426400C50687 /* commands.json */; };
 		857CAAFC1AF51C9C004F8058 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 857CAAFB1AF51C9C004F8058 /* SystemConfiguration.framework */; };
 		858120CE1B268E5800133D2B /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 858120CD1B268E5800133D2B /* StoreKit.framework */; };
 		859D6D8A1A9926CA0024FBA4 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 859D6D891A9926CA0024FBA4 /* AppDelegate.m */; };
@@ -68,6 +72,12 @@
 		85B514A91B49B433009E0E79 /* Reachability.m in Sources */ = {isa = PBXBuildFile; fileRef = 85B514A81B49B433009E0E79 /* Reachability.m */; };
 		85B514AC1B49C31F009E0E79 /* Util.m in Sources */ = {isa = PBXBuildFile; fileRef = 85B514AB1B49C31F009E0E79 /* Util.m */; };
 		85B514AF1B49C78D009E0E79 /* Util.m in Sources */ = {isa = PBXBuildFile; fileRef = 85B514AE1B49C78D009E0E79 /* Util.m */; };
+		85D0B0051B4F3A3E00342FDA /* NSString+FontAwesome.m in Sources */ = {isa = PBXBuildFile; fileRef = 85D0AFFF1B4F3A3E00342FDA /* NSString+FontAwesome.m */; };
+		85D0B0061B4F3A3E00342FDA /* UIFont+FontAwesome.m in Sources */ = {isa = PBXBuildFile; fileRef = 85D0B0011B4F3A3E00342FDA /* UIFont+FontAwesome.m */; };
+		85D0B0071B4F3A3E00342FDA /* UIImage+FontAwesome.m in Sources */ = {isa = PBXBuildFile; fileRef = 85D0B0031B4F3A3E00342FDA /* UIImage+FontAwesome.m */; };
+		85D0B0101B4F3B1400342FDA /* NSString+FontAwesome.m in Sources */ = {isa = PBXBuildFile; fileRef = 85D0B00B1B4F3B1400342FDA /* NSString+FontAwesome.m */; };
+		85D0B0111B4F3B1400342FDA /* UIFont+FontAwesome.m in Sources */ = {isa = PBXBuildFile; fileRef = 85D0B00D1B4F3B1400342FDA /* UIFont+FontAwesome.m */; };
+		85D0B0121B4F3B1400342FDA /* UIImage+FontAwesome.m in Sources */ = {isa = PBXBuildFile; fileRef = 85D0B00F1B4F3B1400342FDA /* UIImage+FontAwesome.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -120,10 +130,16 @@
 		8562BAE81B0ADA4400F65F26 /* VibrancyViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = VibrancyViewController.m; path = Views/VibrancyViewController.m; sourceTree = "<group>"; };
 		8562BAE91B0ADA4400F65F26 /* VibrancyViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = VibrancyViewController.xib; path = Views/VibrancyViewController.xib; sourceTree = "<group>"; };
 		8562BAF21B0ADA8200F65F26 /* categories.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = categories.plist; path = "Supporting Files/categories.plist"; sourceTree = "<group>"; };
-		8562BAF31B0ADA8200F65F26 /* commands.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = commands.plist; path = "Supporting Files/commands.plist"; sourceTree = "<group>"; };
 		8562BAF41B0ADA8200F65F26 /* images.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; name = images.bundle; path = "Supporting Files/images.bundle"; sourceTree = "<group>"; };
 		8562BAF61B0ADA8200F65F26 /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = "Supporting Files/main.m"; sourceTree = "<group>"; };
 		8562BAFC1B0ADAA500F65F26 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		857006961B4F415600C50687 /* FAImageView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FAImageView.h; path = "Shared Vendors/fontawesome/FAImageView.h"; sourceTree = SOURCE_ROOT; };
+		857006971B4F415600C50687 /* FAImageView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = FAImageView.m; path = "Shared Vendors/fontawesome/FAImageView.m"; sourceTree = SOURCE_ROOT; };
+		857006981B4F415600C50687 /* FontAwesome.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = FontAwesome.ttf; path = "Shared Vendors/fontawesome/FontAwesome.ttf"; sourceTree = SOURCE_ROOT; };
+		8570069B1B4F41BB00C50687 /* FAImageView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FAImageView.h; path = "Shared Vendors/fontawesome/FAImageView.h"; sourceTree = SOURCE_ROOT; };
+		8570069C1B4F41BB00C50687 /* FAImageView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = FAImageView.m; path = "Shared Vendors/fontawesome/FAImageView.m"; sourceTree = SOURCE_ROOT; };
+		8570069D1B4F41BB00C50687 /* FontAwesome.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = FontAwesome.ttf; path = "Shared Vendors/fontawesome/FontAwesome.ttf"; sourceTree = SOURCE_ROOT; };
+		857006A01B4F426400C50687 /* commands.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; name = commands.json; path = "Supporting Files/commands.json"; sourceTree = "<group>"; };
 		857CAAFB1AF51C9C004F8058 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 		858120CD1B268E5800133D2B /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 		859D6D811A9926CA0024FBA4 /* Coco for DirecTV.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Coco for DirecTV.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -206,6 +222,20 @@
 		85B514AB1B49C31F009E0E79 /* Util.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Util.m; path = "Shared Classes/Util.m"; sourceTree = SOURCE_ROOT; };
 		85B514AD1B49C78D009E0E79 /* Util.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Util.h; path = "Shared Classes/Util.h"; sourceTree = SOURCE_ROOT; };
 		85B514AE1B49C78D009E0E79 /* Util.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Util.m; path = "Shared Classes/Util.m"; sourceTree = SOURCE_ROOT; };
+		85D0AFFE1B4F3A3E00342FDA /* NSString+FontAwesome.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "NSString+FontAwesome.h"; path = "Shared Vendors/fontawesome/NSString+FontAwesome.h"; sourceTree = SOURCE_ROOT; };
+		85D0AFFF1B4F3A3E00342FDA /* NSString+FontAwesome.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "NSString+FontAwesome.m"; path = "Shared Vendors/fontawesome/NSString+FontAwesome.m"; sourceTree = SOURCE_ROOT; };
+		85D0B0001B4F3A3E00342FDA /* UIFont+FontAwesome.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "UIFont+FontAwesome.h"; path = "Shared Vendors/fontawesome/UIFont+FontAwesome.h"; sourceTree = SOURCE_ROOT; };
+		85D0B0011B4F3A3E00342FDA /* UIFont+FontAwesome.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "UIFont+FontAwesome.m"; path = "Shared Vendors/fontawesome/UIFont+FontAwesome.m"; sourceTree = SOURCE_ROOT; };
+		85D0B0021B4F3A3E00342FDA /* UIImage+FontAwesome.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "UIImage+FontAwesome.h"; path = "Shared Vendors/fontawesome/UIImage+FontAwesome.h"; sourceTree = SOURCE_ROOT; };
+		85D0B0031B4F3A3E00342FDA /* UIImage+FontAwesome.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "UIImage+FontAwesome.m"; path = "Shared Vendors/fontawesome/UIImage+FontAwesome.m"; sourceTree = SOURCE_ROOT; };
+		85D0B0081B4F3A5500342FDA /* FontAwesome.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = FontAwesome.ttf; path = "Shared Vendors/fontawesome/FontAwesome.ttf"; sourceTree = SOURCE_ROOT; };
+		85D0B00A1B4F3B1400342FDA /* NSString+FontAwesome.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "NSString+FontAwesome.h"; path = "Shared Vendors/fontawesome/NSString+FontAwesome.h"; sourceTree = SOURCE_ROOT; };
+		85D0B00B1B4F3B1400342FDA /* NSString+FontAwesome.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "NSString+FontAwesome.m"; path = "Shared Vendors/fontawesome/NSString+FontAwesome.m"; sourceTree = SOURCE_ROOT; };
+		85D0B00C1B4F3B1400342FDA /* UIFont+FontAwesome.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "UIFont+FontAwesome.h"; path = "Shared Vendors/fontawesome/UIFont+FontAwesome.h"; sourceTree = SOURCE_ROOT; };
+		85D0B00D1B4F3B1400342FDA /* UIFont+FontAwesome.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "UIFont+FontAwesome.m"; path = "Shared Vendors/fontawesome/UIFont+FontAwesome.m"; sourceTree = SOURCE_ROOT; };
+		85D0B00E1B4F3B1400342FDA /* UIImage+FontAwesome.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "UIImage+FontAwesome.h"; path = "Shared Vendors/fontawesome/UIImage+FontAwesome.h"; sourceTree = SOURCE_ROOT; };
+		85D0B00F1B4F3B1400342FDA /* UIImage+FontAwesome.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "UIImage+FontAwesome.m"; path = "Shared Vendors/fontawesome/UIImage+FontAwesome.m"; sourceTree = SOURCE_ROOT; };
+		85D0B0131B4F3B1D00342FDA /* FontAwesome.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = FontAwesome.ttf; path = "Shared Vendors/fontawesome/FontAwesome.ttf"; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -298,6 +328,7 @@
 		850760511AFFEC9D0061DFEA /* Vendor */ = {
 			isa = PBXGroup;
 			children = (
+				85D0AFFC1B4F3A0C00342FDA /* fontawesome */,
 				85043B951B229D4C00CE996B /* CCColorCube */,
 				8562BAAD1B0AD95A00F65F26 /* MBProgressHUD */,
 				8562BAA91B0AD93800F65F26 /* Reachability */,
@@ -382,10 +413,11 @@
 		859D6D841A9926CA0024FBA4 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				857006A01B4F426400C50687 /* commands.json */,
+				85D0B0081B4F3A5500342FDA /* FontAwesome.ttf */,
 				857CAAFB1AF51C9C004F8058 /* SystemConfiguration.framework */,
 				859D6DB01A9A8F5E0024FBA4 /* CFNetwork.framework */,
 				8562BAF21B0ADA8200F65F26 /* categories.plist */,
-				8562BAF31B0ADA8200F65F26 /* commands.plist */,
 				8562BAF41B0ADA8200F65F26 /* images.bundle */,
 				8562BAF61B0ADA8200F65F26 /* main.m */,
 				859D6D8B1A9926CA0024FBA4 /* dtvRemote.xcdatamodeld */,
@@ -430,6 +462,7 @@
 		85B5143C1B486DCD009E0E79 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				85D0B0131B4F3B1D00342FDA /* FontAwesome.ttf */,
 				85B5143D1B486DCD009E0E79 /* Info.plist */,
 			);
 			name = "Supporting Files";
@@ -469,6 +502,7 @@
 		85B514A51B49B422009E0E79 /* Vendor */ = {
 			isa = PBXGroup;
 			children = (
+				85D0B0091B4F3AFF00342FDA /* fontawesome */,
 				85ABB1FF1B4A1516000B89FA /* CCColorCube */,
 				85B514A61B49B428009E0E79 /* Reachability */,
 			);
@@ -482,6 +516,38 @@
 				85B514A81B49B433009E0E79 /* Reachability.m */,
 			);
 			name = Reachability;
+			sourceTree = "<group>";
+		};
+		85D0AFFC1B4F3A0C00342FDA /* fontawesome */ = {
+			isa = PBXGroup;
+			children = (
+				857006961B4F415600C50687 /* FAImageView.h */,
+				857006971B4F415600C50687 /* FAImageView.m */,
+				857006981B4F415600C50687 /* FontAwesome.ttf */,
+				85D0AFFE1B4F3A3E00342FDA /* NSString+FontAwesome.h */,
+				85D0AFFF1B4F3A3E00342FDA /* NSString+FontAwesome.m */,
+				85D0B0001B4F3A3E00342FDA /* UIFont+FontAwesome.h */,
+				85D0B0011B4F3A3E00342FDA /* UIFont+FontAwesome.m */,
+				85D0B0021B4F3A3E00342FDA /* UIImage+FontAwesome.h */,
+				85D0B0031B4F3A3E00342FDA /* UIImage+FontAwesome.m */,
+			);
+			name = fontawesome;
+			sourceTree = "<group>";
+		};
+		85D0B0091B4F3AFF00342FDA /* fontawesome */ = {
+			isa = PBXGroup;
+			children = (
+				8570069B1B4F41BB00C50687 /* FAImageView.h */,
+				8570069C1B4F41BB00C50687 /* FAImageView.m */,
+				8570069D1B4F41BB00C50687 /* FontAwesome.ttf */,
+				85D0B00A1B4F3B1400342FDA /* NSString+FontAwesome.h */,
+				85D0B00B1B4F3B1400342FDA /* NSString+FontAwesome.m */,
+				85D0B00C1B4F3B1400342FDA /* UIFont+FontAwesome.h */,
+				85D0B00D1B4F3B1400342FDA /* UIFont+FontAwesome.m */,
+				85D0B00E1B4F3B1400342FDA /* UIImage+FontAwesome.h */,
+				85D0B00F1B4F3B1400342FDA /* UIImage+FontAwesome.m */,
+			);
+			name = fontawesome;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -578,9 +644,10 @@
 			files = (
 				8562BAEB1B0ADA4400F65F26 /* LaunchScreen.xib in Resources */,
 				8562BAEE1B0ADA4400F65F26 /* NumberPadViewController.xib in Resources */,
-				8562BAF81B0ADA8200F65F26 /* commands.plist in Resources */,
+				8570069A1B4F415600C50687 /* FontAwesome.ttf in Resources */,
 				859D6D951A9926CA0024FBA4 /* Images.xcassets in Resources */,
 				8562BAF91B0ADA8200F65F26 /* images.bundle in Resources */,
+				857006A11B4F426400C50687 /* commands.json in Resources */,
 				8562BAF71B0ADA8200F65F26 /* categories.plist in Resources */,
 				8562BAF11B0ADA4400F65F26 /* VibrancyViewController.xib in Resources */,
 			);
@@ -591,6 +658,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				85B514421B486DCD009E0E79 /* MainInterface.storyboard in Resources */,
+				8570069F1B4F41BB00C50687 /* FontAwesome.ttf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -608,6 +676,7 @@
 				85B514A41B49B412009E0E79 /* Reachability.m in Sources */,
 				859D6D8D1A9926CA0024FBA4 /* dtvRemote.xcdatamodeld in Sources */,
 				85B514751B49B1AA009E0E79 /* IAPHelper.m in Sources */,
+				857006991B4F415600C50687 /* FAImageView.m in Sources */,
 				859D6D8A1A9926CA0024FBA4 /* AppDelegate.m in Sources */,
 				85B5146C1B49B1AA009E0E79 /* dtvCommand.m in Sources */,
 				85B5146E1B49B1AA009E0E79 /* dtvCustomCommand.m in Sources */,
@@ -627,8 +696,11 @@
 				85B5146B1B49B1AA009E0E79 /* dtvChannels.m in Sources */,
 				85B514711B49B1AA009E0E79 /* dtvGuide.m in Sources */,
 				85B5146D1B49B1AA009E0E79 /* dtvCommands.m in Sources */,
+				85D0B0061B4F3A3E00342FDA /* UIFont+FontAwesome.m in Sources */,
 				8562BABB1B0AD9A300F65F26 /* MMDrawerController.m in Sources */,
+				85D0B0071B4F3A3E00342FDA /* UIImage+FontAwesome.m in Sources */,
 				8562BAEC1B0ADA4400F65F26 /* LeftViewController.m in Sources */,
+				85D0B0051B4F3A3E00342FDA /* NSString+FontAwesome.m in Sources */,
 				8562BAFB1B0ADA8200F65F26 /* main.m in Sources */,
 				85ABB1FE1B4A150E000B89FA /* CCLocalMaximum.m in Sources */,
 				85B514731B49B1AA009E0E79 /* dtvIAP.m in Sources */,
@@ -653,8 +725,12 @@
 				85ABB1F81B4A14A8000B89FA /* Colors.m in Sources */,
 				85B514981B49B1B9009E0E79 /* dtvCustomCommand.m in Sources */,
 				85B514A91B49B433009E0E79 /* Reachability.m in Sources */,
+				85D0B0121B4F3B1400342FDA /* UIImage+FontAwesome.m in Sources */,
+				85D0B0101B4F3B1400342FDA /* NSString+FontAwesome.m in Sources */,
 				85B5149B1B49B1B9009E0E79 /* dtvGuide.m in Sources */,
+				8570069E1B4F41BB00C50687 /* FAImageView.m in Sources */,
 				85B514961B49B1B9009E0E79 /* dtvCommand.m in Sources */,
+				85D0B0111B4F3B1400342FDA /* UIFont+FontAwesome.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
