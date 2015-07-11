@@ -26,7 +26,7 @@
                                           position:(NSString *)position;
 + (NSMutableArray *) loadFavoriteCommands;
 + (void)saveFavoriteCommands:(NSMutableArray *) favoriteCommands;
-+ (NSMutableArray *) getCommandArrayOfFavorites;
++ (NSMutableArray *) getCommandArrayOfFavorites:(dtvDevice *)currentDevice;
 @end
 
 

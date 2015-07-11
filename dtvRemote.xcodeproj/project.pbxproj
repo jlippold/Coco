@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		852BD2051B50D2CC0097E80C /* CVCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 852BD2031B50D2CC0097E80C /* CVCell.m */; };
+		852BD2061B50D2CC0097E80C /* CVCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 852BD2041B50D2CC0097E80C /* CVCell.xib */; };
 		8562BAB01B0AD96800F65F26 /* MBProgressHUD.m in Sources */ = {isa = PBXBuildFile; fileRef = 8562BAAF1B0AD96800F65F26 /* MBProgressHUD.m */; };
 		8562BABA1B0AD9A300F65F26 /* MMDrawerBarButtonItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 8562BAB21B0AD9A300F65F26 /* MMDrawerBarButtonItem.m */; };
 		8562BABB1B0AD9A300F65F26 /* MMDrawerController.m in Sources */ = {isa = PBXBuildFile; fileRef = 8562BAB41B0AD9A300F65F26 /* MMDrawerController.m */; };
@@ -72,6 +74,7 @@
 		85B514A91B49B433009E0E79 /* Reachability.m in Sources */ = {isa = PBXBuildFile; fileRef = 85B514A81B49B433009E0E79 /* Reachability.m */; };
 		85B514AC1B49C31F009E0E79 /* Util.m in Sources */ = {isa = PBXBuildFile; fileRef = 85B514AB1B49C31F009E0E79 /* Util.m */; };
 		85B514AF1B49C78D009E0E79 /* Util.m in Sources */ = {isa = PBXBuildFile; fileRef = 85B514AE1B49C78D009E0E79 /* Util.m */; };
+		85C791531B5160960019382D /* CVHeader.m in Sources */ = {isa = PBXBuildFile; fileRef = 85C791511B5160960019382D /* CVHeader.m */; };
 		85D0B0051B4F3A3E00342FDA /* NSString+FontAwesome.m in Sources */ = {isa = PBXBuildFile; fileRef = 85D0AFFF1B4F3A3E00342FDA /* NSString+FontAwesome.m */; };
 		85D0B0061B4F3A3E00342FDA /* UIFont+FontAwesome.m in Sources */ = {isa = PBXBuildFile; fileRef = 85D0B0011B4F3A3E00342FDA /* UIFont+FontAwesome.m */; };
 		85D0B0071B4F3A3E00342FDA /* UIImage+FontAwesome.m in Sources */ = {isa = PBXBuildFile; fileRef = 85D0B0031B4F3A3E00342FDA /* UIImage+FontAwesome.m */; };
@@ -105,6 +108,9 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		852BD2021B50D2CC0097E80C /* CVCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CVCell.h; sourceTree = "<group>"; };
+		852BD2031B50D2CC0097E80C /* CVCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CVCell.m; sourceTree = "<group>"; };
+		852BD2041B50D2CC0097E80C /* CVCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = CVCell.xib; sourceTree = "<group>"; };
 		8562BAAE1B0AD96800F65F26 /* MBProgressHUD.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MBProgressHUD.h; path = Vendor/MBProgressHUD/MBProgressHUD.h; sourceTree = "<group>"; };
 		8562BAAF1B0AD96800F65F26 /* MBProgressHUD.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MBProgressHUD.m; path = Vendor/MBProgressHUD/MBProgressHUD.m; sourceTree = "<group>"; };
 		8562BAB11B0AD9A300F65F26 /* MMDrawerBarButtonItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MMDrawerBarButtonItem.h; path = Vendor/MMDrawerController/MMDrawerBarButtonItem.h; sourceTree = "<group>"; };
@@ -222,6 +228,8 @@
 		85B514AB1B49C31F009E0E79 /* Util.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Util.m; path = "Shared Classes/Util.m"; sourceTree = SOURCE_ROOT; };
 		85B514AD1B49C78D009E0E79 /* Util.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Util.h; path = "Shared Classes/Util.h"; sourceTree = SOURCE_ROOT; };
 		85B514AE1B49C78D009E0E79 /* Util.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Util.m; path = "Shared Classes/Util.m"; sourceTree = SOURCE_ROOT; };
+		85C791501B5160960019382D /* CVHeader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CVHeader.h; sourceTree = "<group>"; };
+		85C791511B5160960019382D /* CVHeader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CVHeader.m; sourceTree = "<group>"; };
 		85D0AFFE1B4F3A3E00342FDA /* NSString+FontAwesome.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "NSString+FontAwesome.h"; path = "Shared Vendors/fontawesome/NSString+FontAwesome.h"; sourceTree = SOURCE_ROOT; };
 		85D0AFFF1B4F3A3E00342FDA /* NSString+FontAwesome.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "NSString+FontAwesome.m"; path = "Shared Vendors/fontawesome/NSString+FontAwesome.m"; sourceTree = SOURCE_ROOT; };
 		85D0B0001B4F3A3E00342FDA /* UIFont+FontAwesome.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "UIFont+FontAwesome.h"; path = "Shared Vendors/fontawesome/UIFont+FontAwesome.h"; sourceTree = SOURCE_ROOT; };
@@ -337,6 +345,20 @@
 			name = Vendor;
 			sourceTree = "<group>";
 		};
+		852BD2011B50D2970097E80C /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				85B5143E1B486DCD009E0E79 /* TodayViewController.h */,
+				85B5143F1B486DCD009E0E79 /* TodayViewController.m */,
+				852BD2021B50D2CC0097E80C /* CVCell.h */,
+				852BD2031B50D2CC0097E80C /* CVCell.m */,
+				852BD2041B50D2CC0097E80C /* CVCell.xib */,
+				85C791501B5160960019382D /* CVHeader.h */,
+				85C791511B5160960019382D /* CVHeader.m */,
+			);
+			name = Views;
+			sourceTree = "<group>";
+		};
 		8562BAA91B0AD93800F65F26 /* Reachability */ = {
 			isa = PBXGroup;
 			children = (
@@ -448,12 +470,11 @@
 		85B5143B1B486DCD009E0E79 /* dtvRemote-Widget */ = {
 			isa = PBXGroup;
 			children = (
+				852BD2011B50D2970097E80C /* Views */,
 				85B514A51B49B422009E0E79 /* Vendor */,
 				85B5143C1B486DCD009E0E79 /* Supporting Files */,
 				85B5144C1B49B12D009E0E79 /* Classes */,
 				85B5144B1B48BEA2009E0E79 /* dtvRemote-Widget.entitlements */,
-				85B5143E1B486DCD009E0E79 /* TodayViewController.h */,
-				85B5143F1B486DCD009E0E79 /* TodayViewController.m */,
 				85B514411B486DCD009E0E79 /* MainInterface.storyboard */,
 			);
 			path = "dtvRemote-Widget";
@@ -657,6 +678,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				852BD2061B50D2CC0097E80C /* CVCell.xib in Resources */,
 				85B514421B486DCD009E0E79 /* MainInterface.storyboard in Resources */,
 				8570069F1B4F41BB00C50687 /* FontAwesome.ttf in Resources */,
 			);
@@ -714,6 +736,7 @@
 				85B514AF1B49C78D009E0E79 /* Util.m in Sources */,
 				85B514A01B49B1B9009E0E79 /* iNet.m in Sources */,
 				85B514971B49B1B9009E0E79 /* dtvCommands.m in Sources */,
+				85C791531B5160960019382D /* CVHeader.m in Sources */,
 				85ABB2041B4A1521000B89FA /* CCColorCube.m in Sources */,
 				85B514401B486DCD009E0E79 /* TodayViewController.m in Sources */,
 				85B514941B49B1B9009E0E79 /* dtvChannel.m in Sources */,
@@ -722,6 +745,7 @@
 				85B514951B49B1B9009E0E79 /* dtvChannels.m in Sources */,
 				85B514991B49B1B9009E0E79 /* dtvDevice.m in Sources */,
 				85ABB2051B4A1521000B89FA /* CCLocalMaximum.m in Sources */,
+				852BD2051B50D2CC0097E80C /* CVCell.m in Sources */,
 				85ABB1F81B4A14A8000B89FA /* Colors.m in Sources */,
 				85B514981B49B1B9009E0E79 /* dtvCustomCommand.m in Sources */,
 				85B514A91B49B433009E0E79 /* Reachability.m in Sources */,

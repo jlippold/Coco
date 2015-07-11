@@ -1537,6 +1537,12 @@
     [self showLeftView:nil];
 }
 - (void) messageDidBecomeActive:(NSNotification *)notification {
+    dtvDevice *d = [dtvDevices getCurrentDevice];
+    
+    if (![d.identifier isEqualToString:currentDevice.identifier]) {
+        [dtvDevices setCurrentDevice:d];
+    }
+        
     [self reachabilityChanged:nil];
     [self onTimerFire:nil];
 }

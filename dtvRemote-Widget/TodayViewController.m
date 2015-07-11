@@ -14,8 +14,19 @@
 #import "dtvChannel.h"
 #import "dtvCommands.h"
 #import "Colors.h"
+#import "CVCell.h"
+#import "CVHeader.h"
+#import "UIImage+FontAwesome.h"
+#import "iNet.h"
+
+static NSString *kIdentifierMultiples = @"bz.jed.dtvRemote.multiples";
+static NSString *const reuseIdentifier = @"CVCell";
+static NSString *const headerReuseIdentifier = @"CVHeader";
 
 @interface TodayViewController () <NCWidgetProviding>
+
+@property(nonatomic, copy) void (^completionHandler)(NCUpdateResult);
+@property(nonatomic) BOOL hasSignaled;
 
 @end
 
@@ -26,44 +37,113 @@
     NSMutableDictionary *channels;
     NSMutableArray *favoriteChannels;
     NSMutableArray *favoriteCommands;
+    NSString *ssid;
+    BOOL purchased;
+    NSUInteger totalChannels;
+    NSUInteger totalCommands;
 }
 
 - (void)viewDidLoad {
     [super viewDidLoad];
     
+    UILabel *lbl = [[UILabel alloc] init];
+    lbl.text = @"Upgrade to enable device switching";
+    lbl.textColor = [Colors textColor];
+
+
+    CGRect frm = self.view.frame;
+    frm.size.height = 12;
+    frm.origin.y = _deviceSegmentedControl.frame.origin.y;
+    frm.origin.x = 0;
+    lbl.frame = frm;
+    
+    lbl.font = [UIFont fontWithName:@"Helvetica-Bold" size:12];
+    lbl.hidden = YES;
+    [self.view addSubview:lbl];
+    
+    [_deviceSegmentedControl removeAllSegments];
     devices = [dtvDevices getSavedDevicesForActiveNetwork];
     currentDevice = [dtvDevices getCurrentDevice];
+    
+    ssid = [iNet fetchSSID];
+    if ([ssid isEqualToString:@""] || devices.count == 0) {
+        lbl.textAlignment = NSTextAlignmentCenter;
+        lbl.text = devices.count == 0 ?
+            [NSString stringWithFormat:@"Open the app to scan the %@ network", ssid] :
+            @"Please connect to a wireless network";
+        
+        lbl.alpha = 0.6;
+        lbl.hidden = NO;
+        _deviceSegmentedControl.hidden = YES;
+        self.preferredContentSize = CGSizeMake(320, 30);
+        return;
+    }
+    
     channels = [dtvChannels load:NO];
     
     favoriteChannels = [dtvChannels loadFavoriteChannels:channels];
-    favoriteCommands = [dtvCommands getCommandArrayOfFavorites];
+    favoriteCommands = [dtvCommands getCommandArrayOfFavorites:currentDevice];
     
+    [_deviceSegmentedControl addTarget:self
+                         action:@selector(chooseDevice:)
+               forControlEvents:UIControlEventValueChanged];
     
-    [_deviceSegmentedControl removeAllSegments];
-    
-    NSArray *keys = [[devices allKeys] sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
-    int i;
-    for (i = 0; i < [keys count]; i++) {
-        NSString *key = [keys objectAtIndex:i];
-        dtvDevice *thisDevice = devices[key];
-        [_deviceSegmentedControl insertSegmentWithTitle:thisDevice.name atIndex:i animated:NO];
-        if ([thisDevice.identifier isEqualToString:currentDevice.identifier]) {
-            _deviceSegmentedControl.selectedSegmentIndex = i;
+    purchased = YES; //[[NSUserDefaults standardUserDefaults] boolForKey:kIdentifierMultiples];
+
+    if (purchased) {
+        NSArray *keys = [[devices allKeys] sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
+        int i;
+        for (i = 0; i < [keys count]; i++) {
+            NSString *key = [keys objectAtIndex:i];
+            dtvDevice *thisDevice = devices[key];
+            [_deviceSegmentedControl insertSegmentWithTitle:thisDevice.name atIndex:i animated:NO];
+            if ([thisDevice.identifier isEqualToString:currentDevice.identifier]) {
+                _deviceSegmentedControl.selectedSegmentIndex = i;
+            }
         }
+    } else {
+        lbl.textAlignment = NSTextAlignmentRight;
+        lbl.text = @"Upgrade to enable device switching";
+        lbl.hidden = NO;
+        _deviceSegmentedControl.hidden = YES;
+
     }
-    
+
     [_cv setDataSource:self];
     [_cv setDelegate:self];
     
-    [self.cv registerClass:[UICollectionViewCell class] forCellWithReuseIdentifier:@"Cell"];
-    [self.cv registerClass:[UICollectionReusableView class] forSupplementaryViewOfKind:UICollectionElementKindSectionHeader withReuseIdentifier:@"HeaderView"];
-
-    self.view.translatesAutoresizingMaskIntoConstraints = NO;
-    [_cv reloadData];
+    [self.cv registerClass:[CVHeader class] forSupplementaryViewOfKind:UICollectionElementKindSectionHeader withReuseIdentifier:headerReuseIdentifier];
     
-    self.preferredContentSize = CGSizeMake(290, 340);
+    [self.cv registerClass:[CVCell class] forCellWithReuseIdentifier:reuseIdentifier];
+    
+    dispatch_time_t delay = dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC * 1);
+    dispatch_after(delay, dispatch_get_main_queue(), ^(void){
+        [self reloadViews];
+    });
+    [self.cv layoutIfNeeded];
+
 }
 
+- (void) reloadViews {
+    
+    [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+        
+        totalChannels = favoriteChannels.count > 10 ? 10 : favoriteChannels.count;
+        totalCommands = favoriteCommands.count > 10 ? 10 : favoriteCommands.count;
+        
+        NSUInteger totalRows = 0;
+        totalRows += totalCommands > 5 ? 2 : 1;
+        totalRows += totalChannels > 5 ? 2 : 1;
+        
+        self.preferredContentSize = CGSizeMake(320, (112 + (totalRows*54)));
+        
+        [self.cv reloadData];
+        
+        [self signalComplete:NCUpdateResultNewData];
+    }];
+
+
+}
 
 - (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout*)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath; {
      return CGSizeMake(50, 50);
@@ -72,108 +152,76 @@
 
 - (UICollectionReusableView *)collectionView:(UICollectionView *)collectionView viewForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
 {
-    UICollectionReusableView *reusableview = nil;
     
-    if (kind == UICollectionElementKindSectionHeader) {
-        UICollectionReusableView *headerView = [collectionView dequeueReusableSupplementaryViewOfKind:UICollectionElementKindSectionHeader withReuseIdentifier:@"HeaderView" forIndexPath:indexPath];
-        UILabel *label = [[UILabel alloc] init];
-        CGRect frm = _cv.frame;
-        frm.size.height = 12;
-        frm.origin.x = 2;
-        frm.origin.y = 8;
-        
-        
-        label.text = indexPath.section == 0 ? @"Favorite Channels" : @"Commands";
-        label.textColor = [Colors textColor];
-        label.font = [UIFont fontWithName:@"Helvetica-Bold" size:12];
-        label.backgroundColor = [UIColor clearColor];
-        label.textAlignment = NSTextAlignmentLeft;
-        label.frame = frm;
-        //headerView.frame = frm;
-        [headerView addSubview:label];
-        reusableview = headerView;
+    CVHeader *header = [collectionView dequeueReusableSupplementaryViewOfKind:UICollectionElementKindSectionHeader withReuseIdentifier:headerReuseIdentifier forIndexPath:indexPath];
+    
+    UILabel *myLabel = (UILabel *)[header viewWithTag:1];
+    if (!myLabel) {
+        myLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, [_cv bounds].size.width, 26)];
+        myLabel.tag = 1;
+        [myLabel setBackgroundColor:[[Colors backgroundColor] colorWithAlphaComponent:0.5f]];
+        [myLabel setFont:[UIFont boldSystemFontOfSize:14.0f]];
+        myLabel.textColor = [Colors textColor];
+        [myLabel setOpaque:YES];
     }
     
-    return reusableview;
+    myLabel.text = indexPath.section == 0 ? @"    Favorite Channels" : @"    Favorite Commands";
+    [header addSubview:myLabel];
+    return header;
+
 }
 
 - (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout referenceSizeForHeaderInSection:(NSInteger)section {
     return CGSizeMake(290, 20.0f);
 }
 
--(UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
 
-    static NSString *CellIdentifier = @"Cell";
+- (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
+
+    CVCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:reuseIdentifier forIndexPath:indexPath];
     
-    UICollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:CellIdentifier forIndexPath:indexPath];
-    
-    if (cell == nil) {
-        cell = [[UICollectionViewCell alloc] init];
-    }
+    cell.label.text = @"";
+    cell.label.textColor = [Colors textColor];
     
     if (indexPath.section == 0) {
         NSString *chId = [favoriteChannels objectAtIndex:indexPath.row];
         dtvChannel *channel = channels[chId];
-        UIImageView *iv = [[UIImageView alloc] init];
-        iv.frame = CGRectMake(2.5f, 0, 45, 40);
-        iv.image = [dtvChannel getImageForChannel:channel];
-        
-        UILabel *label = [[UILabel alloc] init];
-        label.text = [NSString stringWithFormat:@"%d %@", channel.number, channel.name];
-        label.textColor = [Colors textColor];
-        label.font = [UIFont fontWithName:@"Helvetica" size:10];
-        label.backgroundColor = [UIColor clearColor];
-        label.textAlignment = NSTextAlignmentCenter;
-        label.frame = CGRectMake(0, 40, 50, 10);
-        
-        [cell addSubview:iv];
-        [cell addSubview:label];
+        cell.iv.frame = CGRectMake(2.5f, 0, 45, 40);
+        cell.iv.image = [dtvChannel getImageForChannel:channel];
+        cell.label.text = [NSString stringWithFormat:@"%d %@", channel.number, channel.name];
+        cell.iv.contentMode = UIViewContentModeScaleAspectFit;
     }
     
     if (indexPath.section == 1) {
         id obj = [favoriteCommands objectAtIndex:indexPath.row];
         NSString *title;
-        NSString *subTitle;
+        NSString *fontAwesome;
         
         if ([obj isKindOfClass:[dtvCommand class]]) {
             dtvCommand *c = [favoriteCommands objectAtIndex:indexPath.row];
             title = c.commandDescription;
-            subTitle = c.shortName;
+            fontAwesome = [NSString stringWithFormat:@"fa-%@", c.fontAwesome];
         } else {
             dtvCustomCommand *c = [favoriteCommands objectAtIndex:indexPath.row];
             title = c.commandDescription;
-            subTitle = c.shortName;
+            fontAwesome = [NSString stringWithFormat:@"fa-%@", c.fontAwesome];
         }
-        
-        UILabel *label = [[UILabel alloc] init];
-        label.text = title;
-        label.textColor = [Colors textColor];
-        label.font = [UIFont fontWithName:@"Helvetica" size:10];
-        label.backgroundColor = [UIColor clearColor];
-        label.textAlignment = NSTextAlignmentCenter;
-        
-        UIButton *button = [[UIButton alloc] init];
-        [button setTitleColor:[Colors textColor] forState:UIControlStateNormal];
-        [button setTitleColor:[Colors backgroundColor] forState:UIControlStateHighlighted];
-        [button setTitleColor:[Colors backgroundColor] forState:UIControlStateSelected];
-        
-        button.layer.borderColor = [Colors lightTextColor].CGColor;
-        button.layer.borderWidth = 1.5f;
-        button.layer.cornerRadius = 5;
-        button.layer.masksToBounds = YES;
-        [button setFrame:CGRectMake(2.5f, 0, 45, 30)];
-        [button setTitle:subTitle forState:UIControlStateNormal];
-        button.userInteractionEnabled = NO;
-        
-        [label setFrame:CGRectMake(0, 34, 50, 10)];
-        [label setTextColor:[Colors textColor]];
-        
-        [cell addSubview:button];
-        [cell addSubview:label];
+
+        UIImage *cellImage = [UIImage imageWithIcon:fontAwesome
+                                    backgroundColor:[UIColor clearColor]
+                                          iconColor:[Colors textColor]
+                                            andSize:CGSizeMake(16, 16)];
+
+        cell.iv.contentMode = UIViewContentModeCenter;
+        cell.iv.frame = CGRectMake(0, 0, 50, 50);
+        cell.iv.image = cellImage;
+
+        cell.label.text = [NSString stringWithFormat:@"%@", title];
         
     }
-
     
+    cell.spinner.hidden = YES;
+
     return cell;
 }
 
@@ -188,15 +236,27 @@
     return sections;
 }
 
+- (UIEdgeInsets)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout*)collectionViewLayout insetForSectionAtIndex:(NSInteger)section {
+    return UIEdgeInsetsMake(10, 10, 10, 10);
+}
+
 - (NSInteger)collectionView:(UICollectionView *)view numberOfItemsInSection:(NSInteger)section {
     if (section == 0) {
-        return favoriteChannels.count;
+        return totalChannels;
     } else {
-        return favoriteCommands.count;
+        return totalCommands;
     }
 }
 
 - (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath {
+    
+    CVCell *cell = (CVCell *)[_cv cellForItemAtIndexPath:indexPath];
+
+    [cell.spinner startAnimating];
+    cell.iv.hidden = YES;
+    cell.spinner.hidden = NO;
+    
+    
     if (indexPath.section == 0) {
         NSString *chId = [favoriteChannels objectAtIndex:indexPath.row];
         dtvChannel *channel = channels[chId];
@@ -212,6 +272,14 @@
             [dtvCommands sendCustomCommand:c];
         }
     }
+    
+    dispatch_time_t delay = dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC * 0.7);
+    dispatch_after(delay, dispatch_get_main_queue(), ^(void){
+        cell.iv.hidden = NO;
+        cell.spinner.hidden = YES;
+        [cell.spinner stopAnimating];
+    });
+    
 }
 
 - (void)didReceiveMemoryWarning {
@@ -219,14 +287,43 @@
     // Dispose of any resources that can be recreated.
 }
 
+- (void)viewDidDisappear:(BOOL)animated {
+    [super viewDidDisappear:animated];
+    if (!self.hasSignaled) [self signalComplete:NCUpdateResultFailed];
+}
+
+- (void)signalComplete:(NCUpdateResult)updateResult {
+    //NSLog(@"Signaling complete: %lu", updateResult);
+    self.hasSignaled = YES;
+    if (self.completionHandler) self.completionHandler(updateResult);
+}
+
 - (void)widgetPerformUpdateWithCompletionHandler:(void (^)(NCUpdateResult))completionHandler {
     // Perform any setup necessary in order to update the view.
     
-    // If an error is encountered, use NCUpdateResultFailed
-    // If there's no update required, use NCUpdateResultNoData
-    // If there's an update, use NCUpdateResultNewData
-
-    completionHandler(NCUpdateResultNewData);
+    self.completionHandler = completionHandler;
+    
 }
+
+-(UIEdgeInsets)widgetMarginInsetsForProposedMarginInsets:(UIEdgeInsets)defaultMarginInsets {
+    return UIEdgeInsetsZero;
+}
+
+- (void)chooseDevice:(id) sender {
+    NSInteger selectedSegment = _deviceSegmentedControl.selectedSegmentIndex;
+    
+    NSArray *keys = [[devices allKeys] sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
+    NSString *deviceId = keys[selectedSegment];
+    
+    dtvDevice *device = [devices objectForKey:deviceId];
+    [dtvDevices setCurrentDevice:device];
+    currentDevice = device;
+    
+    favoriteCommands = [dtvCommands getCommandArrayOfFavorites:currentDevice];
+    [self reloadViews];
+    
+
+}
+
 
 @end

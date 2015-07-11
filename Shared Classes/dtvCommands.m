@@ -376,23 +376,31 @@
 }
 
 
-+ (NSMutableArray *) getCommandArrayOfFavorites {
++ (NSMutableArray *) getCommandArrayOfFavorites:(dtvDevice *)currentDevice {
     
     NSMutableArray *favorites = [self loadFavoriteCommands];
-    
     NSMutableArray *output = [[NSMutableArray alloc] init];
+    
     NSArray *commands = [self getCommands];
     
     for (dtvCommand *command in commands) {
-        if ([favorites containsObject:command.commandDescription]) {
+        if ([favorites containsObject:command.commandDescription] && command.showInSideBar) {
             [output addObject:command];
         }
     }
     
+    if (!currentDevice) {
+        return output;
+    }
+
+    
     NSMutableArray *customs = [self loadSavedCustoms];
     for (dtvCustomCommand *command in customs) {
         if ([favorites containsObject:command.commandDescription]) {
-            [output addObject:command];
+            if ([[command.networkName uppercaseString] isEqualToString:[currentDevice.ssid uppercaseString]] &&
+                [[command.deviceName uppercaseString] isEqualToString:[currentDevice.name uppercaseString]]) {
+                [output addObject:command];
+            }
         }
     }
 

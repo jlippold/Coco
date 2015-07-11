@@ -197,8 +197,6 @@ static NSString *kIdentifierMultiples = @"bz.jed.dtvRemote.multiples";
         } else if (thisDevice.online) {
             cell.detailTextLabel.text = @"Online";
             
-            
-            
             if ([thisDevice.identifier isEqualToString:currentDevice.identifier]) {
                 
                 cell.detailTextLabel.textColor = [Colors greenColor ];
@@ -215,10 +213,7 @@ static NSString *kIdentifierMultiples = @"bz.jed.dtvRemote.multiples";
                                    backgroundColor:[UIColor clearColor]
                                          iconColor:[Colors textColor]
                                            andSize:CGSizeMake(16, 16)];
-                
             }
-            
-
             
         } else {
             cell.detailTextLabel.text = @"Offline";
@@ -534,9 +529,8 @@ static NSString *kIdentifierMultiples = @"bz.jed.dtvRemote.multiples";
     
     UIViewController *vc = [[[[UIApplication sharedApplication] delegate] window] rootViewController];
     [vc presentViewController:view animated:YES completion:nil];
-    
-    
 }
+
 - (void) messageImportedCustomCommands:(NSNotification *)notification {
     [MBProgressHUD hideHUDForView:self.view animated:YES];
     
