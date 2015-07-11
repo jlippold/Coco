@@ -44,9 +44,9 @@
     if ([blocks count] == 0) {
         NSArray *blockCallSigns = [NSArray arrayWithObjects:
                                    @"CINE", @"CINEHD", @"SONIC", @"PPV", @"DTV",
-                                   @"BSN", @"NHL", @"MLS", @"PPVHD", @"IACHD",
-                                   @"CINE1", @"CINE2", @"CINE3", @"IDEA", @"BEST",
-                                   @"MALL", @"SALE", @"NEW", @"AAN", @"EPL", @"HBOLHD"
+                                   @"BSN", @"NHL", @"MLS", @"PPVHD", @"IACHD", @"SONY", @"SONYHD",
+                                   @"CINE1", @"CINE2", @"CINE3", @"IDEA", @"BEST", @"MGMHD"
+                                   @"MALL", @"SALE", @"NEW", @"AAN", @"EPL", @"HBOLHD", @"HDNM",
                                    @"STZE",@"STZW",@"STZKHD",@"STZCHD",@"SEDG",@"SBLK",@"SCINHD",
                                    @"UEFA", @"RGBY", @"EPL", @"MAS", @"NBA", @"PTNW", @"ACT", nil];
         
@@ -79,7 +79,7 @@
     if (!favs) {
         favs = [[NSMutableArray alloc] init];
         NSArray *favCallSigns = [NSArray arrayWithObjects:
-                                   @"COM", @"CNN", @"HBOE", @"MTV", nil];
+                                   @"CNN", @"COM", @"HIST", @"MTV", @"DSJR", nil];
         
         for (NSString *key in channels) {
             dtvChannel *channel = [channels objectForKey:key];

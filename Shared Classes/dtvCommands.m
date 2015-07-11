@@ -362,15 +362,16 @@
     if (!favs) {
     
         NSArray *defaultFavs = [NSArray arrayWithObjects:
-                                 @"Play", @"Pause", @"Channel Up", @"Channel Down", nil];
+                                 @"Play", @"Pause", @"Channel Up", @"Channel Down", @"Last Channel", nil];
         
         NSArray *commands = [self getCommands];
-
+        favs = [[NSMutableArray alloc] init];
         for (dtvCommand *command in commands) {
-            if ([defaultFavs containsObject:command.commandDescription]) {
+            if ([defaultFavs containsObject:command.commandDescription] && command.showInSideBar) {
                 [favs addObject:command.commandDescription];
             }
         }
+        [self saveFavoriteCommands:favs];
     }
     return favs;
 }

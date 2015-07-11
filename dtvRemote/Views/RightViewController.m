@@ -35,6 +35,11 @@
     currentDevice = [dtvDevices getCurrentDevice];
     commands = [dtvCommands getCommandsForSidebar:currentDevice];
     favoriteCommands = [dtvCommands loadFavoriteCommands];
+    
+    if (!favoriteCommands) {
+        favoriteCommands = [[NSMutableArray alloc] init];
+    }
+    
     isEditing = NO;
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageUpdatedCurrentDevice:)
@@ -226,6 +231,7 @@
         [button setBackgroundImage:image forState:UIControlStateNormal];
         button.backgroundColor = [UIColor clearColor];
         cell.accessoryView = button;
+        
     } else {
         cell.accessoryView = [[UIImageView alloc] initWithImage:[UIImage new]];
     }
@@ -288,7 +294,7 @@
         [button setBackgroundImage:image forState:UIControlStateNormal];
         button.backgroundColor = [UIColor clearColor];
         cell.accessoryView = button;
-        
+        [dtvCommands saveFavoriteCommands:favoriteCommands];
     } else {
 
         if ([obj isKindOfClass:[dtvCommand class]]) {

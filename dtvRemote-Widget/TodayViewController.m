@@ -69,7 +69,7 @@ static NSString *const headerReuseIdentifier = @"CVHeader";
     if ([ssid isEqualToString:@""] || devices.count == 0) {
         lbl.textAlignment = NSTextAlignmentCenter;
         lbl.text = devices.count == 0 ?
-            [NSString stringWithFormat:@"Open the app to scan the %@ network", ssid] :
+            [NSString stringWithFormat:@"Open the app to scan devices on the %@ network", ssid] :
             @"Please connect to a wireless network";
         
         lbl.alpha = 0.6;
@@ -120,7 +120,7 @@ static NSString *const headerReuseIdentifier = @"CVHeader";
     dispatch_after(delay, dispatch_get_main_queue(), ^(void){
         [self reloadViews];
     });
-    [self.cv layoutIfNeeded];
+
 
 }
 
@@ -138,6 +138,7 @@ static NSString *const headerReuseIdentifier = @"CVHeader";
         self.preferredContentSize = CGSizeMake(320, (112 + (totalRows*54)));
         
         [self.cv reloadData];
+        [self.cv layoutIfNeeded];
         
         [self signalComplete:NCUpdateResultNewData];
     }];
@@ -159,7 +160,7 @@ static NSString *const headerReuseIdentifier = @"CVHeader";
     if (!myLabel) {
         myLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, [_cv bounds].size.width, 26)];
         myLabel.tag = 1;
-        [myLabel setBackgroundColor:[[Colors backgroundColor] colorWithAlphaComponent:0.5f]];
+        [myLabel setBackgroundColor:[[Colors backgroundColor] colorWithAlphaComponent:0.4f]];
         [myLabel setFont:[UIFont boldSystemFontOfSize:14.0f]];
         myLabel.textColor = [Colors textColor];
         [myLabel setOpaque:YES];
@@ -237,7 +238,7 @@ static NSString *const headerReuseIdentifier = @"CVHeader";
 }
 
 - (UIEdgeInsets)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout*)collectionViewLayout insetForSectionAtIndex:(NSInteger)section {
-    return UIEdgeInsetsMake(10, 10, 10, 10);
+    return UIEdgeInsetsMake(10, 14, 10, 14);
 }
 
 - (NSInteger)collectionView:(UICollectionView *)view numberOfItemsInSection:(NSInteger)section {
