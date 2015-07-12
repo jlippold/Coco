@@ -47,7 +47,7 @@ static NSString *const headerReuseIdentifier = @"CVHeader";
     [super viewDidLoad];
     
     UILabel *lbl = [[UILabel alloc] init];
-    lbl.text = @"Upgrade to enable device switching";
+    lbl.text = @"";
     lbl.textColor = [Colors textColor];
 
 
@@ -87,7 +87,7 @@ static NSString *const headerReuseIdentifier = @"CVHeader";
                          action:@selector(chooseDevice:)
                forControlEvents:UIControlEventValueChanged];
     
-    purchased = YES; //[[NSUserDefaults standardUserDefaults] boolForKey:kIdentifierMultiples];
+    purchased = [[NSUserDefaults standardUserDefaults] boolForKey:kIdentifierMultiples];
 
     if (purchased) {
         NSArray *keys = [[devices allKeys] sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
@@ -101,7 +101,7 @@ static NSString *const headerReuseIdentifier = @"CVHeader";
             }
         }
     } else {
-        lbl.textAlignment = NSTextAlignmentRight;
+        lbl.textAlignment = NSTextAlignmentCenter;
         lbl.text = @"Upgrade to enable device switching";
         lbl.hidden = NO;
         _deviceSegmentedControl.hidden = YES;
@@ -134,12 +134,18 @@ static NSString *const headerReuseIdentifier = @"CVHeader";
         totalRows += totalCommands > 5 ? 2 : 1;
         totalRows += totalChannels > 5 ? 2 : 1;
         
-        self.preferredContentSize = CGSizeMake(320, (112 + (totalRows*54)));
+
+        NSUInteger height = (112 + (totalRows*54));
         
+        //NSUInteger lastHeight = [[NSUserDefaults standardUserDefaults] integerForKey:@"lastHeight"];
+        
+        self.preferredContentSize = CGSizeMake(320, height);
         [self.cv reloadData];
         [self.cv layoutIfNeeded];
-        
         [self signalComplete:NCUpdateResultNewData];
+        
+        [[NSUserDefaults standardUserDefaults] setInteger:height forKey:@"lastHeight"];
+        [[NSUserDefaults standardUserDefaults] synchronize];
     }];
 
 
@@ -172,7 +178,7 @@ static NSString *const headerReuseIdentifier = @"CVHeader";
 }
 
 - (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout referenceSizeForHeaderInSection:(NSInteger)section {
-    return CGSizeMake(290, 20.0f);
+    return CGSizeMake(320, 20.0f);
 }
 
 
@@ -300,6 +306,15 @@ static NSString *const headerReuseIdentifier = @"CVHeader";
 
 - (void)widgetPerformUpdateWithCompletionHandler:(void (^)(NCUpdateResult))completionHandler {
     // Perform any setup necessary in order to update the view.
+    
+    NSUInteger lastHeight = [[NSUserDefaults standardUserDefaults] integerForKey:@"lastHeight"];
+    
+    if (lastHeight) {
+        self.preferredContentSize = CGSizeMake(320, lastHeight);
+    } else {
+        self.preferredContentSize = CGSizeMake(320, 100);
+    }
+
     
     self.completionHandler = completionHandler;
     
