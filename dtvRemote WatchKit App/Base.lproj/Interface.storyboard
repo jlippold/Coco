@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<document type="com.apple.InterfaceBuilder.WatchKit.Storyboard" version="3.0" toolsVersion="7706" systemVersion="14E46" targetRuntime="watchKit" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="AgC-eL-Hgc">
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="7703"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBWatchKitPlugin" version="7701"/>
+    </dependencies>
+    <scenes>
+        <!--Interface Controller-->
+        <scene sceneID="aou-V4-d1y">
+            <objects>
+                <controller id="AgC-eL-Hgc" customClass="InterfaceController">
+                    <items>
+                        <button width="1" alignment="left" title="Living Room" id="Zh0-QX-2c2">
+                            <fontDescription key="font" style="UICTFontTextStyleHeadline"/>
+                        </button>
+                        <group width="1" height="0.14999999999999999" alignment="left" id="rjs-c1-xX4">
+                            <items>
+                                <button width="0.5" height="1" alignment="left" title="Channels" id="49G-2p-ag6">
+                                    <fontDescription key="font" type="system" pointSize="10"/>
+                                </button>
+                                <button width="0.5" height="1" alignment="right" title="Commands" id="5uK-fK-daw">
+                                    <fontDescription key="font" type="system" pointSize="10"/>
+                                </button>
+                            </items>
+                        </group>
+                        <table alignment="left" id="KLi-yh-ree">
+                            <items>
+                                <tableRow identifier="HeaderRowController" selectable="NO" id="L4f-IO-xCv" customClass="HeaderRowController">
+                                    <group key="rootItem" width="1" height="18" alignment="left" id="lrL-Qw-rmm">
+                                        <items>
+                                            <label width="0.94999999999999996" height="1" alignment="right" text="Label" textAlignment="left" numberOfLines="0" id="xCz-e1-PsI">
+                                                <color key="textColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
+                                                <fontDescription key="font" style="UICTFontTextStyleCaption2"/>
+                                            </label>
+                                        </items>
+                                        <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                    </group>
+                                    <connections>
+                                        <outlet property="label" destination="xCz-e1-PsI" id="KZV-Nv-Xlr"/>
+                                    </connections>
+                                </tableRow>
+                                <tableRow identifier="TableRowController" id="DZ7-JX-ZdY" customClass="TableRowController">
+                                    <group key="rootItem" width="1" alignment="left" id="C1h-PF-hnW">
+                                        <items>
+                                            <imageView width="0.29999999999999999" height="1" alignment="left" id="A3X-0G-SkR"/>
+                                            <label width="0.65000000000000002" height="1" alignment="right" text="Label" textAlignment="left" numberOfLines="3" id="HMn-5d-bGe"/>
+                                        </items>
+                                    </group>
+                                    <connections>
+                                        <outlet property="image" destination="A3X-0G-SkR" id="gNg-zz-ksu"/>
+                                        <outlet property="label" destination="HMn-5d-bGe" id="rc5-1I-3b0"/>
+                                    </connections>
+                                </tableRow>
+                            </items>
+                        </table>
+                    </items>
+                    <connections>
+                        <outlet property="btnChannels" destination="49G-2p-ag6" id="4SI-ww-1b8"/>
+                        <outlet property="btnCommmands" destination="5uK-fK-daw" id="b6D-eq-Thl"/>
+                        <outlet property="devicePicker" destination="Zh0-QX-2c2" id="IcE-Gl-hpc"/>
+                        <outlet property="tableView" destination="KLi-yh-ree" id="Sr2-uq-D1k"/>
+                    </connections>
+                </controller>
+            </objects>
+        </scene>
+    </scenes>
+</document>

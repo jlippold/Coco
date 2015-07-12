@@ -10,8 +10,6 @@
 #import "dtvChannel.h"
 #import "dtvGuideItem.h"
 
-NSDate *guideTime;
-
 @interface dtvGuide : NSObject
 
 + (NSDictionary *)getDurationForChannel:(dtvGuideItem *)guideItem;

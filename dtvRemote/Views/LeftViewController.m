@@ -103,6 +103,8 @@ static NSString *kIdentifierMultiples = @"bz.jed.dtvRemote.multiples";
     [self.view addSubview:sideBarView];
     [self refreshDevicesStatus:nil];
     
+
+    
 }
 
 - (void)didReceiveMemoryWarning {
@@ -348,6 +350,10 @@ static NSString *kIdentifierMultiples = @"bz.jed.dtvRemote.multiples";
 
 
 - (IBAction) getProducts:(id)sender {
+    
+#if TARGET_IPHONE_SIMULATOR
+    wasPurchased = YES;
+#else
     [[dtvIAP sharedInstance] requestProductsWithCompletionHandler:^(BOOL success, NSArray *p) {
         if (success) {
             products = p;
@@ -361,6 +367,7 @@ static NSString *kIdentifierMultiples = @"bz.jed.dtvRemote.multiples";
             }
         }
     }];
+#endif
 }
 
 - (IBAction)refreshDevices:(id)sender {

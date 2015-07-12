@@ -87,8 +87,13 @@ static NSString *const headerReuseIdentifier = @"CVHeader";
                          action:@selector(chooseDevice:)
                forControlEvents:UIControlEventValueChanged];
     
-    purchased = [[NSUserDefaults standardUserDefaults] boolForKey:kIdentifierMultiples];
 
+#if TARGET_IPHONE_SIMULATOR
+    purchased = YES;
+#else
+    purchased = [[NSUserDefaults standardUserDefaults] boolForKey:kIdentifierMultiples];
+#endif
+    
     if (purchased) {
         NSArray *keys = [[devices allKeys] sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
         int i;
