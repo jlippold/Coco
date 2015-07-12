@@ -68,9 +68,8 @@ static NSString *const headerReuseIdentifier = @"CVHeader";
     ssid = [iNet fetchSSID];
     if ([ssid isEqualToString:@""] || devices.count == 0) {
         lbl.textAlignment = NSTextAlignmentCenter;
-        lbl.text = devices.count == 0 ?
-            [NSString stringWithFormat:@"Open the app to scan devices on the %@ network", ssid] :
-            @"Please connect to a wireless network";
+        lbl.text = [ssid isEqualToString:@""] ? @"Please connect to a wireless network":
+        [NSString stringWithFormat:@"Open the app to scan devices on the %@ network", ssid];
         
         lbl.alpha = 0.6;
         lbl.hidden = NO;
