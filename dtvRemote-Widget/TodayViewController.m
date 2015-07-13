@@ -91,7 +91,8 @@ static NSString *const headerReuseIdentifier = @"CVHeader";
 #if TARGET_IPHONE_SIMULATOR
     purchased = YES;
 #else
-    purchased = [[NSUserDefaults standardUserDefaults] boolForKey:kIdentifierMultiples];
+    NSUserDefaults *sharedDefaults = [[NSUserDefaults alloc] initWithSuiteName:@"group.dtvRemote.shares"];
+    purchased = [sharedDefaults boolForKey:kIdentifierMultiples];
 #endif
     
     if (purchased) {

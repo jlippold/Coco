@@ -12,14 +12,23 @@
                     <items>
                         <button width="1" alignment="left" title="Living Room" id="Zh0-QX-2c2">
                             <fontDescription key="font" style="UICTFontTextStyleHeadline"/>
+                            <connections>
+                                <segue destination="rGy-sv-grI" kind="push" id="9dy-Po-9Og"/>
+                            </connections>
                         </button>
                         <group width="1" height="0.14999999999999999" alignment="left" id="rjs-c1-xX4">
                             <items>
                                 <button width="0.5" height="1" alignment="left" title="Channels" id="49G-2p-ag6">
                                     <fontDescription key="font" type="system" pointSize="10"/>
+                                    <connections>
+                                        <action selector="setChannelMode:" destination="AgC-eL-Hgc" id="pHh-X4-dk7"/>
+                                    </connections>
                                 </button>
                                 <button width="0.5" height="1" alignment="right" title="Commands" id="5uK-fK-daw">
                                     <fontDescription key="font" type="system" pointSize="10"/>
+                                    <connections>
+                                        <action selector="setCommandMode:" destination="AgC-eL-Hgc" id="sHo-nC-4XX"/>
+                                    </connections>
                                 </button>
                             </items>
                         </group>
@@ -51,6 +60,18 @@
                                         <outlet property="label" destination="HMn-5d-bGe" id="rc5-1I-3b0"/>
                                     </connections>
                                 </tableRow>
+                                <tableRow identifier="MainDeviceRowController" id="KS4-CG-40e" userLabel="MainDeviceRowController" customClass="MainDeviceRowController">
+                                    <group key="rootItem" width="1" alignment="left" id="msc-Vw-i6p">
+                                        <items>
+                                            <imageView width="0.19999999999999998" height="1" alignment="left" contentMode="center" id="uni-HJ-jEh"/>
+                                            <label width="0.80000000000000004" height="1" alignment="right" text="Label" textAlignment="left" numberOfLines="3" id="rtk-GX-AOt"/>
+                                        </items>
+                                    </group>
+                                    <connections>
+                                        <outlet property="image" destination="uni-HJ-jEh" id="fsr-nD-4nh"/>
+                                        <outlet property="label" destination="rtk-GX-AOt" id="jeE-l5-jot"/>
+                                    </connections>
+                                </tableRow>
                             </items>
                         </table>
                     </items>
@@ -62,6 +83,35 @@
                     </connections>
                 </controller>
             </objects>
+            <point key="canvasLocation" x="299" y="318"/>
+        </scene>
+        <!--Device Interface Controller-->
+        <scene sceneID="QLJ-XL-fnc">
+            <objects>
+                <controller id="rGy-sv-grI" customClass="DeviceInterfaceController">
+                    <items>
+                        <label width="1" height="19" alignment="left" text="Choose Device" textAlignment="center" id="ZfA-6Y-JB3"/>
+                        <table alignment="left" id="cQm-OY-S86">
+                            <items>
+                                <tableRow identifier="DeviceRowController" id="Ae2-D3-2Br" customClass="DeviceRowController">
+                                    <group key="rootItem" width="1" alignment="left" id="VeE-q9-AQ7">
+                                        <items>
+                                            <label width="1" height="1" alignment="left" text="Label" textAlignment="center" id="Vut-5G-mah"/>
+                                        </items>
+                                    </group>
+                                    <connections>
+                                        <outlet property="label" destination="Vut-5G-mah" id="jaG-5q-eeR"/>
+                                    </connections>
+                                </tableRow>
+                            </items>
+                        </table>
+                    </items>
+                    <connections>
+                        <outlet property="tableView" destination="cQm-OY-S86" id="1EV-Ic-Dls"/>
+                    </connections>
+                </controller>
+            </objects>
+            <point key="canvasLocation" x="592" y="281"/>
         </scene>
     </scenes>
 </document>

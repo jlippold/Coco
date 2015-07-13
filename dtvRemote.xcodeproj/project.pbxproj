@@ -9,6 +9,9 @@
 /* Begin PBXBuildFile section */
 		852BD2051B50D2CC0097E80C /* CVCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 852BD2031B50D2CC0097E80C /* CVCell.m */; };
 		852BD2061B50D2CC0097E80C /* CVCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 852BD2041B50D2CC0097E80C /* CVCell.xib */; };
+		8543F80C1B531D4300C08A7E /* DeviceRowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 8543F80B1B531D4300C08A7E /* DeviceRowController.m */; };
+		8543F80F1B531DB300C08A7E /* DeviceInterfaceController.m in Sources */ = {isa = PBXBuildFile; fileRef = 8543F80E1B531DB300C08A7E /* DeviceInterfaceController.m */; };
+		8543F8111B532CF600C08A7E /* InterfaceController.m in Sources */ = {isa = PBXBuildFile; fileRef = 8543F8101B532CF600C08A7E /* InterfaceController.m */; };
 		8562BAB01B0AD96800F65F26 /* MBProgressHUD.m in Sources */ = {isa = PBXBuildFile; fileRef = 8562BAAF1B0AD96800F65F26 /* MBProgressHUD.m */; };
 		8562BABA1B0AD9A300F65F26 /* MMDrawerBarButtonItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 8562BAB21B0AD9A300F65F26 /* MMDrawerBarButtonItem.m */; };
 		8562BABB1B0AD9A300F65F26 /* MMDrawerController.m in Sources */ = {isa = PBXBuildFile; fileRef = 8562BAB41B0AD9A300F65F26 /* MMDrawerController.m */; };
@@ -25,6 +28,7 @@
 		8562BAF71B0ADA8200F65F26 /* categories.plist in Resources */ = {isa = PBXBuildFile; fileRef = 8562BAF21B0ADA8200F65F26 /* categories.plist */; };
 		8562BAF91B0ADA8200F65F26 /* images.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 8562BAF41B0ADA8200F65F26 /* images.bundle */; };
 		8562BAFB1B0ADA8200F65F26 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 8562BAF61B0ADA8200F65F26 /* main.m */; };
+		856DEB6A1B53412100BE5700 /* MainDeviceRowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 856DEB691B53412100BE5700 /* MainDeviceRowController.m */; };
 		857006991B4F415600C50687 /* FAImageView.m in Sources */ = {isa = PBXBuildFile; fileRef = 857006971B4F415600C50687 /* FAImageView.m */; };
 		8570069A1B4F415600C50687 /* FontAwesome.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 857006981B4F415600C50687 /* FontAwesome.ttf */; };
 		8570069E1B4F41BB00C50687 /* FAImageView.m in Sources */ = {isa = PBXBuildFile; fileRef = 8570069C1B4F41BB00C50687 /* FAImageView.m */; };
@@ -41,7 +45,6 @@
 		85ABB1FE1B4A150E000B89FA /* CCLocalMaximum.m in Sources */ = {isa = PBXBuildFile; fileRef = 85ABB1FC1B4A150E000B89FA /* CCLocalMaximum.m */; };
 		85ABB2041B4A1521000B89FA /* CCColorCube.m in Sources */ = {isa = PBXBuildFile; fileRef = 85ABB2011B4A1521000B89FA /* CCColorCube.m */; };
 		85ABB2051B4A1521000B89FA /* CCLocalMaximum.m in Sources */ = {isa = PBXBuildFile; fileRef = 85ABB2031B4A1521000B89FA /* CCLocalMaximum.m */; };
-		85AF213C1B52C9720064AAE3 /* InterfaceController.m in Sources */ = {isa = PBXBuildFile; fileRef = 85AF213B1B52C9720064AAE3 /* InterfaceController.m */; };
 		85AF213E1B52C9720064AAE3 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 85AF213D1B52C9720064AAE3 /* Images.xcassets */; };
 		85AF21421B52C9720064AAE3 /* dtvRemote WatchKit App.app in Resources */ = {isa = PBXBuildFile; fileRef = 85AF21411B52C9720064AAE3 /* dtvRemote WatchKit App.app */; };
 		85AF214A1B52C9720064AAE3 /* Interface.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 85AF21481B52C9720064AAE3 /* Interface.storyboard */; };
@@ -154,6 +157,11 @@
 		852BD2021B50D2CC0097E80C /* CVCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CVCell.h; sourceTree = "<group>"; };
 		852BD2031B50D2CC0097E80C /* CVCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CVCell.m; sourceTree = "<group>"; };
 		852BD2041B50D2CC0097E80C /* CVCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = CVCell.xib; sourceTree = "<group>"; };
+		8543F80A1B531D4300C08A7E /* DeviceRowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DeviceRowController.h; sourceTree = "<group>"; };
+		8543F80B1B531D4300C08A7E /* DeviceRowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DeviceRowController.m; sourceTree = "<group>"; };
+		8543F80D1B531DB300C08A7E /* DeviceInterfaceController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DeviceInterfaceController.h; sourceTree = "<group>"; };
+		8543F80E1B531DB300C08A7E /* DeviceInterfaceController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DeviceInterfaceController.m; sourceTree = "<group>"; };
+		8543F8101B532CF600C08A7E /* InterfaceController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = InterfaceController.m; sourceTree = "<group>"; };
 		8562BAAE1B0AD96800F65F26 /* MBProgressHUD.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MBProgressHUD.h; path = Vendor/MBProgressHUD/MBProgressHUD.h; sourceTree = "<group>"; };
 		8562BAAF1B0AD96800F65F26 /* MBProgressHUD.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MBProgressHUD.m; path = Vendor/MBProgressHUD/MBProgressHUD.m; sourceTree = "<group>"; };
 		8562BAB11B0AD9A300F65F26 /* MMDrawerBarButtonItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MMDrawerBarButtonItem.h; path = Vendor/MMDrawerController/MMDrawerBarButtonItem.h; sourceTree = "<group>"; };
@@ -182,6 +190,8 @@
 		8562BAF41B0ADA8200F65F26 /* images.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; name = images.bundle; path = "Supporting Files/images.bundle"; sourceTree = "<group>"; };
 		8562BAF61B0ADA8200F65F26 /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = "Supporting Files/main.m"; sourceTree = "<group>"; };
 		8562BAFC1B0ADAA500F65F26 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		856DEB681B53412100BE5700 /* MainDeviceRowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MainDeviceRowController.h; sourceTree = "<group>"; };
+		856DEB691B53412100BE5700 /* MainDeviceRowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MainDeviceRowController.m; sourceTree = "<group>"; };
 		857006961B4F415600C50687 /* FAImageView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FAImageView.h; path = "Shared Vendors/fontawesome/FAImageView.h"; sourceTree = SOURCE_ROOT; };
 		857006971B4F415600C50687 /* FAImageView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = FAImageView.m; path = "Shared Vendors/fontawesome/FAImageView.m"; sourceTree = SOURCE_ROOT; };
 		857006981B4F415600C50687 /* FontAwesome.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = FontAwesome.ttf; path = "Shared Vendors/fontawesome/FontAwesome.ttf"; sourceTree = SOURCE_ROOT; };
@@ -191,7 +201,7 @@
 		857006A01B4F426400C50687 /* commands.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; name = commands.json; path = "Supporting Files/commands.json"; sourceTree = "<group>"; };
 		857CAAFB1AF51C9C004F8058 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 		858120CD1B268E5800133D2B /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
-		859D6D811A9926CA0024FBA4 /* dtvRemote.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = dtvRemote.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		859D6D811A9926CA0024FBA4 /* Coco for DirecTV.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Coco for DirecTV.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		859D6D881A9926CA0024FBA4 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		859D6D891A9926CA0024FBA4 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		859D6D8C1A9926CA0024FBA4 /* dtvRemote.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = dtvRemote.xcdatamodel; sourceTree = "<group>"; };
@@ -210,7 +220,6 @@
 		85AF21361B52C9720064AAE3 /* dtvRemote WatchKit Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "dtvRemote WatchKit Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
 		85AF21391B52C9720064AAE3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		85AF213A1B52C9720064AAE3 /* InterfaceController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = InterfaceController.h; sourceTree = "<group>"; };
-		85AF213B1B52C9720064AAE3 /* InterfaceController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = InterfaceController.m; sourceTree = "<group>"; };
 		85AF213D1B52C9720064AAE3 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		85AF21411B52C9720064AAE3 /* dtvRemote WatchKit App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "dtvRemote WatchKit App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		85AF21471B52C9720064AAE3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -516,7 +525,7 @@
 		859D6D821A9926CA0024FBA4 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				859D6D811A9926CA0024FBA4 /* dtvRemote.app */,
+				859D6D811A9926CA0024FBA4 /* Coco for DirecTV.app */,
 				85B514371B486DCD009E0E79 /* dtvRemote-Widget.appex */,
 				85AF21361B52C9720064AAE3 /* dtvRemote WatchKit Extension.appex */,
 				85AF21411B52C9720064AAE3 /* dtvRemote WatchKit App.app */,
@@ -573,11 +582,17 @@
 				85AF217E1B52EC4F0064AAE3 /* Vendor */,
 				85AF21591B52D36C0064AAE3 /* Classes */,
 				85AF213A1B52C9720064AAE3 /* InterfaceController.h */,
-				85AF213B1B52C9720064AAE3 /* InterfaceController.m */,
+				8543F8101B532CF600C08A7E /* InterfaceController.m */,
 				85AF21561B52D1ED0064AAE3 /* TableRowController.h */,
 				85AF21571B52D1ED0064AAE3 /* TableRowController.m */,
+				856DEB681B53412100BE5700 /* MainDeviceRowController.h */,
+				856DEB691B53412100BE5700 /* MainDeviceRowController.m */,
 				85AF219D1B52FF980064AAE3 /* HeaderRowController.h */,
 				85AF219E1B52FF980064AAE3 /* HeaderRowController.m */,
+				8543F80D1B531DB300C08A7E /* DeviceInterfaceController.h */,
+				8543F80E1B531DB300C08A7E /* DeviceInterfaceController.m */,
+				8543F80A1B531D4300C08A7E /* DeviceRowController.h */,
+				8543F80B1B531D4300C08A7E /* DeviceRowController.m */,
 				85AF213D1B52C9720064AAE3 /* Images.xcassets */,
 				85AF21381B52C9720064AAE3 /* Supporting Files */,
 			);
@@ -819,7 +834,7 @@
 			);
 			name = dtvRemote;
 			productName = dtvRemote;
-			productReference = 859D6D811A9926CA0024FBA4 /* dtvRemote.app */;
+			productReference = 859D6D811A9926CA0024FBA4 /* Coco for DirecTV.app */;
 			productType = "com.apple.product-type.application";
 		};
 		85AF21351B52C9720064AAE3 /* dtvRemote WatchKit Extension */ = {
@@ -1030,7 +1045,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				85AF217C1B52D3920064AAE3 /* iNet.m in Sources */,
-				85AF213C1B52C9720064AAE3 /* InterfaceController.m in Sources */,
 				85AF21961B52EC950064AAE3 /* NSString+FontAwesome.m in Sources */,
 				85AF21781B52D3920064AAE3 /* dtvDevice.m in Sources */,
 				85AF21941B52EC950064AAE3 /* FAImageView.m in Sources */,
@@ -1041,12 +1055,16 @@
 				85AF21981B52EC950064AAE3 /* UIImage+FontAwesome.m in Sources */,
 				85AF217D1B52D3920064AAE3 /* Util.m in Sources */,
 				85AF219B1B52EC9C0064AAE3 /* Reachability.m in Sources */,
+				856DEB6A1B53412100BE5700 /* MainDeviceRowController.m in Sources */,
 				85AF21971B52EC950064AAE3 /* UIFont+FontAwesome.m in Sources */,
 				85AF21741B52D3920064AAE3 /* dtvChannels.m in Sources */,
+				8543F8111B532CF600C08A7E /* InterfaceController.m in Sources */,
 				85AF21731B52D3920064AAE3 /* dtvChannel.m in Sources */,
+				8543F80C1B531D4300C08A7E /* DeviceRowController.m in Sources */,
 				85AF217A1B52D3920064AAE3 /* dtvGuide.m in Sources */,
 				85AF218A1B52EC8B0064AAE3 /* CCLocalMaximum.m in Sources */,
 				85AF21811B52EC590064AAE3 /* Colors.m in Sources */,
+				8543F80F1B531DB300C08A7E /* DeviceInterfaceController.m in Sources */,
 				85AF217B1B52D3920064AAE3 /* dtvGuideItem.m in Sources */,
 				85AF21771B52D3920064AAE3 /* dtvCustomCommand.m in Sources */,
 				85AF21751B52D3920064AAE3 /* dtvCommand.m in Sources */,
@@ -1203,7 +1221,7 @@
 				INFOPLIST_FILE = dtvRemote/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.3;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_NAME = dtvRemote;
+				PRODUCT_NAME = "Coco for DirecTV";
 				PROVISIONING_PROFILE = "";
 				TARGETED_DEVICE_FAMILY = 1;
 			};
@@ -1219,7 +1237,7 @@
 				INFOPLIST_FILE = dtvRemote/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.3;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_NAME = dtvRemote;
+				PRODUCT_NAME = "Coco for DirecTV";
 				PROVISIONING_PROFILE = "";
 				TARGETED_DEVICE_FAMILY = 1;
 			};
@@ -1238,7 +1256,7 @@
 					"$(inherited)",
 				);
 				INFOPLIST_FILE = "dtvRemote WatchKit Extension/Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 8.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.2;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
 				PRODUCT_NAME = "${TARGET_NAME}";
 				PROVISIONING_PROFILE = "";
@@ -1256,7 +1274,7 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_NO_COMMON_BLOCKS = YES;
 				INFOPLIST_FILE = "dtvRemote WatchKit Extension/Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 8.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.2;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
 				PRODUCT_NAME = "${TARGET_NAME}";
 				PROVISIONING_PROFILE = "";
@@ -1372,6 +1390,7 @@
 				85AF21531B52C9720064AAE3 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		85AF21551B52C9720064AAE3 /* Build configuration list for PBXNativeTarget "dtvRemote WatchKit Extension" */ = {
 			isa = XCConfigurationList;
@@ -1380,6 +1399,7 @@
 				85AF21511B52C9720064AAE3 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		85B514481B486DCD009E0E79 /* Build configuration list for PBXNativeTarget "dtvRemote-Widget" */ = {
 			isa = XCConfigurationList;
