@@ -37,6 +37,7 @@
 		857CAAFC1AF51C9C004F8058 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 857CAAFB1AF51C9C004F8058 /* SystemConfiguration.framework */; };
 		8580DA221B58A07B00534293 /* GlanceInterfaceController.m in Sources */ = {isa = PBXBuildFile; fileRef = 8580DA211B58A07B00534293 /* GlanceInterfaceController.m */; };
 		8580DA251B5A94C600534293 /* SharedVars.m in Sources */ = {isa = PBXBuildFile; fileRef = 8580DA241B5A94C600534293 /* SharedVars.m */; };
+		8580DA271B5AA59900534293 /* logo.png in Resources */ = {isa = PBXBuildFile; fileRef = 8580DA261B5AA59900534293 /* logo.png */; };
 		858120CE1B268E5800133D2B /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 858120CD1B268E5800133D2B /* StoreKit.framework */; };
 		859D6D8A1A9926CA0024FBA4 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 859D6D891A9926CA0024FBA4 /* AppDelegate.m */; };
 		859D6D8D1A9926CA0024FBA4 /* dtvRemote.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 859D6D8B1A9926CA0024FBA4 /* dtvRemote.xcdatamodeld */; };
@@ -108,6 +109,7 @@
 		85B514AC1B49C31F009E0E79 /* Util.m in Sources */ = {isa = PBXBuildFile; fileRef = 85B514AB1B49C31F009E0E79 /* Util.m */; };
 		85B514AF1B49C78D009E0E79 /* Util.m in Sources */ = {isa = PBXBuildFile; fileRef = 85B514AE1B49C78D009E0E79 /* Util.m */; };
 		85C791531B5160960019382D /* CVHeader.m in Sources */ = {isa = PBXBuildFile; fileRef = 85C791511B5160960019382D /* CVHeader.m */; };
+		85C850921B5AAED600D6DB48 /* dtvNowPlaying.m in Sources */ = {isa = PBXBuildFile; fileRef = 85C850911B5AAED600D6DB48 /* dtvNowPlaying.m */; };
 		85D0B0051B4F3A3E00342FDA /* NSString+FontAwesome.m in Sources */ = {isa = PBXBuildFile; fileRef = 85D0AFFF1B4F3A3E00342FDA /* NSString+FontAwesome.m */; };
 		85D0B0061B4F3A3E00342FDA /* UIFont+FontAwesome.m in Sources */ = {isa = PBXBuildFile; fileRef = 85D0B0011B4F3A3E00342FDA /* UIFont+FontAwesome.m */; };
 		85D0B0071B4F3A3E00342FDA /* UIImage+FontAwesome.m in Sources */ = {isa = PBXBuildFile; fileRef = 85D0B0031B4F3A3E00342FDA /* UIImage+FontAwesome.m */; };
@@ -207,6 +209,7 @@
 		8580DA211B58A07B00534293 /* GlanceInterfaceController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GlanceInterfaceController.m; sourceTree = "<group>"; };
 		8580DA231B5A94C600534293 /* SharedVars.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SharedVars.h; sourceTree = "<group>"; };
 		8580DA241B5A94C600534293 /* SharedVars.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SharedVars.m; sourceTree = "<group>"; };
+		8580DA261B5AA59900534293 /* logo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = logo.png; sourceTree = "<group>"; };
 		858120CD1B268E5800133D2B /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 		859D6D811A9926CA0024FBA4 /* Coco for DirecTV.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Coco for DirecTV.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		859D6D881A9926CA0024FBA4 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -342,6 +345,8 @@
 		85B514AE1B49C78D009E0E79 /* Util.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Util.m; path = "Shared Classes/Util.m"; sourceTree = SOURCE_ROOT; };
 		85C791501B5160960019382D /* CVHeader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CVHeader.h; sourceTree = "<group>"; };
 		85C791511B5160960019382D /* CVHeader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CVHeader.m; sourceTree = "<group>"; };
+		85C850901B5AAED600D6DB48 /* dtvNowPlaying.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = dtvNowPlaying.h; path = "Shared Classes/dtvNowPlaying.h"; sourceTree = SOURCE_ROOT; };
+		85C850911B5AAED600D6DB48 /* dtvNowPlaying.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = dtvNowPlaying.m; path = "Shared Classes/dtvNowPlaying.m"; sourceTree = SOURCE_ROOT; };
 		85D0AFFE1B4F3A3E00342FDA /* NSString+FontAwesome.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "NSString+FontAwesome.h"; path = "Shared Vendors/fontawesome/NSString+FontAwesome.h"; sourceTree = SOURCE_ROOT; };
 		85D0AFFF1B4F3A3E00342FDA /* NSString+FontAwesome.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "NSString+FontAwesome.m"; path = "Shared Vendors/fontawesome/NSString+FontAwesome.m"; sourceTree = SOURCE_ROOT; };
 		85D0B0001B4F3A3E00342FDA /* UIFont+FontAwesome.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "UIFont+FontAwesome.h"; path = "Shared Vendors/fontawesome/UIFont+FontAwesome.h"; sourceTree = SOURCE_ROOT; };
@@ -625,6 +630,7 @@
 		85AF21451B52C9720064AAE3 /* dtvRemote WatchKit App */ = {
 			isa = PBXGroup;
 			children = (
+				8580DA261B5AA59900534293 /* logo.png */,
 				85AF21481B52C9720064AAE3 /* Interface.storyboard */,
 				85AF214B1B52C9720064AAE3 /* Images.xcassets */,
 				85AF21461B52C9720064AAE3 /* Supporting Files */,
@@ -643,6 +649,8 @@
 		85AF21591B52D36C0064AAE3 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
+				85C850901B5AAED600D6DB48 /* dtvNowPlaying.h */,
+				85C850911B5AAED600D6DB48 /* dtvNowPlaying.m */,
 				85AF217F1B52EC590064AAE3 /* Colors.h */,
 				85AF21801B52EC590064AAE3 /* Colors.m */,
 				85AF215C1B52D3920064AAE3 /* dtvChannel.h */,
@@ -997,6 +1005,7 @@
 			files = (
 				85AF214A1B52C9720064AAE3 /* Interface.storyboard in Resources */,
 				85AF214C1B52C9720064AAE3 /* Images.xcassets in Resources */,
+				8580DA271B5AA59900534293 /* logo.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1059,6 +1068,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				85C850921B5AAED600D6DB48 /* dtvNowPlaying.m in Sources */,
 				85AF217C1B52D3920064AAE3 /* iNet.m in Sources */,
 				85AF21961B52EC950064AAE3 /* NSString+FontAwesome.m in Sources */,
 				85AF21781B52D3920064AAE3 /* dtvDevice.m in Sources */,

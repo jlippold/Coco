@@ -12,5 +12,6 @@
 @interface WatchKitCache : NSObject
 
 + (NSMutableDictionary *) loadChannels;
++ (NSMutableDictionary *) loadAllChannels;
 
 @end

@@ -51,7 +51,6 @@
         [dtvCommands changeChannel:channel device:[SharedVars sharedInstance].currentDevice];
     } else {
         idx = tag - 200;
-        
         id obj = [[SharedVars sharedInstance].favoriteCommands objectAtIndex:idx];
         if ([obj isKindOfClass:[dtvCommand class]]) {
             dtvCommand *c = [[SharedVars sharedInstance].favoriteCommands objectAtIndex:idx];
@@ -63,7 +62,6 @@
     }
     
     [[NSNotificationCenter defaultCenter] postNotificationName:@"messageStartSpinner" object:nil];
-
 
 }
 

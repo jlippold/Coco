@@ -30,4 +30,19 @@
     }
 }
 
++ (NSMutableDictionary *) loadAllChannels {
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    NSString *keyName = @"allChannels";
+    NSData *data = [defaults objectForKey:keyName];
+    
+    if ( data ) {
+        return [[NSKeyedUnarchiver unarchiveObjectWithData:data] mutableCopy];
+    } else {
+        NSMutableDictionary *channels = [dtvChannels load:YES];
+        NSData *data = [NSKeyedArchiver archivedDataWithRootObject:channels];
+        [defaults setObject:data forKey:keyName];
+        [defaults synchronize];
+        return channels;
+    }
+}
 @end

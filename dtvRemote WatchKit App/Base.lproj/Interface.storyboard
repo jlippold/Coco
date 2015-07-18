@@ -122,15 +122,23 @@
                             <items>
                                 <group width="1" height="0.5" alignment="right" id="dMw-uD-ccE">
                                     <items>
-                                        <imageView width="0.20000000000000001" height="1" alignment="left" contentMode="scaleAspectFit" id="9XM-A9-SZe"/>
-                                        <label width="0.90000000000000002" height="1" alignment="right" text="Some movie" textAlignment="left" id="WR8-at-eVP">
-                                            <fontDescription key="font" style="UICTFontTextStyleHeadline"/>
-                                        </label>
+                                        <group width="0.90000000000000002" alignment="right" id="zbi-fy-ig5">
+                                            <items>
+                                                <label width="1" height="1" alignment="right" text=" Some Movie" textAlignment="left" id="WR8-at-eVP">
+                                                    <fontDescription key="font" style="UICTFontTextStyleHeadline"/>
+                                                </label>
+                                            </items>
+                                        </group>
+                                        <group width="0.20000000000000001" height="1" alignment="left" radius="10" id="0Ih-fH-8BM">
+                                            <items>
+                                                <imageView width="0.69999999999999996" height="0.69999999999999996" alignment="center" verticalAlignment="center" image="logo.png" contentMode="scaleAspectFit" id="9XM-A9-SZe"/>
+                                            </items>
+                                        </group>
                                     </items>
                                 </group>
                                 <group width="1" height="0.5" alignment="right" id="YR5-oF-9Ml">
                                     <items>
-                                        <label width="0.80000000000000004" height="0.80000000000000004" alignment="right" text="Bedroom" textAlignment="left" id="lcN-K9-P0y">
+                                        <label width="1" height="0.80000000000000004" alignment="left" text="Bedroom" textAlignment="left" id="lcN-K9-P0y">
                                             <fontDescription key="font" style="UICTFontTextStyleSubhead"/>
                                         </label>
                                     </items>
@@ -139,18 +147,31 @@
                         </group>
                         <group alignment="left" id="oBN-Tj-3mP">
                             <items>
-                                <imageView width="0.60000000000000009" height="1" alignment="right" id="x1O-tF-dE0"/>
+                                <imageView width="0.60000000000000009" height="1" alignment="right" contentMode="scaleAspectFit" id="x1O-tF-dE0"/>
                                 <group width="0.40000000000000002" height="1" alignment="left" layout="vertical" id="9Xa-TR-vPo">
                                     <items>
-                                        <imageView width="1" height="0.40000000000000013" alignment="left" id="sqE-UB-H33"/>
-                                        <label width="1" height="0.50000000000000011" alignment="center" verticalAlignment="center" text="-1:30" textAlignment="center" id="tuG-g7-1gy">
-                                            <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                        <imageView width="1" height="0.30000000000000016" alignment="center" contentMode="scaleAspectFit" id="sqE-UB-H33"/>
+                                        <label width="1" height="0.10000000000000014" alignment="center" verticalAlignment="center" textAlignment="center" id="tuG-g7-1gy">
+                                            <color key="textColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
+                                            <fontDescription key="font" type="system" pointSize="12"/>
+                                        </label>
+                                        <label width="1" height="0.60000000000000009" alignment="left" verticalAlignment="bottom" text=" " numberOfLines="6" id="aPG-o6-hR1">
+                                            <fontDescription key="font" type="system" weight="thin" pointSize="10"/>
                                         </label>
                                     </items>
                                 </group>
                             </items>
                         </group>
                     </items>
+                    <connections>
+                        <outlet property="NowPlayingtitle" destination="WR8-at-eVP" id="2Fn-JW-mjH"/>
+                        <outlet property="boxCover" destination="x1O-tF-dE0" id="AkO-0b-DPv"/>
+                        <outlet property="channelImage" destination="sqE-UB-H33" id="Emy-fD-xsl"/>
+                        <outlet property="deviceLabel" destination="lcN-K9-P0y" id="UKP-pN-Ahh"/>
+                        <outlet property="logo" destination="9XM-A9-SZe" id="5wb-7o-UeR"/>
+                        <outlet property="synopsis" destination="aPG-o6-hR1" id="f3O-89-3yH"/>
+                        <outlet property="timeRemaining" destination="tuG-g7-1gy" id="XzL-7M-PIg"/>
+                    </connections>
                 </glanceController>
             </objects>
             <point key="canvasLocation" x="317" y="595"/>
