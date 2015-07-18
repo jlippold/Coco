@@ -36,6 +36,7 @@
 		857006A11B4F426400C50687 /* commands.json in Resources */ = {isa = PBXBuildFile; fileRef = 857006A01B4F426400C50687 /* commands.json */; };
 		857CAAFC1AF51C9C004F8058 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 857CAAFB1AF51C9C004F8058 /* SystemConfiguration.framework */; };
 		8580DA221B58A07B00534293 /* GlanceInterfaceController.m in Sources */ = {isa = PBXBuildFile; fileRef = 8580DA211B58A07B00534293 /* GlanceInterfaceController.m */; };
+		8580DA251B5A94C600534293 /* SharedVars.m in Sources */ = {isa = PBXBuildFile; fileRef = 8580DA241B5A94C600534293 /* SharedVars.m */; };
 		858120CE1B268E5800133D2B /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 858120CD1B268E5800133D2B /* StoreKit.framework */; };
 		859D6D8A1A9926CA0024FBA4 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 859D6D891A9926CA0024FBA4 /* AppDelegate.m */; };
 		859D6D8D1A9926CA0024FBA4 /* dtvRemote.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 859D6D8B1A9926CA0024FBA4 /* dtvRemote.xcdatamodeld */; };
@@ -204,6 +205,8 @@
 		857CAAFB1AF51C9C004F8058 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 		8580DA201B58A07B00534293 /* GlanceInterfaceController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GlanceInterfaceController.h; sourceTree = "<group>"; };
 		8580DA211B58A07B00534293 /* GlanceInterfaceController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GlanceInterfaceController.m; sourceTree = "<group>"; };
+		8580DA231B5A94C600534293 /* SharedVars.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SharedVars.h; sourceTree = "<group>"; };
+		8580DA241B5A94C600534293 /* SharedVars.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SharedVars.m; sourceTree = "<group>"; };
 		858120CD1B268E5800133D2B /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 		859D6D811A9926CA0024FBA4 /* Coco for DirecTV.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Coco for DirecTV.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		859D6D881A9926CA0024FBA4 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -473,6 +476,8 @@
 				852BD2041B50D2CC0097E80C /* CVCell.xib */,
 				85C791501B5160960019382D /* CVHeader.h */,
 				85C791511B5160960019382D /* CVHeader.m */,
+				8580DA231B5A94C600534293 /* SharedVars.h */,
+				8580DA241B5A94C600534293 /* SharedVars.m */,
 			);
 			name = Views;
 			sourceTree = "<group>";
@@ -1094,6 +1099,7 @@
 				85C791531B5160960019382D /* CVHeader.m in Sources */,
 				85ABB2041B4A1521000B89FA /* CCColorCube.m in Sources */,
 				85B514401B486DCD009E0E79 /* TodayViewController.m in Sources */,
+				8580DA251B5A94C600534293 /* SharedVars.m in Sources */,
 				85B514941B49B1B9009E0E79 /* dtvChannel.m in Sources */,
 				85B5149A1B49B1B9009E0E79 /* dtvDevices.m in Sources */,
 				85B5149C1B49B1B9009E0E79 /* dtvGuideItem.m in Sources */,

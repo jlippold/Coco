@@ -12,6 +12,7 @@
 
 @property (strong, nonatomic) IBOutlet UILabel *label;
 @property (strong, nonatomic) IBOutlet UIImageView *iv;
-@property (strong, nonatomic) IBOutlet UIActivityIndicatorView *spinner;
+
+- (IBAction)tapped:(id)sender;
 
 @end

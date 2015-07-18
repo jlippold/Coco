@@ -18,10 +18,12 @@
 #import "CVHeader.h"
 #import "UIImage+FontAwesome.h"
 #import "iNet.h"
+#import "SharedVars.h"
 
 static NSString *kIdentifierMultiples = @"bz.jed.dtvRemote.multiples";
 static NSString *const reuseIdentifier = @"CVCell";
 static NSString *const headerReuseIdentifier = @"CVHeader";
+static int const cellSize = 50;
 
 @interface TodayViewController () <NCWidgetProviding>
 
@@ -32,11 +34,7 @@ static NSString *const headerReuseIdentifier = @"CVHeader";
 
 @implementation TodayViewController {
     NSMutableDictionary *devices;
-    dtvDevice *currentDevice;
     NSMutableDictionary *commands;
-    NSMutableDictionary *channels;
-    NSMutableArray *favoriteChannels;
-    NSMutableArray *favoriteCommands;
     NSString *ssid;
     BOOL purchased;
     NSUInteger totalChannels;
@@ -49,8 +47,10 @@ static NSString *const headerReuseIdentifier = @"CVHeader";
     UILabel *lbl = [[UILabel alloc] init];
     lbl.text = @"";
     lbl.textColor = [Colors textColor];
-
-
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageStartSpinner:)
+                                                 name:@"messageStartSpinner" object:nil];
+    
     CGRect frm = self.view.frame;
     frm.size.height = 12;
     frm.origin.y = _deviceSegmentedControl.frame.origin.y;
@@ -63,7 +63,6 @@ static NSString *const headerReuseIdentifier = @"CVHeader";
     
     [_deviceSegmentedControl removeAllSegments];
     devices = [dtvDevices getSavedDevicesForActiveNetwork];
-    currentDevice = [dtvDevices getCurrentDevice];
     
     ssid = [iNet fetchSSID];
     if ([ssid isEqualToString:@""] || devices.count == 0) {
@@ -78,10 +77,6 @@ static NSString *const headerReuseIdentifier = @"CVHeader";
         return;
     }
     
-    channels = [dtvChannels load:NO];
-    
-    favoriteChannels = [dtvChannels loadFavoriteChannels:channels];
-    favoriteCommands = [dtvCommands getCommandArrayOfFavorites:currentDevice];
     
     [_deviceSegmentedControl addTarget:self
                          action:@selector(chooseDevice:)
@@ -102,7 +97,7 @@ static NSString *const headerReuseIdentifier = @"CVHeader";
             NSString *key = [keys objectAtIndex:i];
             dtvDevice *thisDevice = devices[key];
             [_deviceSegmentedControl insertSegmentWithTitle:thisDevice.name atIndex:i animated:NO];
-            if ([thisDevice.identifier isEqualToString:currentDevice.identifier]) {
+            if ([thisDevice.identifier isEqualToString:[SharedVars sharedInstance].currentDevice.identifier]) {
                 _deviceSegmentedControl.selectedSegmentIndex = i;
             }
         }
@@ -133,8 +128,8 @@ static NSString *const headerReuseIdentifier = @"CVHeader";
     
     [[NSOperationQueue mainQueue] addOperationWithBlock:^{
         
-        totalChannels = favoriteChannels.count > 10 ? 10 : favoriteChannels.count;
-        totalCommands = favoriteCommands.count > 10 ? 10 : favoriteCommands.count;
+        totalChannels = [SharedVars sharedInstance].favoriteChannels.count > 10 ? 10 : [SharedVars sharedInstance].favoriteChannels.count;
+        totalCommands = [SharedVars sharedInstance].favoriteCommands.count > 10 ? 10 : [SharedVars sharedInstance].favoriteCommands.count;
         
         NSUInteger totalRows = 0;
         totalRows += totalCommands > 5 ? 2 : 1;
@@ -158,7 +153,7 @@ static NSString *const headerReuseIdentifier = @"CVHeader";
 }
 
 - (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout*)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath; {
-     return CGSizeMake(50, 50);
+     return CGSizeMake(cellSize, cellSize);
 }
 
 
@@ -167,19 +162,23 @@ static NSString *const headerReuseIdentifier = @"CVHeader";
     
     CVHeader *header = [collectionView dequeueReusableSupplementaryViewOfKind:UICollectionElementKindSectionHeader withReuseIdentifier:headerReuseIdentifier forIndexPath:indexPath];
     
+
     UILabel *myLabel = (UILabel *)[header viewWithTag:1];
     if (!myLabel) {
-        myLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, [_cv bounds].size.width, 26)];
+        myLabel = [[UILabel alloc] initWithFrame:CGRectMake(10, 0, [_cv bounds].size.width, 26)];
         myLabel.tag = 1;
         [myLabel setBackgroundColor:[[Colors backgroundColor] colorWithAlphaComponent:0.4f]];
         [myLabel setFont:[UIFont boldSystemFontOfSize:14.0f]];
         myLabel.textColor = [Colors textColor];
         [myLabel setOpaque:YES];
+    
+        
     }
     
     myLabel.text = indexPath.section == 0 ? @"    Favorite Channels" : @"    Favorite Commands";
     [header addSubview:myLabel];
     return header;
+    
 
 }
 
@@ -196,25 +195,28 @@ static NSString *const headerReuseIdentifier = @"CVHeader";
     cell.label.textColor = [Colors textColor];
     
     if (indexPath.section == 0) {
-        NSString *chId = [favoriteChannels objectAtIndex:indexPath.row];
-        dtvChannel *channel = channels[chId];
+        NSString *chId = [[SharedVars sharedInstance].favoriteChannels objectAtIndex:indexPath.row];
+        dtvChannel *channel = [SharedVars sharedInstance].channels[chId];
         cell.iv.frame = CGRectMake(2.5f, 0, 45, 40);
         cell.iv.image = [dtvChannel getImageForChannel:channel];
         cell.label.text = [NSString stringWithFormat:@"%d %@", channel.number, channel.name];
         cell.iv.contentMode = UIViewContentModeScaleAspectFit;
+        cell.tag = indexPath.row + 100;
     }
     
     if (indexPath.section == 1) {
-        id obj = [favoriteCommands objectAtIndex:indexPath.row];
+        id obj = [[SharedVars sharedInstance].favoriteCommands objectAtIndex:indexPath.row];
         NSString *title;
         NSString *fontAwesome;
         
+        cell.tag = indexPath.row + 200;
+        
         if ([obj isKindOfClass:[dtvCommand class]]) {
-            dtvCommand *c = [favoriteCommands objectAtIndex:indexPath.row];
+            dtvCommand *c = [[SharedVars sharedInstance].favoriteCommands objectAtIndex:indexPath.row];
             title = c.commandDescription;
             fontAwesome = [NSString stringWithFormat:@"fa-%@", c.fontAwesome];
         } else {
-            dtvCustomCommand *c = [favoriteCommands objectAtIndex:indexPath.row];
+            dtvCustomCommand *c = [[SharedVars sharedInstance].favoriteCommands objectAtIndex:indexPath.row];
             title = c.commandDescription;
             fontAwesome = [NSString stringWithFormat:@"fa-%@", c.fontAwesome];
         }
@@ -225,24 +227,24 @@ static NSString *const headerReuseIdentifier = @"CVHeader";
                                             andSize:CGSizeMake(16, 16)];
 
         cell.iv.contentMode = UIViewContentModeCenter;
-        cell.iv.frame = CGRectMake(0, 0, 50, 50);
+        cell.iv.frame = CGRectMake(0, 0, cellSize, cellSize);
         cell.iv.image = cellImage;
 
+        
         cell.label.text = [NSString stringWithFormat:@"%@", title];
         
     }
     
-    cell.spinner.hidden = YES;
 
     return cell;
 }
 
 - (NSInteger)numberOfSectionsInCollectionView: (UICollectionView *)collectionView {
     int sections = 0;
-    if (favoriteCommands && [favoriteCommands count] > 0) {
+    if ([SharedVars sharedInstance].favoriteCommands && [[SharedVars sharedInstance].favoriteCommands count] > 0) {
         sections++;
     }
-    if (favoriteChannels && [favoriteChannels count] > 0) {
+    if ([SharedVars sharedInstance].favoriteChannels && [[SharedVars sharedInstance].favoriteChannels count] > 0) {
         sections++;
     }
     return sections;
@@ -260,38 +262,15 @@ static NSString *const headerReuseIdentifier = @"CVHeader";
     }
 }
 
-- (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath {
-    
-    CVCell *cell = (CVCell *)[_cv cellForItemAtIndexPath:indexPath];
+- (BOOL)collectionView:(UICollectionView *)collectionView shouldSelectItemAtIndexPath:(NSIndexPath *)indexPath{
+    return NO;
+}
 
-    [cell.spinner startAnimating];
-    cell.iv.hidden = YES;
-    cell.spinner.hidden = NO;
-    
-    
-    if (indexPath.section == 0) {
-        NSString *chId = [favoriteChannels objectAtIndex:indexPath.row];
-        dtvChannel *channel = channels[chId];
-        [dtvCommands changeChannel:channel device:currentDevice];
-    } else {
-        id obj = [favoriteCommands objectAtIndex:indexPath.row];
-        
-        if ([obj isKindOfClass:[dtvCommand class]]) {
-            dtvCommand *c = [favoriteCommands objectAtIndex:indexPath.row];
-            [dtvCommands sendCommand:c.dtvCommandText device:currentDevice];
-        } else {
-            dtvCustomCommand *c = [favoriteCommands objectAtIndex:indexPath.row];
-            [dtvCommands sendCustomCommand:c];
-        }
-    }
-    
-    dispatch_time_t delay = dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC * 0.7);
-    dispatch_after(delay, dispatch_get_main_queue(), ^(void){
-        cell.iv.hidden = NO;
-        cell.spinner.hidden = YES;
-        [cell.spinner stopAnimating];
-    });
-    
+- (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath {
+
+
+
+
 }
 
 - (void)didReceiveMemoryWarning {
@@ -338,12 +317,21 @@ static NSString *const headerReuseIdentifier = @"CVHeader";
     
     dtvDevice *device = [devices objectForKey:deviceId];
     [dtvDevices setCurrentDevice:device];
-    currentDevice = device;
     
-    favoriteCommands = [dtvCommands getCommandArrayOfFavorites:currentDevice];
+    [SharedVars sharedInstance].currentDevice = device;
+    
+    [SharedVars sharedInstance].favoriteCommands = [dtvCommands getCommandArrayOfFavorites:device];
     [self reloadViews];
-    
+}
 
+- (void) messageStartSpinner:(NSNotification *)notification {
+    [self.spinner startAnimating];
+    
+    dispatch_time_t delay = dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC * 1);
+    dispatch_after(delay, dispatch_get_main_queue(), ^(void){
+        [self.spinner stopAnimating];
+    });
+    
 }
 
 

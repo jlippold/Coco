@@ -12,5 +12,6 @@
 
 @property (nonatomic, weak) IBOutlet UISegmentedControl *deviceSegmentedControl;
 @property (nonatomic, weak) IBOutlet UICollectionView *cv;
+@property (weak, nonatomic) IBOutlet UIActivityIndicatorView *spinner;
 
 @end

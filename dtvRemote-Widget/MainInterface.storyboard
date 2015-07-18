@@ -17,7 +17,7 @@
                         <rect key="frame" x="0.0" y="0.0" width="320" height="100"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <collectionView opaque="NO" multipleTouchEnabled="YES" contentMode="scaleToFill" bounces="NO" scrollEnabled="NO" showsHorizontalScrollIndicator="NO" showsVerticalScrollIndicator="NO" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="Mc6-Sb-zhB">
+                            <collectionView opaque="NO" contentMode="scaleToFill" bounces="NO" scrollEnabled="NO" showsHorizontalScrollIndicator="NO" showsVerticalScrollIndicator="NO" delaysContentTouches="NO" canCancelContentTouches="NO" bouncesZoom="NO" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="Mc6-Sb-zhB">
                                 <rect key="frame" x="6" y="42" width="291" height="48"/>
                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                 <color key="tintColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
@@ -37,6 +37,14 @@
                                 </segments>
                                 <color key="tintColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
                             </segmentedControl>
+                            <activityIndicatorView hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" hidesWhenStopped="YES" style="white" translatesAutoresizingMaskIntoConstraints="NO" id="CL0-Z5-cpU">
+                                <rect key="frame" x="300" y="10" width="20" height="20"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="20" id="4u9-bD-zXa"/>
+                                    <constraint firstAttribute="height" constant="20" id="VgQ-qo-WEn"/>
+                                </constraints>
+                                <color key="color" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
+                            </activityIndicatorView>
                         </subviews>
                         <constraints>
                             <constraint firstAttribute="trailingMargin" secondItem="Mc6-Sb-zhB" secondAttribute="trailing" constant="7" id="9vV-qB-pfR"/>
@@ -44,7 +52,9 @@
                             <constraint firstItem="Mc6-Sb-zhB" firstAttribute="leading" secondItem="S3S-Oj-5AN" secondAttribute="leadingMargin" constant="-10" id="Iz7-jj-0ev"/>
                             <constraint firstItem="H9y-6n-euk" firstAttribute="top" secondItem="Mc6-Sb-zhB" secondAttribute="bottom" constant="10" id="Mzw-kS-MEF"/>
                             <constraint firstAttribute="centerX" secondItem="0QK-g6-St1" secondAttribute="centerX" id="ZgO-IF-ldA"/>
+                            <constraint firstItem="CL0-Z5-cpU" firstAttribute="top" secondItem="Znm-wc-TSG" secondAttribute="bottom" constant="10" id="kgN-zp-3Dh"/>
                             <constraint firstItem="0QK-g6-St1" firstAttribute="top" secondItem="Znm-wc-TSG" secondAttribute="bottom" constant="6" id="ojz-xj-4cO"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="CL0-Z5-cpU" secondAttribute="trailing" constant="-16" id="yug-gd-l7N"/>
                         </constraints>
                     </view>
                     <extendedEdge key="edgesForExtendedLayout"/>
@@ -56,6 +66,7 @@
                     <connections>
                         <outlet property="cv" destination="Mc6-Sb-zhB" id="5XL-CD-8N7"/>
                         <outlet property="deviceSegmentedControl" destination="0QK-g6-St1" id="pGN-hA-qP4"/>
+                        <outlet property="spinner" destination="CL0-Z5-cpU" id="TCz-CA-sey"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="vXp-U4-Rya" userLabel="First Responder" sceneMemberID="firstResponder"/>

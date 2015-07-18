@@ -6,7 +6,7 @@
     <objects>
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
         <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
-        <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="CVCell" id="gTV-IL-0wX" customClass="CVCell">
+        <collectionViewCell opaque="NO" clipsSubviews="YES" contentMode="center" reuseIdentifier="CVCell" id="gTV-IL-0wX" customClass="CVCell">
             <rect key="frame" x="0.0" y="0.0" width="50" height="50"/>
             <autoresizingMask key="autoresizingMask"/>
             <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center">
@@ -15,6 +15,7 @@
                     <imageView userInteractionEnabled="NO" tag="4" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="QFp-BF-xZZ">
                         <rect key="frame" x="0.0" y="0.0" width="50" height="40"/>
                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                        <gestureRecognizers/>
                     </imageView>
                     <label opaque="NO" userInteractionEnabled="NO" tag="5" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Label" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="P1t-GL-Z7Q">
                         <rect key="frame" x="0.0" y="40" width="50" height="10"/>
@@ -23,19 +24,20 @@
                         <color key="textColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
                         <nil key="highlightedColor"/>
                     </label>
-                    <activityIndicatorView hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" style="white" translatesAutoresizingMaskIntoConstraints="NO" id="R3t-NW-6WO">
-                        <rect key="frame" x="15" y="12" width="20" height="20"/>
-                        <color key="tintColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                        <color key="color" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                    </activityIndicatorView>
                 </subviews>
                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
             </view>
+            <gestureRecognizers/>
             <connections>
                 <outlet property="iv" destination="QFp-BF-xZZ" id="OI7-XA-3T7"/>
                 <outlet property="label" destination="P1t-GL-Z7Q" id="0XB-AS-TFk"/>
-                <outlet property="spinner" destination="R3t-NW-6WO" id="Ovk-fq-OQC"/>
+                <outletCollection property="gestureRecognizers" destination="Way-GD-8ab" appends="YES" id="1GH-pI-Qut"/>
             </connections>
         </collectionViewCell>
+        <tapGestureRecognizer id="Way-GD-8ab">
+            <connections>
+                <action selector="tapped:" destination="gTV-IL-0wX" id="1Pi-M5-whg"/>
+            </connections>
+        </tapGestureRecognizer>
     </objects>
 </document>
