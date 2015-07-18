@@ -33,7 +33,7 @@
                                                  name:@"messageUpdatedNowPlaying" object:nil];
     
     channels = [WatchKitCache loadAllChannels];
-    currentDevice = [dtvDevices getCurrentDevice];
+    [self refreshNowPlaying:nil];
 
 }
 
@@ -46,9 +46,12 @@
 - (void)didDeactivate {
     // This method is called when watch view controller is no longer visible
     [super didDeactivate];
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+
 }
 
 - (void) refreshNowPlaying:(id)sender {
+    currentDevice = [dtvDevices getCurrentDevice];
     if (currentDevice) {
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
             NSString *channelNum = [dtvCommands getChannelOnDevice:currentDevice];

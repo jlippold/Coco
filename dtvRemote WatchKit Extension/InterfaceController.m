@@ -49,6 +49,9 @@
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageUpdatedCurrentDevice:)
                                                  name:@"messageUpdatedCurrentDevice" object:nil];
     
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageUpdatedStatusOfDevices:)
+                                                 name:@"messageUpdatedStatusOfDevices" object:nil];
+    
     isCommandMode = [[NSUserDefaults standardUserDefaults] boolForKey:@"watchKitCommandMode"];
     if (!isCommandMode) {
         isCommandMode = NO;
@@ -65,16 +68,21 @@
     sortedChannels = [dtvChannels sortChannels:channels sortBy:@"default"];
     rowData = [[NSMutableArray alloc] init];
 
+    
     [self loadTableData];
     [self refreshGuide:nil];
+    
+    [self checkDeviceStatus];
 }
 
 - (void) loadTableData {
+
     if (isCommandMode) {
         [self loadCommandList];
     } else {
         [self loadChannelList];
     }
+    
 }
 
 - (void) loadChannelList {
@@ -244,6 +252,7 @@
     
     [self.devicePicker setTitle:currentDevice.name];
     [self loadTableData];
+    //[self checkDeviceStatus];
 }
 
 - (void)didDeactivate {
@@ -272,6 +281,27 @@
     } else {
         [self.btnChannels setBackgroundColor:nil];
         [self.btnCommmands setBackgroundColor:[Colors blueColor]];
+    }
+}
+
+- (void) checkDeviceStatus {
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
+        [dtvDevices checkStatusOfDevices:devices];
+    });
+}
+
+- (void) messageUpdatedStatusOfDevices:(NSNotification *)notification {
+    devices = notification.object;
+    NSString *deviceId = currentDevice.identifier;
+    for (NSString *thisId in [devices allKeys]) {
+        dtvDevice *thisDevice = devices[thisId];
+        if ([thisDevice.identifier isEqualToString:deviceId]) {
+            if (!thisDevice.online) {
+                [self.devicePicker setBackgroundColor:[Colors redColor]];
+            } else {
+                [self.devicePicker setBackgroundColor:nil];
+            }
+        }
     }
 }
 
