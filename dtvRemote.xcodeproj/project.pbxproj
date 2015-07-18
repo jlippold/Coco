@@ -35,6 +35,7 @@
 		8570069F1B4F41BB00C50687 /* FontAwesome.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8570069D1B4F41BB00C50687 /* FontAwesome.ttf */; };
 		857006A11B4F426400C50687 /* commands.json in Resources */ = {isa = PBXBuildFile; fileRef = 857006A01B4F426400C50687 /* commands.json */; };
 		857CAAFC1AF51C9C004F8058 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 857CAAFB1AF51C9C004F8058 /* SystemConfiguration.framework */; };
+		8580DA221B58A07B00534293 /* GlanceInterfaceController.m in Sources */ = {isa = PBXBuildFile; fileRef = 8580DA211B58A07B00534293 /* GlanceInterfaceController.m */; };
 		858120CE1B268E5800133D2B /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 858120CD1B268E5800133D2B /* StoreKit.framework */; };
 		859D6D8A1A9926CA0024FBA4 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 859D6D891A9926CA0024FBA4 /* AppDelegate.m */; };
 		859D6D8D1A9926CA0024FBA4 /* dtvRemote.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 859D6D8B1A9926CA0024FBA4 /* dtvRemote.xcdatamodeld */; };
@@ -112,6 +113,7 @@
 		85D0B0101B4F3B1400342FDA /* NSString+FontAwesome.m in Sources */ = {isa = PBXBuildFile; fileRef = 85D0B00B1B4F3B1400342FDA /* NSString+FontAwesome.m */; };
 		85D0B0111B4F3B1400342FDA /* UIFont+FontAwesome.m in Sources */ = {isa = PBXBuildFile; fileRef = 85D0B00D1B4F3B1400342FDA /* UIFont+FontAwesome.m */; };
 		85D0B0121B4F3B1400342FDA /* UIImage+FontAwesome.m in Sources */ = {isa = PBXBuildFile; fileRef = 85D0B00F1B4F3B1400342FDA /* UIImage+FontAwesome.m */; };
+		85D691921B55DD1C002194C0 /* WatchKitCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 85D691911B55DD1C002194C0 /* WatchKitCache.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -200,6 +202,8 @@
 		8570069D1B4F41BB00C50687 /* FontAwesome.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = FontAwesome.ttf; path = "Shared Vendors/fontawesome/FontAwesome.ttf"; sourceTree = SOURCE_ROOT; };
 		857006A01B4F426400C50687 /* commands.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; name = commands.json; path = "Supporting Files/commands.json"; sourceTree = "<group>"; };
 		857CAAFB1AF51C9C004F8058 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
+		8580DA201B58A07B00534293 /* GlanceInterfaceController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GlanceInterfaceController.h; sourceTree = "<group>"; };
+		8580DA211B58A07B00534293 /* GlanceInterfaceController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GlanceInterfaceController.m; sourceTree = "<group>"; };
 		858120CD1B268E5800133D2B /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 		859D6D811A9926CA0024FBA4 /* Coco for DirecTV.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Coco for DirecTV.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		859D6D881A9926CA0024FBA4 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -349,6 +353,8 @@
 		85D0B00E1B4F3B1400342FDA /* UIImage+FontAwesome.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "UIImage+FontAwesome.h"; path = "Shared Vendors/fontawesome/UIImage+FontAwesome.h"; sourceTree = SOURCE_ROOT; };
 		85D0B00F1B4F3B1400342FDA /* UIImage+FontAwesome.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "UIImage+FontAwesome.m"; path = "Shared Vendors/fontawesome/UIImage+FontAwesome.m"; sourceTree = SOURCE_ROOT; };
 		85D0B0131B4F3B1D00342FDA /* FontAwesome.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = FontAwesome.ttf; path = "Shared Vendors/fontawesome/FontAwesome.ttf"; sourceTree = SOURCE_ROOT; };
+		85D691901B55DD1C002194C0 /* WatchKitCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WatchKitCache.h; sourceTree = "<group>"; };
+		85D691911B55DD1C002194C0 /* WatchKitCache.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WatchKitCache.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -583,6 +589,8 @@
 				85AF21591B52D36C0064AAE3 /* Classes */,
 				85AF213A1B52C9720064AAE3 /* InterfaceController.h */,
 				8543F8101B532CF600C08A7E /* InterfaceController.m */,
+				8580DA201B58A07B00534293 /* GlanceInterfaceController.h */,
+				8580DA211B58A07B00534293 /* GlanceInterfaceController.m */,
 				85AF21561B52D1ED0064AAE3 /* TableRowController.h */,
 				85AF21571B52D1ED0064AAE3 /* TableRowController.m */,
 				856DEB681B53412100BE5700 /* MainDeviceRowController.h */,
@@ -593,6 +601,8 @@
 				8543F80E1B531DB300C08A7E /* DeviceInterfaceController.m */,
 				8543F80A1B531D4300C08A7E /* DeviceRowController.h */,
 				8543F80B1B531D4300C08A7E /* DeviceRowController.m */,
+				85D691901B55DD1C002194C0 /* WatchKitCache.h */,
+				85D691911B55DD1C002194C0 /* WatchKitCache.m */,
 				85AF213D1B52C9720064AAE3 /* Images.xcassets */,
 				85AF21381B52C9720064AAE3 /* Supporting Files */,
 			);
@@ -1053,6 +1063,8 @@
 				85AF219F1B52FF980064AAE3 /* HeaderRowController.m in Sources */,
 				85AF21761B52D3920064AAE3 /* dtvCommands.m in Sources */,
 				85AF21981B52EC950064AAE3 /* UIImage+FontAwesome.m in Sources */,
+				85D691921B55DD1C002194C0 /* WatchKitCache.m in Sources */,
+				8580DA221B58A07B00534293 /* GlanceInterfaceController.m in Sources */,
 				85AF217D1B52D3920064AAE3 /* Util.m in Sources */,
 				85AF219B1B52EC9C0064AAE3 /* Reachability.m in Sources */,
 				856DEB6A1B53412100BE5700 /* MainDeviceRowController.m in Sources */,

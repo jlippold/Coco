@@ -13,5 +13,5 @@
 
 @property (nonatomic, weak) IBOutlet WKInterfaceImage *image;
 @property (nonatomic, weak) IBOutlet WKInterfaceLabel *label;
-
+@property (nonatomic, weak) IBOutlet WKInterfaceLabel *imageLabel;
 @end

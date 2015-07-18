@@ -21,6 +21,7 @@
 #import "dtvCommand.h"
 #import "dtvCustomCommand.h"
 #import "UIImage+FontAwesome.h"
+#import "WatchKitCache.h"
 
 @interface InterfaceController()
 
@@ -60,7 +61,7 @@
     [self.devicePicker setTitle:currentDevice.name];
     commands = [dtvCommands getCommandsForSidebar:currentDevice];
     
-    channels = [dtvChannels load:NO];
+    channels = [WatchKitCache loadChannels];
     sortedChannels = [dtvChannels sortChannels:channels sortBy:@"default"];
     rowData = [[NSMutableArray alloc] init];
 
@@ -102,6 +103,7 @@
     }
     
     [self.tableView setRowTypes:rowTypes];
+    //[[WKInterfaceDevice currentDevice] removeAllCachedImages];
     
     for (NSInteger i = 0; i < rowTypes.count; i++) {
         
@@ -116,7 +118,8 @@
             dtvGuideItem *guideItem = guide[chId];
             
             [row.label setText: (guideItem) ? guideItem.title : channel.name];
-            //[row.image setImage:[dtvChannel getImageForChannel:channel]];
+            [row.imageLabel setText:[NSString stringWithFormat:@"%d", channel.number]];
+
         }
     }
 }

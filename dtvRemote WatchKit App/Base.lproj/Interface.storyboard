@@ -51,12 +51,12 @@
                                 <tableRow identifier="TableRowController" id="DZ7-JX-ZdY" customClass="TableRowController">
                                     <group key="rootItem" width="1" alignment="left" id="C1h-PF-hnW">
                                         <items>
-                                            <imageView width="0.29999999999999999" height="1" alignment="left" id="A3X-0G-SkR"/>
+                                            <label width="0.30000000000000004" height="1" alignment="left" text="1234" textAlignment="center" minimumScaleFactor="0.70000000000000007" id="E75-39-lcl"/>
                                             <label width="0.65000000000000002" height="1" alignment="right" text="Label" textAlignment="left" numberOfLines="3" id="HMn-5d-bGe"/>
                                         </items>
                                     </group>
                                     <connections>
-                                        <outlet property="image" destination="A3X-0G-SkR" id="gNg-zz-ksu"/>
+                                        <outlet property="imageLabel" destination="E75-39-lcl" id="Evu-Mi-LnL"/>
                                         <outlet property="label" destination="HMn-5d-bGe" id="rc5-1I-3b0"/>
                                     </connections>
                                 </tableRow>
@@ -112,6 +112,48 @@
                 </controller>
             </objects>
             <point key="canvasLocation" x="592" y="281"/>
+        </scene>
+        <!--Glance Interface Controller-->
+        <scene sceneID="gVL-mp-tqM">
+            <objects>
+                <glanceController id="DCC-xz-pF8" customClass="GlanceInterfaceController">
+                    <items>
+                        <group alignment="left" layout="vertical" id="NO7-Kj-43s">
+                            <items>
+                                <group width="1" height="0.5" alignment="right" id="dMw-uD-ccE">
+                                    <items>
+                                        <imageView width="0.20000000000000001" height="1" alignment="left" contentMode="scaleAspectFit" id="9XM-A9-SZe"/>
+                                        <label width="0.90000000000000002" height="1" alignment="right" text="Some movie" textAlignment="left" id="WR8-at-eVP">
+                                            <fontDescription key="font" style="UICTFontTextStyleHeadline"/>
+                                        </label>
+                                    </items>
+                                </group>
+                                <group width="1" height="0.5" alignment="right" id="YR5-oF-9Ml">
+                                    <items>
+                                        <label width="0.80000000000000004" height="0.80000000000000004" alignment="right" text="Bedroom" textAlignment="left" id="lcN-K9-P0y">
+                                            <fontDescription key="font" style="UICTFontTextStyleSubhead"/>
+                                        </label>
+                                    </items>
+                                </group>
+                            </items>
+                        </group>
+                        <group alignment="left" id="oBN-Tj-3mP">
+                            <items>
+                                <imageView width="0.60000000000000009" height="1" alignment="right" id="x1O-tF-dE0"/>
+                                <group width="0.40000000000000002" height="1" alignment="left" layout="vertical" id="9Xa-TR-vPo">
+                                    <items>
+                                        <imageView width="1" height="0.40000000000000013" alignment="left" id="sqE-UB-H33"/>
+                                        <label width="1" height="0.50000000000000011" alignment="center" verticalAlignment="center" text="-1:30" textAlignment="center" id="tuG-g7-1gy">
+                                            <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                        </label>
+                                    </items>
+                                </group>
+                            </items>
+                        </group>
+                    </items>
+                </glanceController>
+            </objects>
+            <point key="canvasLocation" x="317" y="595"/>
         </scene>
     </scenes>
 </document>
