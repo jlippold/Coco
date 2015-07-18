@@ -64,7 +64,6 @@
                 if (channel.identifier == 0) {
                     [self setAsOffline];
                 } else {
-                    [self.NowPlayingtitle setText:@"Loading..."];
                     [self.deviceLabel setText:[NSString stringWithFormat:@"%@: %d", currentDevice.name, channel.number]];
                     [self.channelImage setImage:[dtvChannel getImageForChannel:channel]];
                     dispatch_async(dispatch_get_main_queue(), ^{
@@ -92,6 +91,7 @@
     
     [self.timeRemaining setText:np.timeLeft];
     [self.synopsis setText:np.synopsis];
+    [self.NowPlayingtitle setText:np.title];
     
     [UIView animateWithDuration:0.25
                      animations:^{
