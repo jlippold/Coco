@@ -94,7 +94,6 @@
     
     Reachability *reach;
     
-    
 }
 
 #pragma mark - Initialization
@@ -128,6 +127,7 @@
     currentDevice = [dtvDevices getCurrentDevice];
     blockedChannels = [dtvChannels loadBlockedChannels:channels];
     favoriteChannels = [dtvChannels loadFavoriteChannels:channels];
+    
     
     xOffset = 140;
     searchBarMinWidth = 74;
@@ -882,7 +882,17 @@
     NSArray *sections = [[sortedChannels allKeys] sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
     NSString *sectionKey = [sections objectAtIndex:indexPath.section];
     NSMutableDictionary *sectionData = [sortedChannels objectForKey:sectionKey];
-    NSArray *sectionChannels = [[sectionData allKeys] sortedArrayUsingSelector: @selector(compare:)];
+    
+    
+    //NSArray *sectionChannels = [[sectionData allKeys] sortedArrayUsingSelector: @selector(compare:)];
+    id channelSort = ^(NSString *chId1, NSString *chId2){
+        dtvChannel *channel1 = channels[chId1];
+        dtvChannel *channel2 = channels[chId2];
+        return channel1.number > channel2.number;
+    };
+    NSArray *sectionChannels = [[sectionData allKeys] sortedArrayUsingComparator:channelSort];
+    
+    
     NSString *chId = [sectionChannels objectAtIndex:indexPath.row];
     
     dtvChannel *channel = sectionData[chId];
@@ -954,7 +964,15 @@
                          sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
     NSString *sectionKey = [sections objectAtIndex:indexPath.section];
     NSMutableDictionary *sectionData = [sortedChannels objectForKey:sectionKey];
-    NSArray *sectionChannels = [[sectionData allKeys] sortedArrayUsingSelector: @selector(compare:)];
+    
+    //NSArray *sectionChannels = [[sectionData allKeys] sortedArrayUsingSelector: @selector(compare:)];
+    id channelSort = ^(NSString *chId1, NSString *chId2){
+        dtvChannel *channel1 = channels[chId1];
+        dtvChannel *channel2 = channels[chId2];
+        return channel1.number > channel2.number;
+    };
+    NSArray *sectionChannels = [[sectionData allKeys] sortedArrayUsingComparator:channelSort];
+    
     NSString *chId = [sectionChannels objectAtIndex:indexPath.row];
     dtvChannel *channel = [sectionData objectForKey:chId];
     dtvGuideItem *guideItem = guide[chId];
@@ -1799,7 +1817,15 @@
     
     for (NSString *sectionKey in sections) {
         NSMutableDictionary *sectionData = [sortedChannels objectForKey:sectionKey];
-        NSArray *sectionChannels = [[sectionData allKeys] sortedArrayUsingSelector: @selector(compare:)];
+
+        //NSArray *sectionChannels = [[sectionData allKeys] sortedArrayUsingSelector: @selector(compare:)];
+        id channelSort = ^(NSString *chId1, NSString *chId2){
+            dtvChannel *channel1 = channels[chId1];
+            dtvChannel *channel2 = channels[chId2];
+            return channel1.number > channel2.number;
+        };
+        NSArray *sectionChannels = [[sectionData allKeys] sortedArrayUsingComparator:channelSort];
+        
         for (id sectionChannelKey in sectionChannels) {
             dtvChannel *thisChannel = sectionData[sectionChannelKey];
             if (channel.number == thisChannel.number) {

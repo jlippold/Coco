@@ -102,7 +102,15 @@
         }
         
         NSMutableDictionary *sectionData = [sortedChannels objectForKey:sectionName];
-        NSArray *sectionChannels = [[sectionData allKeys] sortedArrayUsingSelector: @selector(compare:)];
+        
+        //NSArray *sectionChannels = [[sectionData allKeys] sortedArrayUsingSelector: @selector(compare:)];
+        id channelSort = ^(NSString *chId1, NSString *chId2){
+            dtvChannel *channel1 = channels[chId1];
+            dtvChannel *channel2 = channels[chId2];
+            return channel1.number > channel2.number;
+        };
+        NSArray *sectionChannels = [[sectionData allKeys] sortedArrayUsingComparator:channelSort];
+        
         for (id sectionChannelKey in sectionChannels) {
             NSString *chId = sectionChannelKey;
             [rowData addObject:chId];
