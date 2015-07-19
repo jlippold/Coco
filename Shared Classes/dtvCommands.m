@@ -105,7 +105,7 @@
 
 + (NSString *)getChannelOnDevice:(dtvDevice *)device {
     
-    if (!device) {
+    if (!device || [device isKindOfClass:[NSString class]]) {
         return @"";
     }
     
