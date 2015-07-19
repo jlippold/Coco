@@ -320,6 +320,7 @@
     
     NSMutableDictionary *sortedChannels = [[NSMutableDictionary alloc] init];
     NSArray *keys = [channels allKeys];
+    NSArray *favorites = [self loadFavoriteChannels:channels];
     
     if ([sort isEqualToString:@"default"]) {
         if ([[NSUserDefaults standardUserDefaults] stringForKey:@"sort"] == nil) {
@@ -327,6 +328,15 @@
             [[NSUserDefaults standardUserDefaults] synchronize];
         }
         sort = [[NSUserDefaults standardUserDefaults] stringForKey:@"sort"];
+    }
+    
+    if ([favorites count] > 0 ) {
+        NSString *favHeader = @"⭐️Favorites";
+        [sortedChannels setObject:[[NSMutableDictionary alloc] init] forKey:favHeader];
+        for (NSString *chId in favorites) {
+            dtvChannel *channel = channels[chId];
+            [sortedChannels[favHeader] setObject:channel forKey:chId];
+        }
     }
     
     if ([sort isEqualToString:@"name"]) {
@@ -353,6 +363,7 @@
     }
     
     if ([sort isEqualToString:@"category"]) {
+        
         
         for (NSString *chId in keys) {
             dtvChannel *channel = channels[chId];
