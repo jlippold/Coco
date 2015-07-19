@@ -86,12 +86,14 @@ NSString *const IAPHelperProductPurchasedNotification = @"IAPHelperProductPurcha
 
 - (void)request:(SKRequest *)request didFailWithError:(NSError *)error
 {
+    /*
     UIAlertView *message = [[UIAlertView alloc] initWithTitle:@"Failed to load list of products."
                                                       message:nil
                                                      delegate:nil
                                             cancelButtonTitle:@"OK"
                                             otherButtonTitles:nil];
     [message show];
+    */
     
     _productsRequest = nil;
     
