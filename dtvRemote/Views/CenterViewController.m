@@ -1374,15 +1374,14 @@
 
 
 - (void) messageAPIDown:(NSNotification *)notification {
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [MBProgressHUD hideHUDForView:self.view animated:YES];
-        
-        UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Connection Error"
-                                                                       message:@"Error accessing directv guide" preferredStyle:UIAlertControllerStyleAlert];
-        UIAlertAction* accept = [UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil];
-        [alert addAction:accept];
-        [self presentViewController:alert animated:YES completion:nil];
+    
+    [self showStatusOverlay:@"Connection Error: Error accessing directv guide"];
+    
+    dispatch_time_t delay = dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC * 0.5);
+    dispatch_after(delay, dispatch_get_main_queue(), ^(void){
+       [self hideStatusOverlay:@"Connection Error: Error accessing directv guide"];
     });
+    
 }
 
 

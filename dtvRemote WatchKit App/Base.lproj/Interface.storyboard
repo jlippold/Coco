@@ -124,7 +124,7 @@
                                     <items>
                                         <group width="0.90000000000000002" alignment="right" id="zbi-fy-ig5">
                                             <items>
-                                                <label width="1" height="1" alignment="right" text=" Some Movie" textAlignment="left" id="WR8-at-eVP">
+                                                <label width="1" height="1" alignment="right" text=" " textAlignment="left" id="WR8-at-eVP">
                                                     <fontDescription key="font" style="UICTFontTextStyleHeadline"/>
                                                 </label>
                                             </items>
@@ -138,7 +138,7 @@
                                 </group>
                                 <group width="1" height="0.5" alignment="right" id="YR5-oF-9Ml">
                                     <items>
-                                        <label width="1" height="0.80000000000000004" alignment="left" text="Bedroom" textAlignment="right" id="lcN-K9-P0y">
+                                        <label width="1" height="0.80000000000000004" alignment="left" text=" " textAlignment="right" id="lcN-K9-P0y">
                                             <fontDescription key="font" style="UICTFontTextStyleSubhead"/>
                                         </label>
                                     </items>

@@ -23,6 +23,9 @@
     NSMutableDictionary *channels;
     dtvDevice *currentDevice;
     NSTimer *timer;
+    NSString *currentProgramId;
+    BOOL refreshing;
+    dtvNowPlaying *nowPlaying;
 }
 
 - (void)awakeWithContext:(id)context {
@@ -32,14 +35,16 @@
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageUpdatedNowPlaying:)
                                                  name:@"messageUpdatedNowPlaying" object:nil];
+    
     timer = [[NSTimer alloc] init];
     timer = [NSTimer scheduledTimerWithTimeInterval:60.0
                                              target:self
                                            selector:@selector(onTimerFire:)
                                            userInfo:nil
                                             repeats:YES];
-    
+    nowPlaying = [[dtvNowPlaying alloc] init];
     channels = [WatchKitCache loadAllChannels];
+    refreshing = NO;
     [self refreshNowPlaying:nil];
 
 }
@@ -52,6 +57,11 @@
 - (void)willActivate {
     // This method is called when watch view controller is about to be visible to user
     [super willActivate];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageUpdatedNowPlaying:)
+                                                 name:@"messageUpdatedNowPlaying" object:nil];
+    
+    refreshing = NO;
     [self refreshNowPlaying:nil];
 }
 
@@ -63,6 +73,11 @@
 }
 
 - (void) refreshNowPlaying:(id)sender {
+    if (refreshing) {
+        return;
+    }
+    refreshing = YES;
+    
     currentDevice = [dtvDevices getCurrentDevice];
     if (currentDevice) {
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
@@ -77,20 +92,23 @@
                 if (channel.identifier == 0) {
                     [self setAsOffline];
                 } else {
-                    [self.deviceLabel setText:[NSString stringWithFormat:@"%@: %d", currentDevice.name, channel.number]];
+                    
+                    [self.deviceLabel setText:[NSString stringWithFormat:@"%@ ch:%d", currentDevice.name, channel.number]];
                     [self.channelImage setImage:[dtvChannel getImageForChannel:channel]];
                     dispatch_async(dispatch_get_main_queue(), ^{
                         [self updateNowPlaying:channel];
+                        refreshing = NO;
                     });
                 }
             }
         });
+    } else {
+        [self setAsNoDevice];
     }
 }
 
 - (void) updateNowPlaying:(dtvChannel *) channel {
-    dtvNowPlaying *np = [[dtvNowPlaying alloc] init];
-    [np update:channel];
+    [nowPlaying update:channel];
 }
 
 - (void) messageUpdatedNowPlaying:(NSNotification *)notification {
@@ -103,6 +121,15 @@
     }
     
     [self.timeRemaining setText:np.timeLeft];
+    
+    if ([currentProgramId isEqualToString:np.programId]) {
+        return;
+    } else {
+        [self clearNowPlaying];
+    }
+    
+    currentProgramId = np.programId;
+    
     [self.synopsis setText:np.synopsis];
     [self.NowPlayingtitle setText:np.title];
     
@@ -126,7 +153,28 @@
 
 - (void) setAsOffline {
     [self.NowPlayingtitle setText:@"Offline"];
+    [self clearDeviceAndChannel];
+    [self clearNowPlaying];
 }
+
+- (void) setAsNoDevice {
+    [self.NowPlayingtitle setText:@"No Device Found"];
+    [self clearDeviceAndChannel];
+    [self clearNowPlaying];
+}
+
+- (void) clearDeviceAndChannel {
+    [self.deviceLabel setText:@""];
+    [self.channelImage setImage:nil];
+    refreshing = NO;
+}
+
+- (void) clearNowPlaying {
+    [self.synopsis setText:@""];
+    [self.timeRemaining setText:@""];
+    [self.boxCover setImage:nil];
+}
+
 @end
 
 
