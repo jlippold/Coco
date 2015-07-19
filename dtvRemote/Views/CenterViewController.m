@@ -91,6 +91,7 @@
     BOOL isEditing;
     BOOL isPlaying;
     BOOL usingVibrancy;
+    BOOL didDisplayFavoritesWarning;
     
     Reachability *reach;
     
@@ -127,7 +128,7 @@
     currentDevice = [dtvDevices getCurrentDevice];
     blockedChannels = [dtvChannels loadBlockedChannels:channels];
     favoriteChannels = [dtvChannels loadFavoriteChannels:channels];
-    
+    didDisplayFavoritesWarning = NO;
     
     xOffset = 140;
     searchBarMinWidth = 74;
@@ -1006,6 +1007,11 @@
             [favoriteChannels addObject:chId];
             cell.detailTextLabel.text = @"Favorite";
             match = true;
+            
+            if ([favoriteChannels count] > 10) {
+                [self displayFavoritesWarning];
+            }
+            
         } else {
             //favorite to nothing
             image = [UIImage new];
@@ -1403,7 +1409,17 @@
 }
 
 
-- (void) messageDownloadChannelLogos:(NSNotification *)notification { 
+- (void) displayFavoritesWarning {
+    UIAlertView *message = [[UIAlertView alloc] initWithTitle:@"Favorite Information"
+                                                      message:@"Only the first 10 favorites will be displayed in the today view widget"
+                                                     delegate:nil
+                                            cancelButtonTitle:@"OK"
+                                            otherButtonTitles:nil];
+    didDisplayFavoritesWarning = YES;
+    [message show];
+}
+
+- (void) messageDownloadChannelLogos:(NSNotification *)notification {
     [MBProgressHUD hideHUDForView:self.view animated:YES];
     channels = [notification object];
     allChannels = [notification object];
