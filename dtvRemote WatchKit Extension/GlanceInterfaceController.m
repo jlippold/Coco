@@ -22,6 +22,7 @@
 @implementation GlanceInterfaceController {
     NSMutableDictionary *channels;
     dtvDevice *currentDevice;
+    NSTimer *timer;
 }
 
 - (void)awakeWithContext:(id)context {
@@ -31,11 +32,22 @@
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageUpdatedNowPlaying:)
                                                  name:@"messageUpdatedNowPlaying" object:nil];
+    timer = [[NSTimer alloc] init];
+    timer = [NSTimer scheduledTimerWithTimeInterval:60.0
+                                             target:self
+                                           selector:@selector(onTimerFire:)
+                                           userInfo:nil
+                                            repeats:YES];
     
     channels = [WatchKitCache loadAllChannels];
     [self refreshNowPlaying:nil];
 
 }
+
+- (void) onTimerFire:(id)sender {
+    [self refreshNowPlaying:nil];
+}
+
 
 - (void)willActivate {
     // This method is called when watch view controller is about to be visible to user
@@ -54,7 +66,8 @@
     currentDevice = [dtvDevices getCurrentDevice];
     if (currentDevice) {
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
-            NSString *channelNum = [dtvCommands getChannelOnDevice:currentDevice];
+            NSString *channelNum = @"";
+            channelNum = [dtvCommands getChannelOnDevice:currentDevice];
             
             if ([channelNum isEqualToString:@""]) {
                 [self setAsOffline];

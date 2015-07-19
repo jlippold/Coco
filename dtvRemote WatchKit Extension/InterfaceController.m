@@ -70,7 +70,7 @@
 
     
     [self loadTableData];
-    [self refreshGuide:nil];
+    //[self refreshGuide:nil];
     
     [self checkDeviceStatus];
 }

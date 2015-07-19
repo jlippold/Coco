@@ -105,6 +105,10 @@
 
 + (NSString *)getChannelOnDevice:(dtvDevice *)device {
     
+    if (!device) {
+        return @"";
+    }
+    
     NSString *chNum = @"";
     NSURL *url = [NSURL URLWithString:
                   [NSString stringWithFormat:@"http://%@:8080/tv/getTuned?%@",
