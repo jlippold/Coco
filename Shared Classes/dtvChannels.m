@@ -335,7 +335,9 @@
         [sortedChannels setObject:[[NSMutableDictionary alloc] init] forKey:favHeader];
         for (NSString *chId in favorites) {
             dtvChannel *channel = channels[chId];
-            [sortedChannels[favHeader] setObject:channel forKey:chId];
+            if (channel) {
+                [sortedChannels[favHeader] setObject:channel forKey:chId];
+            }
         }
     }
     
