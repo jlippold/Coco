@@ -612,12 +612,18 @@
     overlay.alpha = 0;
     overlay.backgroundColor = [UIColor clearColor];
     overlay.frame = [[UIApplication sharedApplication] statusBarFrame];
+    overlay.userInteractionEnabled = YES;
+    
+    UITapGestureRecognizer *singleFingerTap = [[UITapGestureRecognizer alloc] initWithTarget:self
+                                                                                      action:@selector(scrollTop:)];
+    [overlay addGestureRecognizer:singleFingerTap];
     
     overlayProgress = [[UIView alloc] init];
     overlayProgress.frame = [[UIApplication sharedApplication] statusBarFrame];
     overlayProgress.opaque = YES;
     overlayProgress.alpha = 0.8;
     overlayProgress.backgroundColor = [Colors greenColor];
+    overlayProgress.userInteractionEnabled = NO;
     
     overlayLabel = [[UILabel alloc] init];
     overlayLabel.textColor = [UIColor whiteColor];
@@ -625,7 +631,8 @@
     overlayLabel.text = @"";
     overlayLabel.font = [UIFont fontWithName:@"Helvetica" size:12];
     overlayLabel.textAlignment = NSTextAlignmentCenter;
-
+    overlayLabel.userInteractionEnabled = NO;
+    
     [self.view addSubview:overlayProgress];
     [overlay addSubview:overlayLabel];
     [self.view addSubview:overlay];
@@ -1386,6 +1393,9 @@
 
 }
 
+- (IBAction) scrollTop:(id)sender  {
+    mainTableView.contentOffset = CGPointMake(0, 0 - mainTableView.contentInset.top);
+}
 
 
 #pragma mark - Messages / Events
